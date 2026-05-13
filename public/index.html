@@ -141,6 +141,15 @@
     }
     input.error-field { border-color: var(--error); }
 
+    .field-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0.7;
+      min-height: 16px;
+      letter-spacing: 0.04em;
+    }
+
     .divider {
       display: flex;
       align-items: center;
@@ -279,6 +288,14 @@
 
     <div class="fields">
       <div class="field-group">
+        <label>Nome da Empresa <span class="tag">ALIAS</span></label>
+        <input type="text" id="companyName" placeholder="Ex: Contabilidade America" />
+        <span class="field-hint" id="aliasPreview"></span>
+      </div>
+
+      <div class="divider">—</div>
+
+      <div class="field-group">
         <label>Link Desktop <span class="tag">FIGMA</span></label>
         <input type="url" id="deskUrl" placeholder="https://www.figma.com/proto/..." />
       </div>
@@ -316,6 +333,29 @@
   </div>
 
   <script>
+    function normalizeAlias(name) {
+      return name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 50);
+    }
+
+    // Preview do alias em tempo real
+    document.getElementById('companyName').addEventListener('input', function () {
+      const preview = document.getElementById('aliasPreview');
+      const val = this.value.trim();
+      if (val) {
+        preview.textContent = `→ tinyurl.com/${normalizeAlias(val)}-vin`;
+      } else {
+        preview.textContent = '';
+      }
+    });
+
     function extractFigmaId(url) {
       try {
         const u = new URL(url);
@@ -348,8 +388,15 @@
       hideError();
       document.getElementById('resultBox').style.display = 'none';
 
+      const companyName = document.getElementById('companyName').value.trim();
       const deskUrl = document.getElementById('deskUrl').value.trim();
       const mobUrl = document.getElementById('mobUrl').value.trim();
+
+      if (!companyName) {
+        showError('// informe o nome da empresa');
+        document.getElementById('companyName').classList.add('error-field');
+        return;
+      }
 
       const deskId = extractFigmaId(deskUrl);
       const mobId = extractFigmaId(mobUrl);
@@ -365,6 +412,7 @@
         return;
       }
 
+      document.getElementById('companyName').classList.remove('error-field');
       document.getElementById('deskUrl').classList.remove('error-field');
       document.getElementById('mobUrl').classList.remove('error-field');
 
@@ -374,13 +422,13 @@
         const res = await fetch('/api/shorten', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deskId, mobId }),
+          body: JSON.stringify({ deskId, mobId, companyName }),
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-          showError(`// erro: ${data.error}`);
+          showError(`// ${data.error}`);
           return;
         }
 
@@ -410,4 +458,3 @@
   </script>
 </body>
 </html>
-
