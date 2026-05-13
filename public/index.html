@@ -3,36 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Figma Redirect — Gerador</title>
+  <title>Figma Redirect — Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0c0c0f;
       --surface: #141418;
+      --surface2: #1a1a20;
       --border: #222228;
       --accent: #b8f059;
-      --accent-dim: rgba(184,240,89,0.12);
+      --accent-dim: rgba(184,240,89,0.10);
+      --accent-border: rgba(184,240,89,0.22);
       --text: #f0f0f0;
       --muted: #555560;
       --error: #ff5c5c;
+      --warning: #f0a429;
       --radius: 10px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Syne', sans-serif;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 24px;
     }
-
-    /* subtle grid background */
     body::before {
       content: '';
       position: fixed;
@@ -41,420 +38,619 @@
         linear-gradient(var(--border) 1px, transparent 1px),
         linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 40px 40px;
-      opacity: 0.35;
+      opacity: 0.3;
       pointer-events: none;
+      z-index: 0;
     }
+    .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
 
-    .card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%;
-      max-width: 520px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(184,240,89,0.25);
-      color: var(--accent);
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      padding: 4px 10px;
-      border-radius: 100px;
-      margin-bottom: 20px;
-    }
-    .badge-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
+    /* HEADER */
+    .app-header { display: flex; align-items: center; margin-bottom: 28px; }
+    .logo-dot {
+      width: 8px; height: 8px; border-radius: 50%;
       background: var(--accent);
       animation: pulse 2s ease-in-out infinite;
+      margin-right: 10px;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .logo-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--accent); }
 
-    h1 {
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 6px;
-      letter-spacing: -0.03em;
+    /* TABS */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
     }
-    h1 span { color: var(--accent); }
-
-    .subtitle {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 32px;
-      letter-spacing: 0.04em;
+    .tab {
+      flex: 1; padding: 10px 20px; border: none; border-radius: 8px;
+      background: transparent; color: var(--muted);
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
     }
+    .tab.active { background: var(--accent); color: #0c0c0f; }
+    .tab:not(.active):hover { color: var(--text); }
 
+    /* PANELS */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* CARD */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+    .card-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .card-title span { color: var(--accent); }
+    .card-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 28px; }
+
+    /* FIELDS */
     .fields { display: flex; flex-direction: column; gap: 16px; }
-
     .field-group { display: flex; flex-direction: column; gap: 6px; }
-
     label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
     }
     label .tag {
-      background: var(--border);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.08em;
+      background: var(--border); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 2px 6px; border-radius: 4px;
     }
-
-    input {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      padding: 13px 16px;
-      width: 100%;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
+    input, textarea, select {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      padding: 13px 16px; width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
     }
-    input::placeholder { color: var(--muted); }
-    input:focus {
+    textarea { resize: vertical; min-height: 130px; }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    input:focus, textarea:focus, select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(184,240,89,0.08);
     }
-    input.error-field { border-color: var(--error); }
-
-    .field-hint {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--accent);
-      opacity: 0.7;
-      min-height: 16px;
-      letter-spacing: 0.04em;
-    }
-
+    input.error-field, textarea.error-field { border-color: var(--error); }
+    select option { background: #1a1a20; }
+    .field-hint { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); opacity: 0.7; min-height: 16px; letter-spacing: 0.04em; }
     .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 4px 0;
-      color: var(--muted);
-      font-size: 11px;
-      font-family: 'DM Mono', monospace;
+      display: flex; align-items: center; gap: 12px; margin: 4px 0;
+      color: var(--muted); font-size: 11px; font-family: 'DM Mono', monospace;
     }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+    /* BUTTONS */
     .btn {
-      margin-top: 8px;
-      width: 100%;
-      padding: 15px;
-      background: var(--accent);
-      color: #0c0c0f;
-      border: none;
-      border-radius: var(--radius);
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.04em;
-      cursor: pointer;
+      padding: 13px 20px; border: none; border-radius: var(--radius);
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+      letter-spacing: 0.04em; cursor: pointer;
       transition: opacity 0.2s, transform 0.1s;
-      position: relative;
-      overflow: hidden;
     }
-    .btn:hover { opacity: 0.9; }
+    .btn:hover { opacity: 0.88; }
     .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    .btn-inner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--accent); color: #0c0c0f; width: 100%; margin-top: 8px; }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-excel { background: #1d6f42; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
     .spinner {
-      display: none;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(0,0,0,0.2);
-      border-top-color: #0c0c0f;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      display: none; width: 15px; height: 15px;
+      border: 2px solid rgba(0,0,0,0.2); border-top-color: #0c0c0f;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* RESULT */
     .result-box {
-      display: none;
-      margin-top: 20px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(184,240,89,0.2);
-      border-radius: var(--radius);
-      padding: 16px;
+      display: none; margin-top: 20px;
+      background: var(--accent-dim); border: 1px solid var(--accent-border);
+      border-radius: var(--radius); padding: 16px;
     }
-    .result-label {
-      font-size: 10px;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-    .result-url {
-      font-family: 'DM Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      word-break: break-all;
-      margin-bottom: 12px;
-    }
+    .result-label { font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px; }
+    .result-url { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--text); word-break: break-all; margin-bottom: 12px; }
     .copy-btn {
-      background: var(--accent);
-      color: #0c0c0f;
-      border: none;
-      border-radius: 6px;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      padding: 7px 14px;
-      cursor: pointer;
-      transition: opacity 0.2s;
+      background: var(--accent); color: #0c0c0f; border: none;
+      border-radius: 6px; font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 11px; padding: 7px 14px; cursor: pointer; transition: opacity 0.2s;
     }
     .copy-btn:hover { opacity: 0.85; }
+    .error-msg { display: none; margin-top: 12px; color: var(--error); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.04em; }
 
-    .error-msg {
-      display: none;
-      margin-top: 12px;
-      color: var(--error);
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.04em;
+    /* LINKS DO DIA */
+    .links-panel { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .links-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .links-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--muted); }
+    .links-count {
+      background: var(--accent-dim); border: 1px solid var(--accent-border);
+      color: var(--accent); font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 2px 8px; border-radius: 100px;
     }
+    .links-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+    .link-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; gap: 12px;
+    }
+    .link-item-info { flex: 1; min-width: 0; }
+    .link-item-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-item-url { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-item-time { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); white-space: nowrap; }
+    .link-copy-btn {
+      background: var(--border); color: var(--text); border: none;
+      border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
+    .link-copy-btn:hover { background: var(--accent); color: #0c0c0f; }
+    .links-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 20px; }
 
-    .footer {
-      margin-top: 28px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* ABA DADOS */
+    .section { margin-bottom: 32px; }
+    .section-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .footer-text {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.06em;
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* TABELA */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead tr { background: var(--surface2); }
+    th {
+      font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
+      color: var(--muted); text-transform: uppercase; padding: 12px 14px;
+      text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border);
     }
-    .footer-icons { display: flex; gap: 12px; }
-    .icon-tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      color: var(--muted);
-      background: var(--border);
-      padding: 3px 7px;
-      border-radius: 4px;
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .td-name { font-weight: 600; white-space: nowrap; }
+    .td-link { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .td-link a { color: inherit; text-decoration: none; }
+    .td-link a:hover { text-decoration: underline; }
+    .td-missing { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warning); }
+    .status-select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 5px 8px; width: 100%; cursor: pointer; outline: none;
     }
+    .del-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 14px; padding: 4px 6px; border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .del-btn:hover { color: var(--error); background: rgba(255,92,92,0.1); }
+    .table-empty { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+
+    /* NOTIFY */
+    .notify {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface); border: 1px solid var(--accent-border);
+      color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px;
+      padding: 12px 18px; border-radius: 10px; z-index: 999;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s ease; pointer-events: none;
+    }
+    .notify.show { transform: translateY(0); opacity: 1; }
+    .notify.err { border-color: rgba(255,92,92,0.4); color: var(--error); }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="badge">
-      <div class="badge-dot"></div>
-      FIGMA REDIRECT
-    </div>
+<div class="app">
 
-    <h1>Gere seu link<br><span>inteligente.</span></h1>
-    <p class="subtitle">// detecta dispositivo → redireciona automaticamente</p>
+  <div class="app-header">
+    <div class="logo-dot"></div>
+    <span class="logo-text">FIGMA REDIRECT STUDIO</span>
+  </div>
 
-    <div class="fields">
-      <div class="field-group">
-        <label>Nome da Empresa <span class="tag">ALIAS</span></label>
-        <input type="text" id="companyName" placeholder="Ex: Contabilidade America" />
-        <span class="field-hint" id="aliasPreview"></span>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('redirect')">Redirecionamento</button>
+    <button class="tab" onclick="switchTab('dados')">Dados & Excel</button>
+  </div>
+
+  <!-- ABA 1 -->
+  <div class="panel active" id="panel-redirect">
+    <div class="card">
+      <div class="card-title">Gere seu link <span>inteligente.</span></div>
+      <div class="card-sub">// detecta dispositivo → redireciona automaticamente</div>
+
+      <div class="fields">
+        <div class="field-group">
+          <label>Nome da Empresa <span class="tag">ALIAS</span></label>
+          <input type="text" id="companyName" placeholder="Ex: Contabilidade America" />
+          <span class="field-hint" id="aliasPreview"></span>
+        </div>
+        <div class="divider">—</div>
+        <div class="field-group">
+          <label>Link Desktop <span class="tag">FIGMA</span></label>
+          <input type="url" id="deskUrl" placeholder="https://www.figma.com/proto/..." />
+        </div>
+        <div class="divider">↕</div>
+        <div class="field-group">
+          <label>Link Mobile <span class="tag">FIGMA</span></label>
+          <input type="url" id="mobUrl" placeholder="https://www.figma.com/proto/..." />
+        </div>
       </div>
 
-      <div class="divider">—</div>
+      <button class="btn btn-primary" id="generateBtn" onclick="generate()">
+        <div class="btn-inner">
+          <div class="spinner" id="spinner"></div>
+          <span id="btnText">Gerar link TinyURL</span>
+        </div>
+      </button>
 
-      <div class="field-group">
-        <label>Link Desktop <span class="tag">FIGMA</span></label>
-        <input type="url" id="deskUrl" placeholder="https://www.figma.com/proto/..." />
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-label">// LINK GERADO</div>
+        <div class="result-url" id="resultUrl"></div>
+        <button class="copy-btn" onclick="copyUrl()">Copiar link</button>
       </div>
 
-      <div class="divider">↕</div>
-
-      <div class="field-group">
-        <label>Link Mobile <span class="tag">FIGMA</span></label>
-        <input type="url" id="mobUrl" placeholder="https://www.figma.com/proto/..." />
-      </div>
-    </div>
-
-    <button class="btn" id="generateBtn" onclick="generate()">
-      <div class="btn-inner">
-        <div class="spinner" id="spinner"></div>
-        <span id="btnText">Gerar link TinyURL</span>
-      </div>
-    </button>
-
-    <div class="error-msg" id="errorMsg"></div>
-
-    <div class="result-box" id="resultBox">
-      <div class="result-label">// LINK GERADO</div>
-      <div class="result-url" id="resultUrl"></div>
-      <button class="copy-btn" onclick="copyUrl()">Copiar link</button>
-    </div>
-
-    <div class="footer">
-      <span class="footer-text">tinyurl.com/***-vin</span>
-      <div class="footer-icons">
-        <span class="icon-tag">DESKTOP</span>
-        <span class="icon-tag">MOBILE</span>
+      <div class="links-panel">
+        <div class="links-header">
+          <span class="links-title">// LINKS DO DIA</span>
+          <span class="links-count" id="linksCount">0</span>
+        </div>
+        <div class="links-list" id="linksList">
+          <div class="links-empty">Nenhum link gerado ainda hoje</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    function normalizeAlias(name) {
-      return name
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .slice(0, 50);
-    }
+  <!-- ABA 2 -->
+  <div class="panel" id="panel-dados">
+    <div class="card">
+      <div class="card-title">Dados & <span>Excel.</span></div>
+      <div class="card-sub">// cole o JSON → cruza com links salvos → exporta</div>
 
-    // Preview do alias em tempo real
-    document.getElementById('companyName').addEventListener('input', function () {
-      const preview = document.getElementById('aliasPreview');
-      const val = this.value.trim();
-      if (val) {
-        preview.textContent = `→ tinyurl.com/${normalizeAlias(val)}-vin`;
-      } else {
-        preview.textContent = '';
-      }
+      <div class="section">
+        <div class="section-title">Importar JSON</div>
+        <div class="field-group">
+          <label>JSON gerado pelo assistente</label>
+          <textarea id="jsonInput" placeholder='Cole aqui o JSON com a estrutura de projetos...'></textarea>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="importJson()">Importar e cruzar dados</button>
+        <div class="error-msg" id="jsonError"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          Empresas
+          <span id="empresasCount" style="color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;font-weight:400;text-transform:none;letter-spacing:0"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Empresa</th>
+                <th>Site</th>
+                <th>WhatsApp</th>
+                <th>Protótipo</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="empresasTbody">
+              <tr><td colspan="6" class="table-empty">Nenhuma empresa importada ainda</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-excel" onclick="exportExcel()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+          Gerar Excel
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">Limpar tudo</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notify" id="notify"></div>
+
+<script>
+const LINKS_KEY = 'fr_links';
+const EMPRESAS_KEY = 'fr_empresas';
+const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
+
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', ['redirect','dados'][i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── NOTIFY ──
+function notify(msg, isErr) {
+  const el = document.getElementById('notify');
+  el.textContent = msg;
+  el.className = 'notify show' + (isErr ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── UTILS ──
+function normalizeAlias(name) {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,50);
+}
+
+function buildWhatsapp(raw) {
+  if (!raw) return '';
+  const num = raw.replace(/\D/g,'');
+  if (!num) return '';
+  const full = num.startsWith('55') ? num : '55' + num;
+  return 'https://wa.me/' + full;
+}
+
+function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
+function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+// ── LINKS STORAGE ──
+function getLinks() {
+  try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; }
+}
+
+function saveLink(name, url) {
+  const links = getLinks();
+  links.unshift({ name, url, date: todayStr(), time: timeStr(), ts: Date.now() });
+  localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+  renderLinks();
+}
+
+function findLinkByName(name) {
+  const norm = normalizeAlias(name);
+  return getLinks().find(l => normalizeAlias(l.name) === norm || l.url.includes(norm));
+}
+
+function renderLinks() {
+  const today = todayStr();
+  const todayLinks = getLinks().filter(l => l.date === today);
+  document.getElementById('linksCount').textContent = todayLinks.length;
+  const el = document.getElementById('linksList');
+  if (!todayLinks.length) {
+    el.innerHTML = '<div class="links-empty">Nenhum link gerado hoje</div>';
+    return;
+  }
+  el.innerHTML = todayLinks.map(l => `
+    <div class="link-item">
+      <div class="link-item-info">
+        <div class="link-item-name">${escHtml(l.name)}</div>
+        <div class="link-item-url">${escHtml(l.url)}</div>
+      </div>
+      <div class="link-item-time">${l.time}</div>
+      <button class="link-copy-btn" onclick="copyText('${l.url}',this)">Copiar</button>
+    </div>`).join('');
+}
+
+// ── EMPRESAS STORAGE ──
+function getEmpresas() {
+  try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || '[]'); } catch { return []; }
+}
+function saveEmpresas(list) { localStorage.setItem(EMPRESAS_KEY, JSON.stringify(list)); }
+
+function renderEmpresas() {
+  const list = getEmpresas();
+  document.getElementById('empresasCount').textContent = list.length ? `(${list.length})` : '';
+  const tbody = document.getElementById('empresasTbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma empresa importada ainda</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((e,i) => {
+    const wa = buildWhatsapp(e.whatsapp);
+    const proto = e.prototipo || '';
+    return `<tr>
+      <td class="td-name">${escHtml(e.nome)}</td>
+      <td class="td-link">${e.site ? `<a href="${e.site}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+      <td class="td-link">${wa ? `<a href="${wa}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
+      <td class="td-link">${proto ? `<a href="${proto}" target="_blank">${escHtml(proto)}</a>` : '<span class="td-missing">⚠ não encontrado</span>'}</td>
+      <td>
+        <select class="status-select" onchange="updateStatus(${i},this.value)">
+          ${STATUS_OPTIONS.map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="del-btn" onclick="deleteEmpresa(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(i, val) {
+  const list = getEmpresas(); list[i].status = val; saveEmpresas(list);
+}
+
+function deleteEmpresa(i) {
+  const list = getEmpresas(); list.splice(i,1); saveEmpresas(list); renderEmpresas();
+}
+
+function clearAll() {
+  if (!confirm('Limpar todas as empresas da tabela?')) return;
+  saveEmpresas([]); renderEmpresas(); notify('Tabela limpa');
+}
+
+// ── IMPORTAR JSON ──
+function importJson() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  const errEl = document.getElementById('jsonError');
+  errEl.style.display = 'none';
+
+  if (!raw) { errEl.textContent = '// cole o JSON antes de importar'; errEl.style.display = 'block'; return; }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); }
+  catch { errEl.textContent = '// JSON inválido — verifique a estrutura'; errEl.style.display = 'block'; return; }
+
+  const projetos = parsed.projetos;
+  if (!Array.isArray(projetos) || !projetos.length) {
+    errEl.textContent = '// JSON sem projetos válidos'; errEl.style.display = 'block'; return;
+  }
+
+  const existing = getEmpresas();
+  let added = 0, updated = 0;
+
+  projetos.forEach(p => {
+    const nome = (p.pagina || '').replace(/↪\s*/g,'').trim() || 'Sem nome';
+    const site = p.site || '';
+    const whatsapp = p.header?.whatsapp || '';
+    const proto = findLinkByName(nome)?.url || '';
+
+    const idx = existing.findIndex(e => normalizeAlias(e.nome) === normalizeAlias(nome));
+    if (idx >= 0) {
+      existing[idx] = {
+        ...existing[idx],
+        site: site || existing[idx].site,
+        whatsapp: whatsapp || existing[idx].whatsapp,
+        prototipo: proto || existing[idx].prototipo,
+      };
+      updated++;
+    } else {
+      existing.push({ nome, site, whatsapp, prototipo: proto, status: 'Não enviada' });
+      added++;
+    }
+  });
+
+  saveEmpresas(existing);
+  renderEmpresas();
+  document.getElementById('jsonInput').value = '';
+  notify(`✓ ${added} adicionadas, ${updated} atualizadas`);
+}
+
+// ── EXPORTAR EXCEL ──
+function exportExcel() {
+  const list = getEmpresas();
+  if (!list.length) { notify('Nenhuma empresa para exportar', true); return; }
+
+  const rows = list.map(e => ({
+    'Nome da Empresa': e.nome,
+    'Link do Site': e.site || '',
+    'Link do WhatsApp': buildWhatsapp(e.whatsapp),
+    'Link de Protótipo': e.prototipo || '',
+    'Status': e.status || 'Não enviada',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:30},{wch:42},{wch:44},{wch:44},{wch:16}];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Empresas');
+
+  const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+  XLSX.writeFile(wb, `figma-redirect-${date}.xlsx`);
+  notify('✓ Excel gerado com sucesso');
+}
+
+// ── ABA 1 — GERAR LINK ──
+document.getElementById('companyName').addEventListener('input', function() {
+  const val = this.value.trim();
+  document.getElementById('aliasPreview').textContent = val
+    ? `→ tinyurl.com/${normalizeAlias(val)}-vin` : '';
+});
+
+function extractFigmaId(url) {
+  try { return new URL(url).searchParams.get('node-id'); } catch { return null; }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+}
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+
+function setLoading(val) {
+  document.getElementById('generateBtn').disabled = val;
+  document.getElementById('spinner').style.display = val ? 'block' : 'none';
+  document.getElementById('btnText').textContent = val ? 'Gerando...' : 'Gerar link TinyURL';
+}
+
+async function generate() {
+  hideError();
+  document.getElementById('resultBox').style.display = 'none';
+
+  const companyName = document.getElementById('companyName').value.trim();
+  const deskUrl = document.getElementById('deskUrl').value.trim();
+  const mobUrl = document.getElementById('mobUrl').value.trim();
+
+  if (!companyName) {
+    showError('// informe o nome da empresa');
+    document.getElementById('companyName').classList.add('error-field'); return;
+  }
+  const deskId = extractFigmaId(deskUrl);
+  const mobId = extractFigmaId(mobUrl);
+  if (!deskId) {
+    showError('// link desktop inválido ou sem node-id');
+    document.getElementById('deskUrl').classList.add('error-field'); return;
+  }
+  if (!mobId) {
+    showError('// link mobile inválido ou sem node-id');
+    document.getElementById('mobUrl').classList.add('error-field'); return;
+  }
+  ['companyName','deskUrl','mobUrl'].forEach(id =>
+    document.getElementById(id).classList.remove('error-field'));
+
+  setLoading(true);
+  try {
+    const res = await fetch('/api/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deskId, mobId, companyName }),
     });
+    const data = await res.json();
+    if (!res.ok) { showError(`// ${data.error}`); return; }
 
-    function extractFigmaId(url) {
-      try {
-        const u = new URL(url);
-        return u.searchParams.get('node-id');
-      } catch {
-        return null;
-      }
-    }
+    const shortUrl = data.shortUrl;
+    document.getElementById('resultUrl').textContent = shortUrl;
+    document.getElementById('resultBox').style.display = 'block';
+    saveLink(companyName, shortUrl);
 
-    function showError(msg) {
-      const el = document.getElementById('errorMsg');
-      el.textContent = msg;
-      el.style.display = 'block';
-    }
+    document.getElementById('companyName').value = '';
+    document.getElementById('deskUrl').value = '';
+    document.getElementById('mobUrl').value = '';
+    document.getElementById('aliasPreview').textContent = '';
+  } catch {
+    showError('// falha na conexão com o servidor');
+  } finally {
+    setLoading(false);
+  }
+}
 
-    function hideError() {
-      document.getElementById('errorMsg').style.display = 'none';
-    }
+function copyUrl() {
+  const url = document.getElementById('resultUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar link', 2000);
+  });
+}
 
-    function setLoading(val) {
-      const btn = document.getElementById('generateBtn');
-      const spinner = document.getElementById('spinner');
-      const text = document.getElementById('btnText');
-      btn.disabled = val;
-      spinner.style.display = val ? 'block' : 'none';
-      text.textContent = val ? 'Gerando...' : 'Gerar link TinyURL';
-    }
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar', 1800);
+  });
+}
 
-    async function generate() {
-      hideError();
-      document.getElementById('resultBox').style.display = 'none';
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-      const companyName = document.getElementById('companyName').value.trim();
-      const deskUrl = document.getElementById('deskUrl').value.trim();
-      const mobUrl = document.getElementById('mobUrl').value.trim();
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('panel-redirect').classList.contains('active'))
+    generate();
+});
 
-      if (!companyName) {
-        showError('// informe o nome da empresa');
-        document.getElementById('companyName').classList.add('error-field');
-        return;
-      }
-
-      const deskId = extractFigmaId(deskUrl);
-      const mobId = extractFigmaId(mobUrl);
-
-      if (!deskId) {
-        showError('// link desktop inválido ou sem node-id');
-        document.getElementById('deskUrl').classList.add('error-field');
-        return;
-      }
-      if (!mobId) {
-        showError('// link mobile inválido ou sem node-id');
-        document.getElementById('mobUrl').classList.add('error-field');
-        return;
-      }
-
-      document.getElementById('companyName').classList.remove('error-field');
-      document.getElementById('deskUrl').classList.remove('error-field');
-      document.getElementById('mobUrl').classList.remove('error-field');
-
-      setLoading(true);
-
-      try {
-        const res = await fetch('/api/shorten', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deskId, mobId, companyName }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          showError(`// ${data.error}`);
-          return;
-        }
-
-        document.getElementById('resultUrl').textContent = data.shortUrl;
-        document.getElementById('resultBox').style.display = 'block';
-
-      } catch (err) {
-        showError('// falha na conexão com o servidor');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function copyUrl() {
-      const url = document.getElementById('resultUrl').textContent;
-      navigator.clipboard.writeText(url).then(() => {
-        const btn = document.querySelector('.copy-btn');
-        btn.textContent = 'Copiado ✓';
-        setTimeout(() => btn.textContent = 'Copiar link', 2000);
-      });
-    }
-
-    // Enter para gerar
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Enter') generate();
-    });
-  </script>
+// INIT
+renderLinks();
+renderEmpresas();
+</script>
 </body>
 </html>
