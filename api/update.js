@@ -1,3 +1,28 @@
+const REDIS_URL   = process.env.KV_REST_API_URL;
+const REDIS_TOKEN = process.env.KV_REST_API_TOKEN;
+
+async function redisGet(key) {
+  const res = await fetch(`${REDIS_URL}/get/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data.result) return null;
+  try { return JSON.parse(data.result); } catch { return null; }
+}
+
+async function redisSet(key, value) {
+  const res = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${REDIS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ value: JSON.stringify(value) }),
+  });
+  if (!res.ok) throw new Error(`Redis SET failed: ${await res.text()}`);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
@@ -6,68 +31,34 @@ export default async function handler(req, res) {
   if (req.method !== 'PATCH') return res.status(405).json({ error: 'Method not allowed' });
 
   const { alias, deskUrl, mobUrl } = req.body;
-  if (!alias) return res.status(400).json({ error: 'alias é obrigatório' });
-  if (!deskUrl && !mobUrl) return res.status(400).json({ error: 'Informe ao menos um link para atualizar' });
 
-  function extractId(url) {
-    try { return new URL(url).searchParams.get('node-id'); } catch { return null; }
-  }
+  if (!alias)
+    return res.status(400).json({ error: 'alias é obrigatório' });
+  if (!deskUrl && !mobUrl)
+    return res.status(400).json({ error: 'Informe ao menos um link para atualizar' });
 
-  const token = process.env.TINYURL_TOKEN;
-  const baseUrl = process.env.BASE_URL || 'https://redirect-self-delta.vercel.app';
-
-  // 1. Busca a URL atual do alias para preservar os IDs não alterados
-  const getRes = await fetch(`https://api.tinyurl.com/alias/tinyurl.com/${alias}`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (!getRes.ok) return res.status(404).json({ error: 'Alias não encontrado no TinyURL' });
-
-  const getData = await getRes.json();
-  const currentLongUrl = getData.data?.url || '';
-
-  let currentDeskId, currentMobId;
   try {
-    const u = new URL(currentLongUrl);
-    currentDeskId = u.searchParams.get('d');
-    currentMobId  = u.searchParams.get('m');
-  } catch {
-    return res.status(500).json({ error: 'Não foi possível ler a URL atual' });
+    const current = await redisGet(`redirect:${alias}`);
+    if (!current)
+      return res.status(404).json({ error: `Alias "${alias}" não encontrado no banco` });
+
+    const updated = {
+      ...current,
+      deskUrl:   deskUrl   || current.deskUrl,
+      mobUrl:    mobUrl    || current.mobUrl,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await redisSet(`redirect:${alias}`, updated);
+
+    return res.status(200).json({
+      ok: true,
+      alias,
+      deskUrl: updated.deskUrl,
+      mobUrl:  updated.mobUrl,
+    });
+  } catch (err) {
+    console.error('update error:', err);
+    return res.status(500).json({ error: 'Erro ao atualizar no banco' });
   }
-
-  const finalDeskId = deskUrl ? (extractId(deskUrl) || currentDeskId) : currentDeskId;
-  const finalMobId  = mobUrl  ? (extractId(mobUrl)  || currentMobId)  : currentMobId;
-
-  const newLongUrl = `${baseUrl}/r?d=${encodeURIComponent(finalDeskId)}&m=${encodeURIComponent(finalMobId)}`;
-
-  // 2. Deleta o alias atual
-  const deleteRes = await fetch(`https://api.tinyurl.com/alias/tinyurl.com/${alias}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-
-  if (!deleteRes.ok) {
-    const d = await deleteRes.json().catch(() => ({}));
-    return res.status(400).json({ error: d.errors?.[0] || 'Erro ao deletar alias antigo' });
-  }
-
-  // 3. Recria o alias com a nova URL
-  const createRes = await fetch('https://api.tinyurl.com/create', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      url: newLongUrl,
-      alias: alias,
-      domain: 'tinyurl.com',
-    }),
-  });
-
-  if (!createRes.ok) {
-    const d = await createRes.json().catch(() => ({}));
-    return res.status(400).json({ error: d.errors?.[0] || 'Erro ao recriar alias no TinyURL' });
-  }
-
-  return res.status(200).json({ ok: true });
 }
