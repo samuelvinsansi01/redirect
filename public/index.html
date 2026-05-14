@@ -652,9 +652,29 @@ function getLinks() {
 
 function saveLink(name, url) {
   const links = getLinks();
-  links.unshift({ name, url, date: todayStr(), time: timeStr(), ts: Date.now() });
+  const today = todayStr();
+  links.unshift({ name, url, date: today, time: timeStr(), ts: Date.now() });
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
   renderLinks();
+
+  // Auto-fill prototype on companies imported on the same day
+  const normName = normalizeAlias(stripPrefix(name));
+  const weekData = getWeekData();
+  if (!weekData || !weekData.days[today]) return;
+
+  let filled = 0;
+  weekData.days[today] = weekData.days[today].map(e => {
+    if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) {
+      filled++;
+      return { ...e, prototipo: url };
+    }
+    return e;
+  });
+
+  if (filled > 0) {
+    saveWeekData(weekData);
+    notify(`✓ Protótipo preenchido em ${filled} empresa${filled > 1 ? 's' : ''} de hoje`);
+  }
 }
 
 function findLinkByName(name) {
