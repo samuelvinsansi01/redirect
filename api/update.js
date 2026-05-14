@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const token = process.env.TINYURL_TOKEN;
   const baseUrl = process.env.BASE_URL || 'https://redirect-self-delta.vercel.app';
 
-  // Busca a URL atual do alias para pegar os IDs que não foram alterados
+  // 1. Busca a URL atual do alias para preservar os IDs não alterados
   const getRes = await fetch(`https://api.tinyurl.com/alias/tinyurl.com/${alias}`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -39,18 +39,34 @@ export default async function handler(req, res) {
 
   const newLongUrl = `${baseUrl}/r?d=${encodeURIComponent(finalDeskId)}&m=${encodeURIComponent(finalMobId)}`;
 
-  const updateRes = await fetch(`https://api.tinyurl.com/alias/tinyurl.com/${alias}`, {
-    method: 'PATCH',
+  // 2. Deleta o alias atual
+  const deleteRes = await fetch(`https://api.tinyurl.com/alias/tinyurl.com/${alias}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (!deleteRes.ok) {
+    const d = await deleteRes.json().catch(() => ({}));
+    return res.status(400).json({ error: d.errors?.[0] || 'Erro ao deletar alias antigo' });
+  }
+
+  // 3. Recria o alias com a nova URL
+  const createRes = await fetch('https://api.tinyurl.com/create', {
+    method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ url: newLongUrl, domain: 'tinyurl.com', alias }),
+    body: JSON.stringify({
+      url: newLongUrl,
+      alias: alias,
+      domain: 'tinyurl.com',
+    }),
   });
 
-  if (!updateRes.ok) {
-    const d = await updateRes.json().catch(() => ({}));
-    return res.status(400).json({ error: d.errors?.[0] || 'Erro ao atualizar no TinyURL' });
+  if (!createRes.ok) {
+    const d = await createRes.json().catch(() => ({}));
+    return res.status(400).json({ error: d.errors?.[0] || 'Erro ao recriar alias no TinyURL' });
   }
 
   return res.status(200).json({ ok: true });
