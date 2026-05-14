@@ -219,7 +219,43 @@
       cursor: pointer; transition: all 0.2s; flex-shrink: 0;
     }
     .link-hide-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
+    .link-edit-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 5px; font-size: 11px;
+      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .link-edit-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .link-archive-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 5px; font-size: 11px;
+      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .link-archive-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
     .links-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 20px; }
+
+    /* PROTOTYPE INLINE EDIT */
+    .proto-edit-wrap { display: flex; align-items: center; gap: 6px; max-width: 220px; }
+    .proto-input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 5px 8px; width: 140px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .proto-input:focus { border-color: var(--accent); }
+    .proto-save-btn {
+      background: var(--accent); color: #0c0c0f; border: none; border-radius: 5px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9px;
+      padding: 5px 8px; cursor: pointer; white-space: nowrap;
+    }
+    .proto-edit-icon {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 4px; font-size: 10px; width: 20px; height: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0; vertical-align: middle; margin-left: 4px;
+    }
+    .proto-edit-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
     /* ABA DADOS */
     .section { margin-bottom: 32px; }
@@ -544,6 +580,41 @@
 
 </div>
 
+<!-- EDIT LINK MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">Editar link <span>TinyURL</span></div>
+    <div class="modal-sub">// os links do Figma serão atualizados. O link curto permanece o mesmo.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+      <div class="field-group">
+        <label>Link Desktop <span class="tag">FIGMA</span></label>
+        <input type="url" id="editDeskUrl" placeholder="https://www.figma.com/proto/..." />
+      </div>
+      <div class="field-group">
+        <label>Link Mobile <span class="tag">FIGMA</span></label>
+        <input type="url" id="editMobUrl" placeholder="https://www.figma.com/proto/..." />
+      </div>
+      <div class="error-msg" id="editError" style="display:none"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" id="editSaveBtn" onclick="saveEditLink()">Salvar alterações</button>
+      <button class="modal-btn-cancel" onclick="closeEditModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHIVE CONFIRM MODAL -->
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal">
+    <div class="modal-title">Arquivar <span>link?</span></div>
+    <div class="modal-sub">// o link curto deixará de funcionar no TinyURL. Essa ação não pode ser desfeita.</div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" style="background:var(--error);color:#fff" onclick="confirmArchiveLink()">Arquivar mesmo assim</button>
+      <button class="modal-btn-cancel" onclick="closeArchiveModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- DUPLICATE MODAL -->
 <div class="modal-overlay" id="dupModal">
   <div class="modal">
@@ -702,8 +773,9 @@ function renderLinks() {
         <div class="link-item-url">${escHtml(l.url)}</div>
       </div>
       <div class="link-item-time">${l.time}</div>
-      <button class="link-copy-btn" onclick="copyText('${l.url}',this)">Copiar</button>
-      <button class="link-hide-btn" onclick="hideLink(${l.ts})" title="Ocultar">–</button>
+      <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
+      <button class="link-edit-btn" onclick="openEditModal(${l.ts})" title="Editar links Figma">✎</button>
+      <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar no TinyURL">✕</button>
     </div>`).join('');
 }
 
@@ -712,6 +784,168 @@ function hideLink(ts) {
   const idx = links.findIndex(l => l.ts === ts);
   if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
   renderLinks();
+}
+
+// ── TINYURL API ──
+const TINY_TOKEN = 'lkioSAXg3T1bMyxOXPDxdvP3M3jJvwYqvRoooc4G6ZQdiG5tBGpMPq8Kn6fx';
+
+function extractAliasFromUrl(shortUrl) {
+  // e.g. https://tinyurl.com/contabilizza-vin → contabilizza-vin
+  try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
+}
+
+async function tinyUpdate(alias, newDestUrl) {
+  const res = await fetch(`https://api.tinyurl.com/update/${alias}`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${TINY_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url: newDestUrl }),
+  });
+  return res;
+}
+
+async function tinyArchive(alias) {
+  const res = await fetch(`https://api.tinyurl.com/archive/${alias}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${TINY_TOKEN}` },
+  });
+  return res;
+}
+
+// ── EDIT MODAL ──
+let editingTs = null;
+
+function openEditModal(ts) {
+  editingTs = ts;
+  document.getElementById('editDeskUrl').value = '';
+  document.getElementById('editMobUrl').value = '';
+  document.getElementById('editError').style.display = 'none';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  editingTs = null;
+}
+
+async function saveEditLink() {
+  const deskUrl = document.getElementById('editDeskUrl').value.trim();
+  const mobUrl  = document.getElementById('editMobUrl').value.trim();
+  const errEl   = document.getElementById('editError');
+  errEl.style.display = 'none';
+
+  if (!deskUrl && !mobUrl) {
+    errEl.textContent = '// preencha ao menos um dos links';
+    errEl.style.display = 'block'; return;
+  }
+
+  const links = getLinks();
+  const link  = links.find(l => l.ts === editingTs);
+  if (!link) { closeEditModal(); return; }
+
+  const alias = extractAliasFromUrl(link.url);
+  if (!alias) {
+    errEl.textContent = '// não foi possível extrair o alias do link';
+    errEl.style.display = 'block'; return;
+  }
+
+  const btn = document.getElementById('editSaveBtn');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+
+  try {
+    // The redirect page at /api/shorten uses deskId + mobId query params.
+    // We need to build a new destination URL for the redirect endpoint.
+    // The TinyURL points to our server's redirect page, so we update via /api/update.
+    const res = await fetch('/api/update', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        alias,
+        deskUrl: deskUrl || undefined,
+        mobUrl:  mobUrl  || undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      errEl.textContent = `// erro: ${d.error || res.status}`;
+      errEl.style.display = 'block'; return;
+    }
+
+    // Update stored deskUrl/mobUrl on the link record
+    const idx = links.findIndex(l => l.ts === editingTs);
+    if (idx >= 0) {
+      if (deskUrl) links[idx].deskUrl = deskUrl;
+      if (mobUrl)  links[idx].mobUrl  = mobUrl;
+      localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+    }
+
+    closeEditModal();
+    notify('✓ Link atualizado com sucesso');
+    renderLinks();
+  } catch {
+    errEl.textContent = '// falha na conexão com o servidor';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Salvar alterações'; btn.disabled = false;
+  }
+}
+
+// ── ARCHIVE MODAL ──
+let archivingTs = null;
+
+function openArchiveModal(ts) {
+  archivingTs = ts;
+  document.getElementById('archiveModal').classList.add('open');
+}
+
+function closeArchiveModal() {
+  document.getElementById('archiveModal').classList.remove('open');
+  archivingTs = null;
+}
+
+async function confirmArchiveLink() {
+  const links = getLinks();
+  const link  = links.find(l => l.ts === archivingTs);
+  if (!link) { closeArchiveModal(); return; }
+
+  const alias = extractAliasFromUrl(link.url);
+  const btn   = document.querySelector('#archiveModal .modal-btn-ok');
+  btn.textContent = 'Arquivando...'; btn.disabled = true;
+
+  try {
+    if (alias) {
+      const res = await tinyArchive(alias);
+      if (!res.ok) {
+        notify('Erro ao arquivar no TinyURL — removido apenas localmente', 'warn');
+      } else {
+        notify('✓ Link arquivado no TinyURL');
+      }
+    }
+
+    // Hide locally regardless
+    const idx = links.findIndex(l => l.ts === archivingTs);
+    if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
+
+    // Also remove prototype from same-day companies
+    const today = link.date || todayStr();
+    const weekData = getWeekData();
+    if (weekData && weekData.days[today]) {
+      weekData.days[today] = weekData.days[today].map(e =>
+        e.prototipo === link.url ? { ...e, prototipo: '' } : e
+      );
+      saveWeekData(weekData);
+    }
+
+    closeArchiveModal();
+    renderLinks();
+  } catch {
+    notify('// falha na conexão', 'err');
+  } finally {
+    btn.textContent = 'Arquivar mesmo assim'; btn.disabled = false;
+  }
 }
 
 // ── EMPRESAS STORAGE (week-aware) ──
@@ -910,11 +1144,18 @@ function renderDayTable(data, day) {
     html += `<tr class="status-group-header"><td colspan="6">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
     groups[status].forEach(e => {
       const wa = buildWhatsapp(e.whatsapp);
+      const protoCell = e.prototipo
+        ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a></span>
+           <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar link">✎</button>`
+        : `<div class="proto-edit-wrap">
+             <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${e._idx}" />
+             <button class="proto-save-btn" onclick="saveProto('${day}',${e._idx})">OK</button>
+           </div>`;
       html += `<tr>
         <td class="td-name">${escHtml(e.nome)}</td>
         <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
         <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
-        <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠ não encontrado</span>'}</td>
+        <td style="white-space:nowrap">${protoCell}</td>
         <td>
           <select class="status-select" onchange="updateStatus('${day}',${e._idx},this.value)">
             ${STATUS_OPTIONS.map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
@@ -926,6 +1167,31 @@ function renderDayTable(data, day) {
   });
 
   tbody.innerHTML = html;
+}
+
+function showProtoEdit(day, idx, btn) {
+  // Replace link+edit-icon with input+save inline
+  const td = btn.parentElement;
+  const data = ensureWeekData();
+  const current = (data.days[day] && data.days[day][idx]) ? data.days[day][idx].prototipo : '';
+  td.innerHTML = `<div class="proto-edit-wrap">
+    <input class="proto-input" value="${escHtml(current)}" id="proto-input-${day}-${idx}" />
+    <button class="proto-save-btn" onclick="saveProto('${day}',${idx})">OK</button>
+  </div>`;
+  document.getElementById(`proto-input-${day}-${idx}`).focus();
+}
+
+function saveProto(day, idx) {
+  const input = document.getElementById(`proto-input-${day}-${idx}`);
+  if (!input) return;
+  const val = input.value.trim();
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx] !== undefined) {
+    data.days[day][idx].prototipo = val;
+    saveWeekData(data);
+    renderDados();
+    notify(val ? '✓ Protótipo atualizado' : '✓ Protótipo removido');
+  }
 }
 
 function updateStatus(day, idx, val) {
