@@ -348,6 +348,75 @@
       padding: 8px 14px; border-bottom: 1px solid var(--border);
     }
 
+    /* USAR BUTTON */
+    .usar-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .usar-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .usar-btn.active { background: var(--accent); color: #0c0c0f; border-color: var(--accent); font-weight: 700; }
+    .usar-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    /* MENSAGEM PRONTA */
+    .msg-panel {
+      margin-top: 24px;
+      background: var(--bg);
+      border: 1px solid var(--accent-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .msg-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--accent-dim);
+      border-bottom: 1px solid var(--accent-border);
+    }
+    .msg-panel-label {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: 0.1em; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .msg-panel-empresa {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--muted);
+    }
+    .msg-panel-empresa span {
+      color: var(--text); font-weight: 600;
+    }
+    .msg-body {
+      padding: 16px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      line-height: 1.8; color: var(--text);
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+    .msg-link-highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .msg-no-link {
+      color: var(--warning);
+      font-style: italic;
+    }
+    .msg-panel-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .msg-copy-btn {
+      background: var(--accent); color: #0c0c0f; border: none;
+      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 12px; padding: 10px 20px; cursor: pointer;
+      transition: opacity 0.2s; white-space: nowrap;
+    }
+    .msg-copy-btn:hover { opacity: 0.85; }
+    .msg-copy-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .msg-hint {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+    }
+
     /* EXPORT OPTIONS */
     .export-options {
       background: var(--bg); border: 1px solid var(--border);
@@ -509,13 +578,27 @@
                 <th>WhatsApp</th>
                 <th>Protótipo</th>
                 <th>Status</th>
+                <th>Msg</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="empresasTbody">
-              <tr><td colspan="6" class="table-empty">Nenhuma empresa importada ainda</td></tr>
+              <tr><td colspan="7" class="table-empty">Nenhuma empresa importada ainda</td></tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- PAINEL MENSAGEM PRONTA -->
+        <div class="msg-panel" id="msgPanel">
+          <div class="msg-panel-header">
+            <span class="msg-panel-label">// MENSAGEM PRONTA</span>
+            <span class="msg-panel-empresa" id="msgEmpresaLabel">Selecione uma empresa na tabela acima</span>
+          </div>
+          <div class="msg-body" id="msgBody"><span class="msg-no-link">← clique em "Usar" em uma empresa para carregar a mensagem com o link correto</span></div>
+          <div class="msg-panel-footer">
+            <span class="msg-hint" id="msgHint">// nenhuma empresa selecionada</span>
+            <button class="msg-copy-btn" id="msgCopyBtn" onclick="copyMsg()" disabled>Copiar mensagem</button>
+          </div>
         </div>
       </div>
 
@@ -631,19 +714,32 @@
 
 <script>
 const LINKS_KEY = 'fr_links';
-const EMPRESAS_KEY = 'fr_empresas_v2';   // v2 = week-aware
+const EMPRESAS_KEY = 'fr_empresas_v2';
 const HISTORY_KEY = 'fr_empresas_hist';
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
+
+// Mensagem base — só o link muda
+const MSG_BASE = `Olá, tudo bem?
+Meu nome é Samuel, trabalho com criação e reformulação de sites institucionais, com foco em melhorar credibilidade e facilitar o recebimento de novos contatos.
+Observei o site de vocês e desenvolvi uma amostra de como uma nova estrutura poderia melhorar a apresentação do escritório, com uma comunicação mais clara e mais orientada à conversão de clientes.
+Segue o link para visualizar:
+
+{LINK}
+
+Essa é apenas uma simulação de direção visual e posicionamento, para demonstrar como o site poderia evoluir nesse cenário.
+Quando puder, me diz o que achou e se faria sentido algo nesse formato para o escritório.`;
+
+// Estado da empresa selecionada para a mensagem
+let selectedMsgEmpresa = null;
 
 // ── DATE HELPERS ──
 function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
 function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
-// Returns the Sunday that starts the current week
 function getWeekStart(d) {
   const dt = d ? new Date(d) : new Date();
   dt.setHours(0,0,0,0);
-  const day = dt.getDay(); // 0=Sun
+  const day = dt.getDay();
   dt.setDate(dt.getDate() - day);
   return dt;
 }
@@ -654,7 +750,6 @@ function getWeekStartStr(d) {
 
 function currentWeekStartStr() { return getWeekStartStr(); }
 
-// All 7 days of the current week
 function currentWeekDays() {
   const days = [];
   const start = getWeekStart();
@@ -668,7 +763,6 @@ function currentWeekDays() {
 
 const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function dayLabel(dateStr) {
-  // dateStr = 'DD/MM/YYYY'
   const [d,m,y] = dateStr.split('/').map(Number);
   const dt = new Date(y, m-1, d);
   return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + '/' + (m<10?'0'+m:m);
@@ -716,6 +810,57 @@ function stripPrefix(name) {
   return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim();
 }
 
+// ── MENSAGEM PRONTA ──
+function usarEmpresaMsg(nome, prototipo) {
+  selectedMsgEmpresa = { nome, prototipo };
+
+  const labelEl = document.getElementById('msgEmpresaLabel');
+  const bodyEl = document.getElementById('msgBody');
+  const hintEl = document.getElementById('msgHint');
+  const copyBtn = document.getElementById('msgCopyBtn');
+
+  labelEl.innerHTML = `empresa: <span>${escHtml(nome)}</span>`;
+
+  if (!prototipo) {
+    bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado. Adicione o link na tabela antes de usar a mensagem.</span>`;
+    hintEl.textContent = '// sem protótipo — adicione o link na coluna Protótipo';
+    copyBtn.disabled = true;
+    // Scroll suave até o painel
+    document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
+  const msgFinal = MSG_BASE.replace('{LINK}', prototipo);
+
+  // Renderiza a mensagem com o link destacado
+  const parts = msgFinal.split(prototipo);
+  bodyEl.innerHTML =
+    escHtml(parts[0]) +
+    `<span class="msg-link-highlight">${escHtml(prototipo)}</span>` +
+    escHtml(parts[1] || '');
+
+  hintEl.textContent = `// ${escHtml(nome)} · link pronto para envio`;
+  copyBtn.disabled = false;
+
+  document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Atualiza visual dos botões Usar na tabela
+  document.querySelectorAll('.usar-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.nome === nome);
+  });
+}
+
+function copyMsg() {
+  if (!selectedMsgEmpresa || !selectedMsgEmpresa.prototipo) return;
+  const msgFinal = MSG_BASE.replace('{LINK}', selectedMsgEmpresa.prototipo);
+  navigator.clipboard.writeText(msgFinal).then(() => {
+    const btn = document.getElementById('msgCopyBtn');
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar mensagem', 2200);
+    notify(`✓ Mensagem de ${selectedMsgEmpresa.nome} copiada`);
+  });
+}
+
 // ── LINKS STORAGE ──
 function getLinks() {
   try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; }
@@ -728,7 +873,6 @@ function saveLink(name, url) {
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
   renderLinks();
 
-  // Auto-fill prototype on companies imported on the same day
   const normName = normalizeAlias(stripPrefix(name));
   const weekData = getWeekData();
   if (!weekData || !weekData.days[today]) return;
@@ -790,7 +934,6 @@ function hideLink(ts) {
 const TINY_TOKEN = 'lkioSAXg3T1bMyxOXPDxdvP3M3jJvwYqvRoooc4G6ZQdiG5tBGpMPq8Kn6fx';
 
 function extractAliasFromUrl(shortUrl) {
-  // e.g. https://tinyurl.com/contabilizza-vin → contabilizza-vin
   try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
 }
 
@@ -855,9 +998,6 @@ async function saveEditLink() {
   btn.textContent = 'Salvando...'; btn.disabled = true;
 
   try {
-    // The redirect page at /api/shorten uses deskId + mobId query params.
-    // We need to build a new destination URL for the redirect endpoint.
-    // The TinyURL points to our server's redirect page, so we update via /api/update.
     const res = await fetch('/api/update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -874,7 +1014,6 @@ async function saveEditLink() {
       errEl.style.display = 'block'; return;
     }
 
-    // Update stored deskUrl/mobUrl on the link record
     const idx = links.findIndex(l => l.ts === editingTs);
     if (idx >= 0) {
       if (deskUrl) links[idx].deskUrl = deskUrl;
@@ -925,11 +1064,9 @@ async function confirmArchiveLink() {
       }
     }
 
-    // Hide locally regardless
     const idx = links.findIndex(l => l.ts === archivingTs);
     if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
 
-    // Also remove prototype from same-day companies
     const today = link.date || todayStr();
     const weekData = getWeekData();
     if (weekData && weekData.days[today]) {
@@ -948,8 +1085,7 @@ async function confirmArchiveLink() {
   }
 }
 
-// ── EMPRESAS STORAGE (week-aware) ──
-// Structure: { weekStart: 'DD/MM/YYYY', days: { 'DD/MM/YYYY': [ {nome, site, whatsapp, prototipo, status}, ... ] } }
+// ── EMPRESAS STORAGE ──
 function getWeekData() {
   try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || 'null'); } catch { return null; }
 }
@@ -958,7 +1094,6 @@ function ensureWeekData() {
   let data = getWeekData();
   const ws = currentWeekStartStr();
   if (!data || data.weekStart !== ws) {
-    // If there's old data and it's a different week, archive it
     if (data && data.weekStart !== ws) {
       archiveWeekData(data);
     }
@@ -974,7 +1109,6 @@ function saveWeekData(data) {
 
 function archiveWeekData(data) {
   if (!data) return;
-  // Only keep 1 previous week
   localStorage.setItem(HISTORY_KEY, JSON.stringify({ ...data, archivedAt: todayStr() }));
 }
 
@@ -982,7 +1116,6 @@ function getHistoryData() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || 'null'); } catch { return null; }
 }
 
-// Flatten week data to array: [{date, nome, site, whatsapp, prototipo, status}]
 function flattenWeekData(data) {
   if (!data) return [];
   const result = [];
@@ -992,7 +1125,6 @@ function flattenWeekData(data) {
   return result;
 }
 
-// All companies across all days (for duplicate check)
 function getAllNomesInWeek(data) {
   const nomes = new Set();
   Object.values(data.days).forEach(dayArr => {
@@ -1001,7 +1133,6 @@ function getAllNomesInWeek(data) {
   return nomes;
 }
 
-// ── STATE for selected day tab ──
 let selectedDay = todayStr();
 
 // ── IMPORTAR JSON ──
@@ -1077,7 +1208,6 @@ function renderDados() {
   const weekDays = currentWeekDays();
   const today = todayStr();
 
-  // Day tabs
   const tabsEl = document.getElementById('dayTabs');
   tabsEl.innerHTML = weekDays.map(day => {
     const count = (data.days[day] || []).length;
@@ -1089,11 +1219,9 @@ function renderDados() {
     </button>`;
   }).join('');
 
-  // Total count
   const total = flattenWeekData(data).length;
   document.getElementById('empresasCount').textContent = total ? `(${total} total)` : '';
 
-  // Export day selector
   const sel = document.getElementById('exportDaySelect');
   const prev = sel.value;
   sel.innerHTML = '<option value="">Selecionar dia...</option>' +
@@ -1101,13 +1229,9 @@ function renderDados() {
       `<option value="${d}"${d === prev ? ' selected' : ''}>${dayLabel(d)} (${data.days[d].length})</option>`
     ).join('');
 
-  // Table for selected day — grouped by status
   renderDayTable(data, selectedDay);
-
-  // History
   renderHistory();
 
-  // Sunday banner
   if (isSunday()) {
     document.getElementById('sundayBanner').classList.remove('hidden');
   } else {
@@ -1125,11 +1249,10 @@ function renderDayTable(data, day) {
   const dayArr = data.days[day] || [];
 
   if (!dayArr.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Nenhuma empresa em ${dayLabel(day)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa em ${dayLabel(day)}</td></tr>`;
     return;
   }
 
-  // Group by status
   const groups = {};
   STATUS_OPTIONS.forEach(s => groups[s] = []);
   dayArr.forEach((e, i) => {
@@ -1141,9 +1264,12 @@ function renderDayTable(data, day) {
   let html = '';
   STATUS_OPTIONS.forEach(status => {
     if (!groups[status].length) return;
-    html += `<tr class="status-group-header"><td colspan="6">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
+    html += `<tr class="status-group-header"><td colspan="7">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
     groups[status].forEach(e => {
       const wa = buildWhatsapp(e.whatsapp);
+      const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
+      const hasProto = !!e.prototipo;
+
       const protoCell = e.prototipo
         ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a></span>
            <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar link">✎</button>`
@@ -1151,6 +1277,7 @@ function renderDayTable(data, day) {
              <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${e._idx}" />
              <button class="proto-save-btn" onclick="saveProto('${day}',${e._idx})">OK</button>
            </div>`;
+
       html += `<tr>
         <td class="td-name">${escHtml(e.nome)}</td>
         <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
@@ -1161,6 +1288,14 @@ function renderDayTable(data, day) {
             ${STATUS_OPTIONS.map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
           </select>
         </td>
+        <td>
+          <button
+            class="usar-btn${isSelected ? ' active' : ''}"
+            data-nome="${escHtml(e.nome)}"
+            onclick="usarEmpresaMsg('${escHtml(e.nome).replace(/'/g,"\\'")}', '${escHtml(e.prototipo || '').replace(/'/g,"\\'")}')"
+            ${!hasProto ? 'title="Adicione o protótipo primeiro"' : 'title="Usar esta empresa na mensagem"'}
+          >${isSelected ? '✓ usando' : 'Usar'}</button>
+        </td>
         <td><button class="del-btn" onclick="deleteEmpresa('${day}',${e._idx})">✕</button></td>
       </tr>`;
     });
@@ -1170,7 +1305,6 @@ function renderDayTable(data, day) {
 }
 
 function showProtoEdit(day, idx, btn) {
-  // Replace link+edit-icon with input+save inline
   const td = btn.parentElement;
   const data = ensureWeekData();
   const current = (data.days[day] && data.days[day][idx]) ? data.days[day][idx].prototipo : '';
@@ -1189,6 +1323,12 @@ function saveProto(day, idx) {
   if (data.days[day] && data.days[day][idx] !== undefined) {
     data.days[day][idx].prototipo = val;
     saveWeekData(data);
+
+    // Se essa empresa estava selecionada na mensagem, atualiza o painel
+    if (selectedMsgEmpresa && selectedMsgEmpresa.nome === data.days[day][idx].nome) {
+      usarEmpresaMsg(data.days[day][idx].nome, val);
+    }
+
     renderDados();
     notify(val ? '✓ Protótipo atualizado' : '✓ Protótipo removido');
   }
@@ -1206,8 +1346,19 @@ function updateStatus(day, idx, val) {
 function deleteEmpresa(day, idx) {
   const data = ensureWeekData();
   if (data.days[day]) {
+    const deleted = data.days[day][idx];
     data.days[day].splice(idx, 1);
     saveWeekData(data);
+
+    // Limpa painel se era a empresa selecionada
+    if (selectedMsgEmpresa && selectedMsgEmpresa.nome === deleted?.nome) {
+      selectedMsgEmpresa = null;
+      document.getElementById('msgEmpresaLabel').textContent = 'Selecione uma empresa na tabela acima';
+      document.getElementById('msgBody').innerHTML = '<span class="msg-no-link">← clique em "Usar" em uma empresa para carregar a mensagem com o link correto</span>';
+      document.getElementById('msgHint').textContent = '// nenhuma empresa selecionada';
+      document.getElementById('msgCopyBtn').disabled = true;
+    }
+
     renderDados();
   }
 }
@@ -1216,6 +1367,7 @@ function clearAll() {
   if (!confirm('Limpar todas as empresas da semana atual?')) return;
   const ws = currentWeekStartStr();
   saveWeekData({ weekStart: ws, days: {} });
+  selectedMsgEmpresa = null;
   renderDados();
   notify('Semana limpa');
 }
@@ -1240,7 +1392,6 @@ function renderHistory() {
   const flat = flattenWeekData(hist);
   badge.textContent = `${flat.length} empresa${flat.length !== 1 ? 's' : ''} · semana de ${hist.weekStart}`;
 
-  // Group by date then by status
   const dateGroups = {};
   flat.forEach(e => {
     if (!dateGroups[e.date]) dateGroups[e.date] = {};
@@ -1304,18 +1455,15 @@ function buildDaySheet(wb, sheetName, companies) {
   const ws = {};
   let row = 0;
 
-  // Write header
   headers.forEach((h, ci) => {
     ws[XLSX.utils.encode_cell({r:row,c:ci})] = { v: h, t: 's' };
   });
   row++;
 
-  // Group by status
   STATUS_ORDER.forEach(status => {
     const group = companies.filter(e => (e.status || 'Não enviada') === status);
     if (!group.length) return;
 
-    // Status group header row
     ws[XLSX.utils.encode_cell({r:row,c:0})] = { v: `── ${status} (${group.length}) ──`, t: 's' };
     for (let ci=1;ci<5;ci++) ws[XLSX.utils.encode_cell({r:row,c:ci})] = { v: '', t: 's' };
     row++;
@@ -1350,11 +1498,10 @@ function exportExcelWeek() {
   const wb = XLSX.utils.book_new();
   weekDays.forEach(day => {
     const companies = data.days[day] || [];
-    const label = dayLabel(day); // e.g. "Dom 11/05"
+    const label = dayLabel(day);
     buildDaySheet(wb, label, companies);
   });
 
-  const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
   XLSX.writeFile(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
   notify('✓ Excel da semana gerado');
 }
@@ -1488,14 +1635,10 @@ document.addEventListener('keydown', e => {
 });
 
 // ── INIT ──
-// Ensure week data is valid on load (triggers archive if new week)
 ensureWeekData();
-
-// Show Sunday banner if needed
 if (isSunday()) {
   document.getElementById('sundayBanner').classList.remove('hidden');
 }
-
 renderLinks();
 </script>
 </body>
