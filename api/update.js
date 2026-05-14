@@ -7,8 +7,20 @@ async function redisGet(key) {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  if (!data.result) return null;
-  try { return JSON.parse(data.result); } catch { return null; }
+
+  let current = data.result;
+  while (typeof current === 'string') {
+    try { current = JSON.parse(current); }
+    catch { break; }
+  }
+  if (current && typeof current === 'object' && current.value !== undefined) {
+    current = current.value;
+    while (typeof current === 'string') {
+      try { current = JSON.parse(current); }
+      catch { break; }
+    }
+  }
+  return current;
 }
 
 async function redisSet(key, value) {
@@ -18,7 +30,7 @@ async function redisSet(key, value) {
       Authorization: `Bearer ${REDIS_TOKEN}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify({ value }),  // sem JSON.stringify(value)
   });
   if (!res.ok) throw new Error(`Redis SET failed: ${await res.text()}`);
 }
@@ -31,7 +43,6 @@ export default async function handler(req, res) {
   if (req.method !== 'PATCH') return res.status(405).json({ error: 'Method not allowed' });
 
   const { alias, deskUrl, mobUrl } = req.body;
-
   if (!alias)
     return res.status(400).json({ error: 'alias é obrigatório' });
   if (!deskUrl && !mobUrl)
