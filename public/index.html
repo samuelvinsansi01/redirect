@@ -546,8 +546,8 @@
 <!-- EDIT LINK MODAL -->
 <div class="modal-overlay" id="editModal">
   <div class="modal" style="max-width:520px">
-    <div class="modal-title">Editar link <span>TinyURL</span></div>
-    <div class="modal-sub">// os links do Figma serão atualizados. O link curto permanece o mesmo.</div>
+    <div class="modal-title">Editar links <span>Figma</span></div>
+    <div class="modal-sub">// os links do Figma serão atualizados no banco. O link curto permanece o mesmo.</div>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
       <div class="field-group">
         <label>Link Desktop <span class="tag">FIGMA</span></label>
@@ -570,7 +570,7 @@
 <div class="modal-overlay" id="archiveModal">
   <div class="modal">
     <div class="modal-title">Arquivar <span>link?</span></div>
-    <div class="modal-sub">// o link curto deixará de funcionar no TinyURL. Essa ação não pode ser desfeita.</div>
+    <div class="modal-sub">// o link será removido da lista. Essa ação não pode ser desfeita.</div>
     <div class="modal-btns">
       <button class="modal-btn-ok" style="background:var(--error);color:#fff" onclick="confirmArchiveLink()">Arquivar mesmo assim</button>
       <button class="modal-btn-cancel" onclick="closeArchiveModal()">Cancelar</button>
@@ -637,8 +637,6 @@ function currentWeekDays() {
 
 const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-// ── CORREÇÃO PRINCIPAL: dayLabel com modo sheet ──
-// forSheet=true usa hífen em vez de barra, evitando erro do Excel
 function dayLabel(dateStr, forSheet) {
   const [d,m,y] = dateStr.split('/').map(Number);
   const dt = new Date(y, m-1, d);
@@ -790,7 +788,7 @@ function renderLinks() {
       <div class="link-item-time">${l.time}</div>
       <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
       <button class="link-edit-btn" onclick="openEditModal(${l.ts})" title="Editar links Figma">✎</button>
-      <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar no TinyURL">✕</button>
+      <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar">✕</button>
     </div>`).join('');
 }
 
@@ -801,7 +799,7 @@ function hideLink(ts) {
   renderLinks();
 }
 
-// ── TINYURL API ──
+// ── ALIAS EXTRACTOR ──
 function extractAliasFromUrl(shortUrl) {
   try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
 }
@@ -867,7 +865,7 @@ async function saveEditLink() {
     }
 
     closeEditModal();
-    notify('✓ Link atualizado com sucesso');
+    notify('✓ Links atualizados no banco com sucesso');
     renderLinks();
   } catch {
     errEl.textContent = '// falha na conexão com o servidor';
@@ -895,43 +893,21 @@ async function confirmArchiveLink() {
   const link  = links.find(l => l.ts === archivingTs);
   if (!link) { closeArchiveModal(); return; }
 
-  const alias = extractAliasFromUrl(link.url);
-  const btn   = document.querySelector('#archiveModal .modal-btn-ok');
-  btn.textContent = 'Arquivando...'; btn.disabled = true;
+  const idx = links.findIndex(l => l.ts === archivingTs);
+  if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
 
-  try {
-    if (alias) {
-      const res = await fetch('/api/archive', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alias }),
-      });
-      if (!res.ok) {
-        notify('Erro ao arquivar no TinyURL — removido apenas localmente', 'warn');
-      } else {
-        notify('✓ Link arquivado no TinyURL');
-      }
-    }
-
-    const idx = links.findIndex(l => l.ts === archivingTs);
-    if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
-
-    const today = link.date || todayStr();
-    const weekData = getWeekData();
-    if (weekData && weekData.days[today]) {
-      weekData.days[today] = weekData.days[today].map(e =>
-        e.prototipo === link.url ? { ...e, prototipo: '' } : e
-      );
-      saveWeekData(weekData);
-    }
-
-    closeArchiveModal();
-    renderLinks();
-  } catch {
-    notify('// falha na conexão', 'err');
-  } finally {
-    btn.textContent = 'Arquivar mesmo assim'; btn.disabled = false;
+  const today = link.date || todayStr();
+  const weekData = getWeekData();
+  if (weekData && weekData.days[today]) {
+    weekData.days[today] = weekData.days[today].map(e =>
+      e.prototipo === link.url ? { ...e, prototipo: '' } : e
+    );
+    saveWeekData(weekData);
   }
+
+  closeArchiveModal();
+  renderLinks();
+  notify('✓ Link removido da lista');
 }
 
 // ── EMPRESAS STORAGE ──
@@ -1305,7 +1281,7 @@ function archiveHistory() {
   notify('Semana anterior arquivada');
 }
 
-// ── EXCEL DOWNLOAD VIA BLOB (funciona em qualquer ambiente) ──
+// ── EXCEL ──
 function downloadWb(wb, filename) {
   try {
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1324,7 +1300,6 @@ function downloadWb(wb, filename) {
   }
 }
 
-// ── EXCEL HELPERS ──
 function makeHyperlink(url) {
   if (!url) return { v: '', t: 's' };
   return { f: `HYPERLINK("${url}","${url}")` };
@@ -1369,7 +1344,6 @@ function buildDaySheet(wb, sheetName, companies) {
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
 }
 
-// ── EXPORTAR ──
 function exportExcelWeek() {
   const data = ensureWeekData();
   const weekDays = currentWeekDays();
@@ -1379,7 +1353,6 @@ function exportExcelWeek() {
   const wb = XLSX.utils.book_new();
   weekDays.forEach(day => {
     const companies = data.days[day] || [];
-    // USA dayLabel(day, true) — barras viram hífens, sem erro no Excel
     buildDaySheet(wb, dayLabel(day, true), companies);
   });
 
@@ -1396,7 +1369,6 @@ function exportExcelDay() {
   if (!companies.length) { notify('Nenhuma empresa neste dia', 'err'); return; }
 
   const wb = XLSX.utils.book_new();
-  // USA dayLabel(day, true)
   buildDaySheet(wb, dayLabel(day, true), companies);
   downloadWb(wb, `figma-${day.replace(/\//g,'-')}.xlsx`);
   notify(`✓ Excel de ${dayLabel(day)} gerado`);
@@ -1413,7 +1385,6 @@ function exportExcelHistory() {
   weekDays.forEach(day => {
     const companies = hist.days[day] || [];
     if (!companies.length) return;
-    // USA dayLabel(day, true)
     buildDaySheet(wb, dayLabel(day, true), companies);
   });
 
@@ -1427,10 +1398,6 @@ document.getElementById('companyName').addEventListener('input', function() {
   document.getElementById('aliasPreview').textContent = val
     ? `→ tinyurl.com/${normalizeAlias(val)}-vin` : '';
 });
-
-function extractFigmaId(url) {
-  try { return new URL(url).searchParams.get('node-id'); } catch { return null; }
-}
 
 function showError(msg) {
   const el = document.getElementById('errorMsg');
@@ -1449,23 +1416,24 @@ async function generate() {
   document.getElementById('resultBox').style.display = 'none';
 
   const companyName = document.getElementById('companyName').value.trim();
-  const deskUrl = document.getElementById('deskUrl').value.trim();
-  const mobUrl = document.getElementById('mobUrl').value.trim();
+  const deskUrl     = document.getElementById('deskUrl').value.trim();
+  const mobUrl      = document.getElementById('mobUrl').value.trim();
 
   if (!companyName) {
     showError('// informe o nome da empresa');
     document.getElementById('companyName').classList.add('error-field'); return;
   }
-  const deskId = extractFigmaId(deskUrl);
-  const mobId = extractFigmaId(mobUrl);
-  if (!deskId) {
-    showError('// link desktop inválido ou sem node-id');
+
+  // ── CORREÇÃO PRINCIPAL: envia as URLs completas, não os node-ids ──
+  if (!deskUrl || !deskUrl.includes('figma.com')) {
+    showError('// link desktop inválido — precisa ser URL do Figma');
     document.getElementById('deskUrl').classList.add('error-field'); return;
   }
-  if (!mobId) {
-    showError('// link mobile inválido ou sem node-id');
+  if (!mobUrl || !mobUrl.includes('figma.com')) {
+    showError('// link mobile inválido — precisa ser URL do Figma');
     document.getElementById('mobUrl').classList.add('error-field'); return;
   }
+
   ['companyName','deskUrl','mobUrl'].forEach(id =>
     document.getElementById(id).classList.remove('error-field'));
 
@@ -1474,7 +1442,7 @@ async function generate() {
     const res = await fetch('/api/shorten', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deskId, mobId, companyName }),
+      body: JSON.stringify({ deskUrl, mobUrl, companyName }),
     });
     const data = await res.json();
     if (!res.ok) { showError(`// ${data.error}`); return; }
