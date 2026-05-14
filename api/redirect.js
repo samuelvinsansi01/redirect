@@ -7,8 +7,15 @@ async function redisGet(key) {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  if (!data.result) return null;
-  try { return JSON.parse(data.result); } catch { return null; }
+  console.log('Redis raw response:', JSON.stringify(data));
+  const raw = data.result;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    // se ainda for string, parseia de novo
+    if (typeof parsed === 'string') return JSON.parse(parsed);
+    return parsed;
+  } catch { return null; }
 }
 
 function isMobileUA(userAgent) {
