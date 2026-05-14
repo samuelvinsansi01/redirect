@@ -12,18 +12,22 @@ async function redisGet(key) {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    // se ainda for string, parseia de novo
     if (typeof parsed === 'string') return JSON.parse(parsed);
     return parsed;
   } catch { return null; }
 }
 
-function isMobileUA(userAgent) {
-  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent || '');
+function isMobileUA(ua) {
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua || '');
 }
 
 export default async function handler(req, res) {
-  const { alias } = req.query;
+  console.log('handler called, url:', req.url);
+
+  const url = new URL(req.url, 'https://placeholder.com');
+  const alias = url.searchParams.get('alias');
+
+  console.log('alias extraído:', alias);
 
   if (!alias)
     return res.status(400).send('Parâmetro alias ausente.');
@@ -36,12 +40,16 @@ export default async function handler(req, res) {
     return res.status(500).send('Erro ao buscar dados. Tente novamente.');
   }
 
+  console.log('record:', JSON.stringify(record));
+
   if (!record)
     return res.status(404).send(`Link "${alias}" não encontrado ou expirado.`);
 
   const ua     = req.headers['user-agent'] || '';
   const mobile = isMobileUA(ua);
   const target = mobile ? record.mobUrl : record.deskUrl;
+
+  console.log('target:', target);
 
   if (!target)
     return res.status(500).send('Link de destino não configurado.');
