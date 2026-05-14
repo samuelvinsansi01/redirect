@@ -1,64 +1,86 @@
+const REDIS_URL   = process.env.KV_REST_API_URL;
+const REDIS_TOKEN = process.env.KV_REST_API_TOKEN;
+
+async function redisSet(key, value) {
+  const res = await fetch(`${REDIS_URL}/set/${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${REDIS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ value: JSON.stringify(value) }),
+  });
+  if (!res.ok) throw new Error(`Redis SET failed: ${await res.text()}`);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { deskId, mobId, companyName } = req.body;
+  const { deskUrl, mobUrl, companyName } = req.body;
 
-  if (!deskId || !mobId) {
-    return res.status(400).json({ error: 'deskId e mobId são obrigatórios' });
-  }
-
-  if (!companyName) {
+  if (!deskUrl || !mobUrl)
+    return res.status(400).json({ error: 'deskUrl e mobUrl são obrigatórios' });
+  if (!companyName)
     return res.status(400).json({ error: 'Nome da empresa é obrigatório' });
+
+  function isFigmaUrl(url) {
+    try { return new URL(url).hostname.includes('figma.com'); } catch { return false; }
   }
+  if (!isFigmaUrl(deskUrl) || !isFigmaUrl(mobUrl))
+    return res.status(400).json({ error: 'Os links precisam ser URLs do Figma' });
 
-  // Normaliza o nome: minúsculas, remove acentos, substitui espaços e caracteres especiais por hífen
-  const normalized = companyName
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .slice(0, 50); // limite de 50 chars antes do sufixo
+  const alias = companyName
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
+    .slice(0, 50) + '-vin';
 
-  const alias = `${normalized}-vin`;
-  const token = process.env.TINYURL_TOKEN;
   const baseUrl = process.env.BASE_URL || 'https://redirect-self-delta.vercel.app';
-  const longUrl = `${baseUrl}/r?d=${encodeURIComponent(deskId)}&m=${encodeURIComponent(mobId)}`;
+  const longUrl = `${baseUrl}/api/redirect?alias=${encodeURIComponent(alias)}`;
+  const token   = process.env.TINYURL_TOKEN;
 
   try {
-    const response = await fetch('https://api.tinyurl.com/create', {
+    const tinyRes = await fetch('https://api.tinyurl.com/create', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        url: longUrl,
-        alias: alias,
-        domain: 'tinyurl.com',
-      }),
+      body: JSON.stringify({ url: longUrl, alias, domain: 'tinyurl.com' }),
     });
 
-    const data = await response.json();
+    const tinyData = await tinyRes.json();
 
-    if (!response.ok) {
-      // TinyURL retorna erro específico quando o alias já existe
-      const errMsg = data.errors?.[0] || '';
-      if (errMsg.toLowerCase().includes('alias') || errMsg.toLowerCase().includes('taken') || errMsg.toLowerCase().includes('exist')) {
-        return res.status(409).json({ error: `O link "tinyurl.com/${alias}" já existe. Tente um nome diferente para a empresa.` });
+    if (!tinyRes.ok) {
+      const errMsg = tinyData.errors?.[0] || '';
+      if (errMsg.toLowerCase().includes('alias') ||
+          errMsg.toLowerCase().includes('taken') ||
+          errMsg.toLowerCase().includes('exist')) {
+        return res.status(409).json({
+          error: `O link "tinyurl.com/${alias}" já existe. Tente um nome diferente.`,
+        });
       }
       return res.status(400).json({ error: errMsg || 'Erro ao criar link TinyURL' });
     }
 
-    return res.status(200).json({ shortUrl: data.data.tiny_url, alias });
+    await redisSet(`redirect:${alias}`, {
+      alias,
+      deskUrl,
+      mobUrl,
+      companyName,
+      createdAt: new Date().toISOString(),
+    });
+
+    return res.status(200).json({
+      shortUrl: tinyData.data.tiny_url,
+      alias,
+    });
   } catch (err) {
-    return res.status(500).json({ error: 'Erro interno ao chamar TinyURL' });
+    console.error('shorten error:', err);
+    return res.status(500).json({ error: 'Erro interno ao criar o link' });
   }
 }
