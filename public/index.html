@@ -1263,7 +1263,6 @@ function renderDayTable(data, day) {
       const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
       const hasProto = !!e.prototipo;
 
-      // ── WhatsApp cell — editable, mirrors protoCell pattern ──
       const waRaw = e.whatsapp || '';
       const waBuilt = buildWhatsapp(waRaw);
       const waCell = waRaw
@@ -1274,7 +1273,6 @@ function renderDayTable(data, day) {
              <button class="proto-save-btn" onclick="saveWa('${day}',${e._idx})">OK</button>
            </div>`;
 
-      // ── Prototype cell ──
       const protoCell = e.prototipo
         ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a></span>
            <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar link">✎</button>`
@@ -1325,7 +1323,6 @@ function showWaEdit(day, idx, btn) {
 function saveWa(day, idx) {
   const inp = document.getElementById('wa-input-' + day + '-' + idx);
   if (!inp) return;
-  // Store only digits — buildWhatsapp handles the rest at render time
   const val = inp.value.trim().replace(/\D/g, '');
   const data = ensureWeekData();
   if (data.days[day] && data.days[day][idx] !== undefined) {
@@ -1472,6 +1469,25 @@ function archiveHistory() {
   notify('Semana anterior arquivada');
 }
 
+// ── EXCEL DOWNLOAD HELPER (Blob — funciona em qualquer ambiente) ──
+function downloadWb(wb, filename) {
+  try {
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    console.error('Erro ao gerar Excel:', err);
+    notify('// erro ao gerar o arquivo Excel', 'err');
+  }
+}
+
 // ── EXCEL HELPERS ──
 const STATUS_ORDER = STATUS_OPTIONS;
 
@@ -1532,7 +1548,7 @@ function exportExcelWeek() {
     buildDaySheet(wb, label, companies);
   });
 
-  XLSX.writeFile(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
+  downloadWb(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
   notify('✓ Excel da semana gerado');
 }
 
@@ -1546,7 +1562,7 @@ function exportExcelDay() {
 
   const wb = XLSX.utils.book_new();
   buildDaySheet(wb, dayLabel(day), companies);
-  XLSX.writeFile(wb, `figma-${day.replace(/\//g,'-')}.xlsx`);
+  downloadWb(wb, `figma-${day.replace(/\//g,'-')}.xlsx`);
   notify(`✓ Excel de ${dayLabel(day)} gerado`);
 }
 
@@ -1565,7 +1581,7 @@ function exportExcelHistory() {
     buildDaySheet(wb, dayLabel(day), companies);
   });
 
-  XLSX.writeFile(wb, `figma-semana-anterior-${hist.weekStart.replace(/\//g,'-')}.xlsx`);
+  downloadWb(wb, `figma-semana-anterior-${hist.weekStart.replace(/\//g,'-')}.xlsx`);
   notify('✓ Excel da semana anterior gerado');
 }
 
