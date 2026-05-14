@@ -8,7 +8,7 @@ async function redisSet(key, value) {
       Authorization: `Bearer ${REDIS_TOKEN}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ value: JSON.stringify(value) }),
+    body: JSON.stringify({ value }),
   });
   if (!res.ok) throw new Error(`Redis SET failed: ${await res.text()}`);
 }
