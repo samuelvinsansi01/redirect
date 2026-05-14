@@ -42,7 +42,7 @@
       pointer-events: none;
       z-index: 0;
     }
-    .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+    .app { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; }
 
     /* HEADER */
     .app-header { display: flex; align-items: center; margin-bottom: 28px; }
@@ -54,6 +54,32 @@
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     .logo-text { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--accent); }
+
+    /* SUNDAY BANNER */
+    .sunday-banner {
+      display: none;
+      background: rgba(240,164,41,0.10);
+      border: 1px solid rgba(240,164,41,0.35);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sunday-banner.hidden { display: none !important; }
+    .sunday-icon { font-size: 20px; flex-shrink: 0; }
+    .sunday-text { flex: 1; }
+    .sunday-title { font-size: 13px; font-weight: 700; color: var(--warning); margin-bottom: 2px; }
+    .sunday-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(240,164,41,0.7); }
+    .sunday-btn {
+      background: var(--warning); color: #0c0c0f;
+      border: none; border-radius: 8px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+      padding: 8px 14px; cursor: pointer; white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .sunday-btn:hover { opacity: 0.85; }
 
     /* TABS */
     .tabs {
@@ -135,6 +161,7 @@
     .btn-primary { background: var(--accent); color: #0c0c0f; width: 100%; margin-top: 8px; }
     .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
     .btn-excel { background: #1d6f42; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .btn-excel-week { background: #155230; color: #fff; display: flex; align-items: center; gap: 8px; }
     .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
     .btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
     .spinner {
@@ -203,6 +230,50 @@
     }
     .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+    /* DAY SELECTOR */
+    .day-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .day-tab {
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .day-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .day-tab:hover:not(.active) { color: var(--text); border-color: #333340; }
+    .day-tab .day-count {
+      display: inline-block; background: var(--border);
+      border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px;
+    }
+    .day-tab.active .day-count { background: rgba(184,240,89,0.2); }
+
+    /* HISTORY SECTION */
+    .history-section {
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .history-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--muted); text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .history-badge {
+      background: rgba(240,164,41,0.15); border: 1px solid rgba(240,164,41,0.3);
+      color: var(--warning); font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 2px 8px; border-radius: 100px; text-transform: none; letter-spacing: 0;
+    }
+    .history-toggle {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .history-toggle:hover { border-color: var(--warning); color: var(--warning); }
+    .history-content { display: none; }
+    .history-content.open { display: block; }
+
     /* TABELA */
     .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -233,6 +304,29 @@
     .del-btn:hover { color: var(--error); background: rgba(255,92,92,0.1); }
     .table-empty { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
 
+    /* GROUP HEADER in table */
+    .status-group-header td {
+      background: var(--surface2); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+    }
+
+    /* EXPORT OPTIONS */
+    .export-options {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-top: 16px;
+    }
+    .export-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 10px; }
+    .export-day-select {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .export-day-select select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace;
+      font-size: 11px; padding: 8px 12px; width: auto; cursor: pointer;
+    }
+
     /* NOTIFY */
     .notify {
       position: fixed; bottom: 24px; right: 24px;
@@ -244,6 +338,31 @@
     }
     .notify.show { transform: translateY(0); opacity: 1; }
     .notify.err { border-color: rgba(255,92,92,0.4); color: var(--error); }
+    .notify.warn { border-color: rgba(240,164,41,0.4); color: var(--warning); }
+
+    /* DUPLICATE MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 500;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; max-width: 480px; width: 90%;
+    }
+    .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+    .modal-title span { color: var(--warning); }
+    .modal-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .modal-list { list-style: none; margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }
+    .modal-list li {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+      padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--warning);
+    }
+    .modal-btns { display: flex; gap: 10px; }
+    .modal-btn-ok { background: var(--accent); color: #0c0c0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 10px 20px; cursor: pointer; }
+    .modal-btn-cancel { background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -252,6 +371,16 @@
   <div class="app-header">
     <div class="logo-dot"></div>
     <span class="logo-text">FIGMA REDIRECT STUDIO</span>
+  </div>
+
+  <!-- SUNDAY BANNER -->
+  <div class="sunday-banner hidden" id="sundayBanner">
+    <div class="sunday-icon">📅</div>
+    <div class="sunday-text">
+      <div class="sunday-title">Nova semana iniciada</div>
+      <div class="sunday-sub">// baixe o Excel da semana anterior antes de arquivar os dados</div>
+    </div>
+    <button class="sunday-btn" onclick="switchTab('dados'); scrollToHistory()">Ver histórico</button>
   </div>
 
   <div class="tabs">
@@ -314,7 +443,7 @@
   <div class="panel" id="panel-dados">
     <div class="card">
       <div class="card-title">Dados & <span>Excel.</span></div>
-      <div class="card-sub">// cole o JSON → cruza com links salvos → exporta</div>
+      <div class="card-sub">// importação por dia → cruza com links → exporta por semana ou dia</div>
 
       <div class="section">
         <div class="section-title">Importar JSON</div>
@@ -328,9 +457,13 @@
 
       <div class="section">
         <div class="section-title">
-          Empresas
+          Empresas da semana
           <span id="empresasCount" style="color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;font-weight:400;text-transform:none;letter-spacing:0"></span>
         </div>
+
+        <!-- Day tabs -->
+        <div class="day-tabs" id="dayTabs"></div>
+
         <div class="table-wrap">
           <table>
             <thead>
@@ -350,24 +483,127 @@
         </div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-excel" onclick="exportExcel()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
-          Gerar Excel
-        </button>
-        <button class="btn btn-secondary" onclick="clearAll()">Limpar tudo</button>
+      <!-- EXPORT OPTIONS -->
+      <div class="export-options">
+        <div class="export-label">// EXPORTAR EXCEL</div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-excel" onclick="exportExcelWeek()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+            Semana completa (7 abas)
+          </button>
+          <div class="export-day-select">
+            <select id="exportDaySelect">
+              <option value="">Selecionar dia...</option>
+            </select>
+            <button class="btn btn-excel" onclick="exportExcelDay()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+              Dia específico
+            </button>
+          </div>
+          <button class="btn btn-secondary" onclick="clearAll()">Limpar semana</button>
+        </div>
       </div>
+
+      <!-- HISTORY -->
+      <div class="history-section" id="historySection">
+        <div class="history-header">
+          <div class="history-title">
+            Semana anterior
+            <span class="history-badge" id="historyBadge"></span>
+          </div>
+          <button class="history-toggle" onclick="toggleHistory()" id="historyToggleBtn">Mostrar</button>
+        </div>
+        <div class="history-content" id="historyContent">
+          <div class="table-wrap" style="margin-bottom:12px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Empresa</th>
+                  <th>Site</th>
+                  <th>WhatsApp</th>
+                  <th>Protótipo</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyTbody"></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-excel-week" onclick="exportExcelHistory()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+              Baixar Excel — semana anterior
+            </button>
+            <button class="btn btn-secondary" onclick="archiveHistory()">Arquivar semana anterior</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
+</div>
+
+<!-- DUPLICATE MODAL -->
+<div class="modal-overlay" id="dupModal">
+  <div class="modal">
+    <div class="modal-title">Duplicatas <span>detectadas</span></div>
+    <div class="modal-sub" id="dupModalSub"></div>
+    <ul class="modal-list" id="dupModalList"></ul>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="closeDupModal()">Entendi, pular duplicatas</button>
+    </div>
+  </div>
 </div>
 
 <div class="notify" id="notify"></div>
 
 <script>
 const LINKS_KEY = 'fr_links';
-const EMPRESAS_KEY = 'fr_empresas';
+const EMPRESAS_KEY = 'fr_empresas_v2';   // v2 = week-aware
+const HISTORY_KEY = 'fr_empresas_hist';
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
+
+// ── DATE HELPERS ──
+function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
+function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+// Returns the Sunday that starts the current week
+function getWeekStart(d) {
+  const dt = d ? new Date(d) : new Date();
+  dt.setHours(0,0,0,0);
+  const day = dt.getDay(); // 0=Sun
+  dt.setDate(dt.getDate() - day);
+  return dt;
+}
+
+function getWeekStartStr(d) {
+  return getWeekStart(d).toLocaleDateString('pt-BR');
+}
+
+function currentWeekStartStr() { return getWeekStartStr(); }
+
+// All 7 days of the current week
+function currentWeekDays() {
+  const days = [];
+  const start = getWeekStart();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    days.push(d.toLocaleDateString('pt-BR'));
+  }
+  return days;
+}
+
+const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function dayLabel(dateStr) {
+  // dateStr = 'DD/MM/YYYY'
+  const [d,m,y] = dateStr.split('/').map(Number);
+  const dt = new Date(y, m-1, d);
+  return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + '/' + (m<10?'0'+m:m);
+}
+
+function isSunday() { return new Date().getDay() === 0; }
 
 // ── TABS ──
 function switchTab(name) {
@@ -375,17 +611,22 @@ function switchTab(name) {
     t.classList.toggle('active', ['redirect','dados'][i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'dados') { renderDados(); }
 }
 
 // ── NOTIFY ──
-function notify(msg, isErr) {
+function notify(msg, type) {
   const el = document.getElementById('notify');
   el.textContent = msg;
-  el.className = 'notify show' + (isErr ? ' err' : '');
-  setTimeout(() => el.classList.remove('show'), 3000);
+  el.className = 'notify show' + (type === 'err' ? ' err' : type === 'warn' ? ' warn' : '');
+  setTimeout(() => el.classList.remove('show'), 3200);
 }
 
 // ── UTILS ──
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function normalizeAlias(name) {
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().trim()
@@ -400,8 +641,9 @@ function buildWhatsapp(raw) {
   return 'https://wa.me/' + full;
 }
 
-function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
-function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function stripPrefix(name) {
+  return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim();
+}
 
 // ── LINKS STORAGE ──
 function getLinks() {
@@ -413,10 +655,6 @@ function saveLink(name, url) {
   links.unshift({ name, url, date: todayStr(), time: timeStr(), ts: Date.now() });
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
   renderLinks();
-}
-
-function stripPrefix(name) {
-  return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim();
 }
 
 function findLinkByName(name) {
@@ -437,7 +675,7 @@ function renderLinks() {
     el.innerHTML = '<div class="links-empty">Nenhum link gerado hoje</div>';
     return;
   }
-  el.innerHTML = todayLinks.map((l,i) => `
+  el.innerHTML = todayLinks.map(l => `
     <div class="link-item" id="link-item-${l.ts}">
       <div class="link-item-info">
         <div class="link-item-name">${escHtml(l.name)}</div>
@@ -456,50 +694,61 @@ function hideLink(ts) {
   renderLinks();
 }
 
-// ── EMPRESAS STORAGE ──
-function getEmpresas() {
-  try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || '[]'); } catch { return []; }
+// ── EMPRESAS STORAGE (week-aware) ──
+// Structure: { weekStart: 'DD/MM/YYYY', days: { 'DD/MM/YYYY': [ {nome, site, whatsapp, prototipo, status}, ... ] } }
+function getWeekData() {
+  try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || 'null'); } catch { return null; }
 }
-function saveEmpresas(list) { localStorage.setItem(EMPRESAS_KEY, JSON.stringify(list)); }
 
-function renderEmpresas() {
-  const list = getEmpresas();
-  document.getElementById('empresasCount').textContent = list.length ? `(${list.length})` : '';
-  const tbody = document.getElementById('empresasTbody');
-  if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma empresa importada ainda</td></tr>';
-    return;
+function ensureWeekData() {
+  let data = getWeekData();
+  const ws = currentWeekStartStr();
+  if (!data || data.weekStart !== ws) {
+    // If there's old data and it's a different week, archive it
+    if (data && data.weekStart !== ws) {
+      archiveWeekData(data);
+    }
+    data = { weekStart: ws, days: {} };
+    localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
   }
-  tbody.innerHTML = list.map((e,i) => {
-    const wa = buildWhatsapp(e.whatsapp);
-    const proto = e.prototipo || '';
-    return `<tr>
-      <td class="td-name">${escHtml(e.nome)}</td>
-      <td class="td-link">${e.site ? `<a href="${e.site}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
-      <td class="td-link">${wa ? `<a href="${wa}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
-      <td class="td-link">${proto ? `<a href="${proto}" target="_blank">${escHtml(proto)}</a>` : '<span class="td-missing">⚠ não encontrado</span>'}</td>
-      <td>
-        <select class="status-select" onchange="updateStatus(${i},this.value)">
-          ${STATUS_OPTIONS.map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </td>
-      <td><button class="del-btn" onclick="deleteEmpresa(${i})">✕</button></td>
-    </tr>`;
-  }).join('');
+  return data;
 }
 
-function updateStatus(i, val) {
-  const list = getEmpresas(); list[i].status = val; saveEmpresas(list);
+function saveWeekData(data) {
+  localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
 }
 
-function deleteEmpresa(i) {
-  const list = getEmpresas(); list.splice(i,1); saveEmpresas(list); renderEmpresas();
+function archiveWeekData(data) {
+  if (!data) return;
+  // Only keep 1 previous week
+  localStorage.setItem(HISTORY_KEY, JSON.stringify({ ...data, archivedAt: todayStr() }));
 }
 
-function clearAll() {
-  if (!confirm('Limpar todas as empresas da tabela?')) return;
-  saveEmpresas([]); renderEmpresas(); notify('Tabela limpa');
+function getHistoryData() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || 'null'); } catch { return null; }
 }
+
+// Flatten week data to array: [{date, nome, site, whatsapp, prototipo, status}]
+function flattenWeekData(data) {
+  if (!data) return [];
+  const result = [];
+  Object.keys(data.days).sort().forEach(date => {
+    (data.days[date] || []).forEach(e => result.push({ date, ...e }));
+  });
+  return result;
+}
+
+// All companies across all days (for duplicate check)
+function getAllNomesInWeek(data) {
+  const nomes = new Set();
+  Object.values(data.days).forEach(dayArr => {
+    (dayArr || []).forEach(e => nomes.add(normalizeAlias(e.nome)));
+  });
+  return nomes;
+}
+
+// ── STATE for selected day tab ──
+let selectedDay = todayStr();
 
 // ── IMPORTAR JSON ──
 function importJson() {
@@ -518,80 +767,343 @@ function importJson() {
     errEl.textContent = '// JSON sem projetos válidos'; errEl.style.display = 'block'; return;
   }
 
-  const existing = getEmpresas();
-  let added = 0, updated = 0;
+  const data = ensureWeekData();
+  const today = todayStr();
+  if (!data.days[today]) data.days[today] = [];
+
+  const existingNomes = getAllNomesInWeek(data);
+  const duplicates = [];
+  let added = 0;
 
   projetos.forEach(p => {
     const nomeRaw = (p.pagina || '').replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim() || 'Sem nome';
     const nome = nomeRaw;
+    const nomeNorm = normalizeAlias(nome);
+
+    if (existingNomes.has(nomeNorm)) {
+      duplicates.push(nome);
+      return;
+    }
+
     const site = p.site || '';
     const whatsapp = p.header?.whatsapp || '';
     const proto = findLinkByName(nome)?.url || '';
 
-    const idx = existing.findIndex(e => normalizeAlias(e.nome) === normalizeAlias(nome));
-    if (idx >= 0) {
-      existing[idx] = {
-        ...existing[idx],
-        site: site || existing[idx].site,
-        whatsapp: whatsapp || existing[idx].whatsapp,
-        prototipo: proto || existing[idx].prototipo,
-      };
-      updated++;
-    } else {
-      existing.push({ nome, site, whatsapp, prototipo: proto, status: 'Não enviada' });
-      added++;
-    }
+    data.days[today].push({ nome, site, whatsapp, prototipo: proto, status: 'Não enviada' });
+    existingNomes.add(nomeNorm);
+    added++;
   });
 
-  saveEmpresas(existing);
-  renderEmpresas();
+  saveWeekData(data);
+  selectedDay = today;
+  renderDados();
   document.getElementById('jsonInput').value = '';
-  notify(`✓ ${added} adicionadas, ${updated} atualizadas`);
+
+  if (duplicates.length) {
+    showDupModal(duplicates, added);
+  } else {
+    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`);
+  }
 }
 
-// ── EXPORTAR EXCEL ──
-function makeHyperlink(url) {
-  if (!url) return '';
-  return { f: `HYPERLINK("${url}","${url}")` };
+function showDupModal(dups, added) {
+  document.getElementById('dupModalSub').textContent =
+    `${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}. As seguintes já existem nesta semana e foram ignoradas:`;
+  document.getElementById('dupModalList').innerHTML = dups.map(d => `<li>↪ ${escHtml(d)}</li>`).join('');
+  document.getElementById('dupModal').classList.add('open');
 }
 
-function exportExcel() {
-  const list = getEmpresas();
-  if (!list.length) { notify('Nenhuma empresa para exportar', true); return; }
+function closeDupModal() {
+  document.getElementById('dupModal').classList.remove('open');
+}
 
-  const headers = ['Nome da Empresa','Link do Site','Link do WhatsApp','Link de Protótipo','Status'];
-  const wb = XLSX.utils.book_new();
-  const ws = {};
+// ── RENDER DADOS ──
+function renderDados() {
+  const data = ensureWeekData();
+  const weekDays = currentWeekDays();
+  const today = todayStr();
 
-  // cabeçalho
-  headers.forEach((h, ci) => {
-    const addr = XLSX.utils.encode_cell({r:0, c:ci});
-    ws[addr] = { v: h, t: 's' };
+  // Day tabs
+  const tabsEl = document.getElementById('dayTabs');
+  tabsEl.innerHTML = weekDays.map(day => {
+    const count = (data.days[day] || []).length;
+    const isToday = day === today;
+    const active = day === selectedDay;
+    return `<button class="day-tab${active ? ' active' : ''}" onclick="selectDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
+      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  // Total count
+  const total = flattenWeekData(data).length;
+  document.getElementById('empresasCount').textContent = total ? `(${total} total)` : '';
+
+  // Export day selector
+  const sel = document.getElementById('exportDaySelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Selecionar dia...</option>' +
+    weekDays.filter(d => (data.days[d] || []).length > 0).map(d =>
+      `<option value="${d}"${d === prev ? ' selected' : ''}>${dayLabel(d)} (${data.days[d].length})</option>`
+    ).join('');
+
+  // Table for selected day — grouped by status
+  renderDayTable(data, selectedDay);
+
+  // History
+  renderHistory();
+
+  // Sunday banner
+  if (isSunday()) {
+    document.getElementById('sundayBanner').classList.remove('hidden');
+  } else {
+    document.getElementById('sundayBanner').classList.add('hidden');
+  }
+}
+
+function selectDay(day) {
+  selectedDay = day;
+  renderDados();
+}
+
+function renderDayTable(data, day) {
+  const tbody = document.getElementById('empresasTbody');
+  const dayArr = data.days[day] || [];
+
+  if (!dayArr.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Nenhuma empresa em ${dayLabel(day)}</td></tr>`;
+    return;
+  }
+
+  // Group by status
+  const groups = {};
+  STATUS_OPTIONS.forEach(s => groups[s] = []);
+  dayArr.forEach((e, i) => {
+    const st = e.status || 'Não enviada';
+    if (!groups[st]) groups[st] = [];
+    groups[st].push({ ...e, _idx: i });
   });
 
-  // dados
-  list.forEach((e, ri) => {
-    const waUrl = buildWhatsapp(e.whatsapp);
-    const row = [
-      { v: e.nome, t: 's' },
-      e.site ? makeHyperlink(e.site) : { v: '', t: 's' },
-      waUrl ? makeHyperlink(waUrl) : { v: '', t: 's' },
-      e.prototipo ? makeHyperlink(e.prototipo) : { v: '', t: 's' },
-      { v: e.status || 'Não enviada', t: 's' },
-    ];
-    row.forEach((cell, ci) => {
-      const addr = XLSX.utils.encode_cell({r: ri+1, c: ci});
-      ws[addr] = cell;
+  let html = '';
+  STATUS_OPTIONS.forEach(status => {
+    if (!groups[status].length) return;
+    html += `<tr class="status-group-header"><td colspan="6">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
+    groups[status].forEach(e => {
+      const wa = buildWhatsapp(e.whatsapp);
+      html += `<tr>
+        <td class="td-name">${escHtml(e.nome)}</td>
+        <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+        <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
+        <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠ não encontrado</span>'}</td>
+        <td>
+          <select class="status-select" onchange="updateStatus('${day}',${e._idx},this.value)">
+            ${STATUS_OPTIONS.map(s=>`<option ${e.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td><button class="del-btn" onclick="deleteEmpresa('${day}',${e._idx})">✕</button></td>
+      </tr>`;
     });
   });
 
-  ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:list.length,c:4}});
-  ws['!cols'] = [{wch:30},{wch:44},{wch:46},{wch:46},{wch:16}];
+  tbody.innerHTML = html;
+}
 
-  XLSX.utils.book_append_sheet(wb, ws, 'Empresas');
+function updateStatus(day, idx, val) {
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx]) {
+    data.days[day][idx].status = val;
+    saveWeekData(data);
+    renderDados();
+  }
+}
+
+function deleteEmpresa(day, idx) {
+  const data = ensureWeekData();
+  if (data.days[day]) {
+    data.days[day].splice(idx, 1);
+    saveWeekData(data);
+    renderDados();
+  }
+}
+
+function clearAll() {
+  if (!confirm('Limpar todas as empresas da semana atual?')) return;
+  const ws = currentWeekStartStr();
+  saveWeekData({ weekStart: ws, days: {} });
+  renderDados();
+  notify('Semana limpa');
+}
+
+// ── HISTORY ──
+let historyOpen = false;
+
+function renderHistory() {
+  const hist = getHistoryData();
+  const sec = document.getElementById('historySection');
+  const badge = document.getElementById('historyBadge');
+  const tbody = document.getElementById('historyTbody');
+
+  if (!hist) {
+    sec.style.opacity = '0.4';
+    badge.textContent = 'nenhum dado';
+    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma semana anterior disponível</td></tr>';
+    return;
+  }
+
+  sec.style.opacity = '1';
+  const flat = flattenWeekData(hist);
+  badge.textContent = `${flat.length} empresa${flat.length !== 1 ? 's' : ''} · semana de ${hist.weekStart}`;
+
+  // Group by date then by status
+  const dateGroups = {};
+  flat.forEach(e => {
+    if (!dateGroups[e.date]) dateGroups[e.date] = {};
+    const st = e.status || 'Não enviada';
+    if (!dateGroups[e.date][st]) dateGroups[e.date][st] = [];
+    dateGroups[e.date][st].push(e);
+  });
+
+  let html = '';
+  Object.keys(dateGroups).sort().forEach(date => {
+    STATUS_OPTIONS.forEach(status => {
+      const group = dateGroups[date][status];
+      if (!group || !group.length) return;
+      html += `<tr class="status-group-header"><td colspan="6">// ${dayLabel(date)} — ${escHtml(status)} (${group.length})</td></tr>`;
+      group.forEach(e => {
+        const wa = buildWhatsapp(e.whatsapp);
+        html += `<tr>
+          <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${escHtml(date)}</td>
+          <td class="td-name">${escHtml(e.nome)}</td>
+          <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+          <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
+          <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠</span>'}</td>
+          <td><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${escHtml(e.status||'Não enviada')}</span></td>
+        </tr>`;
+      });
+    });
+  });
+
+  tbody.innerHTML = html || '<tr><td colspan="6" class="table-empty">Sem dados</td></tr>';
+}
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('historyContent').classList.toggle('open', historyOpen);
+  document.getElementById('historyToggleBtn').textContent = historyOpen ? 'Ocultar' : 'Mostrar';
+}
+
+function scrollToHistory() {
+  const sec = document.getElementById('historySection');
+  if (!historyOpen) toggleHistory();
+  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+function archiveHistory() {
+  if (!confirm('Arquivar dados da semana anterior? Eles serão removidos permanentemente.')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  notify('Semana anterior arquivada');
+}
+
+// ── EXCEL HELPERS ──
+const STATUS_ORDER = STATUS_OPTIONS;
+
+function makeHyperlink(url) {
+  if (!url) return { v: '', t: 's' };
+  return { f: `HYPERLINK("${url}","${url}")` };
+}
+
+function buildDaySheet(wb, sheetName, companies) {
+  const headers = ['Empresa','Site','WhatsApp','Protótipo','Status'];
+  const ws = {};
+  let row = 0;
+
+  // Write header
+  headers.forEach((h, ci) => {
+    ws[XLSX.utils.encode_cell({r:row,c:ci})] = { v: h, t: 's' };
+  });
+  row++;
+
+  // Group by status
+  STATUS_ORDER.forEach(status => {
+    const group = companies.filter(e => (e.status || 'Não enviada') === status);
+    if (!group.length) return;
+
+    // Status group header row
+    ws[XLSX.utils.encode_cell({r:row,c:0})] = { v: `── ${status} (${group.length}) ──`, t: 's' };
+    for (let ci=1;ci<5;ci++) ws[XLSX.utils.encode_cell({r:row,c:ci})] = { v: '', t: 's' };
+    row++;
+
+    group.forEach(e => {
+      const waUrl = buildWhatsapp(e.whatsapp);
+      const cells = [
+        { v: e.nome, t: 's' },
+        e.site ? makeHyperlink(e.site) : { v: '', t: 's' },
+        waUrl ? makeHyperlink(waUrl) : { v: '', t: 's' },
+        e.prototipo ? makeHyperlink(e.prototipo) : { v: '', t: 's' },
+        { v: e.status || 'Não enviada', t: 's' },
+      ];
+      cells.forEach((cell, ci) => {
+        ws[XLSX.utils.encode_cell({r:row,c:ci})] = cell;
+      });
+      row++;
+    });
+  });
+
+  ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:row-1,c:4}});
+  ws['!cols'] = [{wch:30},{wch:44},{wch:46},{wch:46},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+}
+
+function exportExcelWeek() {
+  const data = ensureWeekData();
+  const weekDays = currentWeekDays();
+  const hasData = weekDays.some(d => (data.days[d]||[]).length > 0);
+  if (!hasData) { notify('Nenhuma empresa para exportar', 'err'); return; }
+
+  const wb = XLSX.utils.book_new();
+  weekDays.forEach(day => {
+    const companies = data.days[day] || [];
+    const label = dayLabel(day); // e.g. "Dom 11/05"
+    buildDaySheet(wb, label, companies);
+  });
+
   const date = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
-  XLSX.writeFile(wb, `figma-redirect-${date}.xlsx`);
-  notify('✓ Excel gerado com sucesso');
+  XLSX.writeFile(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
+  notify('✓ Excel da semana gerado');
+}
+
+function exportExcelDay() {
+  const day = document.getElementById('exportDaySelect').value;
+  if (!day) { notify('Selecione um dia para exportar', 'warn'); return; }
+
+  const data = ensureWeekData();
+  const companies = data.days[day] || [];
+  if (!companies.length) { notify('Nenhuma empresa neste dia', 'err'); return; }
+
+  const wb = XLSX.utils.book_new();
+  buildDaySheet(wb, dayLabel(day), companies);
+  XLSX.writeFile(wb, `figma-${day.replace(/\//g,'-')}.xlsx`);
+  notify(`✓ Excel de ${dayLabel(day)} gerado`);
+}
+
+function exportExcelHistory() {
+  const hist = getHistoryData();
+  if (!hist) { notify('Nenhum histórico disponível', 'err'); return; }
+
+  const wb = XLSX.utils.book_new();
+  const weekDays = Object.keys(hist.days).sort();
+
+  if (!weekDays.length) { notify('Histórico vazio', 'err'); return; }
+
+  weekDays.forEach(day => {
+    const companies = hist.days[day] || [];
+    if (!companies.length) return;
+    buildDaySheet(wb, dayLabel(day), companies);
+  });
+
+  XLSX.writeFile(wb, `figma-semana-anterior-${hist.weekStart.replace(/\//g,'-')}.xlsx`);
+  notify('✓ Excel da semana anterior gerado');
 }
 
 // ── ABA 1 — GERAR LINK ──
@@ -684,18 +1196,21 @@ function copyText(text, btn) {
   });
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('panel-redirect').classList.contains('active'))
     generate();
 });
 
-// INIT
+// ── INIT ──
+// Ensure week data is valid on load (triggers archive if new week)
+ensureWeekData();
+
+// Show Sunday banner if needed
+if (isSunday()) {
+  document.getElementById('sundayBanner').classList.remove('hidden');
+}
+
 renderLinks();
-renderEmpresas();
 </script>
 </body>
 </html>
