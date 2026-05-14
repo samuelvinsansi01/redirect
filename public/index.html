@@ -186,20 +186,57 @@
     .copy-btn:hover { opacity: 0.85; }
     .error-msg { display: none; margin-top: 12px; color: var(--error); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.04em; }
 
-    /* LINKS DO DIA */
-    .links-panel { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
-    .links-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .links-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--muted); }
-    .links-count {
-      background: var(--accent-dim); border: 1px solid var(--accent-border);
-      color: var(--accent); font-family: 'DM Mono', monospace; font-size: 9px;
-      padding: 2px 8px; border-radius: 100px;
+    /* ── ABA LINKS ── */
+    .links-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px; flex-wrap: wrap;
     }
-    .links-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+    .links-search {
+      flex: 1; min-width: 200px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      padding: 10px 14px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .links-search:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(184,240,89,0.08);
+    }
+    .links-search::placeholder { color: var(--muted); }
+    .search-count {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .links-day-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .links-day-tab {
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .links-day-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .links-day-tab:hover:not(.active) { color: var(--text); border-color: #333340; }
+    .links-day-tab .day-count { display: inline-block; background: var(--border); border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px; }
+    .links-day-tab.active .day-count { background: rgba(184,240,89,0.2); }
+
+    .links-section-title {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+      color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .links-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .links-list-full { display: flex; flex-direction: column; gap: 8px; }
     .link-item {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--bg); border: 1px solid var(--border);
       border-radius: 8px; padding: 10px 14px; gap: 12px;
+    }
+    .link-item.archived {
+      opacity: 0.55;
+      border-style: dashed;
     }
     .link-item-info { flex: 1; min-width: 0; }
     .link-item-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -211,13 +248,6 @@
       padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: background 0.2s;
     }
     .link-copy-btn:hover { background: var(--accent); color: #0c0c0f; }
-    .link-hide-btn {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 13px;
-      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-    }
-    .link-hide-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
     .link-edit-btn {
       background: none; border: 1px solid var(--border); color: var(--muted);
       border-radius: 5px; font-size: 11px;
@@ -232,29 +262,24 @@
       cursor: pointer; transition: all 0.2s; flex-shrink: 0;
     }
     .link-archive-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
-    .links-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 20px; }
-
-    /* PROTOTYPE INLINE EDIT */
-    .proto-edit-wrap { display: flex; align-items: center; gap: 6px; max-width: 220px; }
-    .proto-input {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px;
-      padding: 5px 8px; width: 140px; outline: none;
-      transition: border-color 0.2s;
-    }
-    .proto-input:focus { border-color: var(--accent); }
-    .proto-save-btn {
-      background: var(--accent); color: #0c0c0f; border: none; border-radius: 5px;
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9px;
-      padding: 5px 8px; cursor: pointer; white-space: nowrap;
-    }
-    .proto-edit-icon {
+    .link-restore-btn {
       background: none; border: 1px solid var(--border); color: var(--muted);
-      border-radius: 4px; font-size: 10px; width: 20px; height: 20px;
-      display: inline-flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s; flex-shrink: 0; vertical-align: middle; margin-left: 4px;
+      border-radius: 5px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
     }
-    .proto-edit-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .link-restore-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .links-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 28px; }
+
+    .archived-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .archived-toggle {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 12px;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .archived-toggle:hover { border-color: var(--warning); color: var(--warning); }
+    .archived-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .archived-content { display: none; }
+    .archived-content.open { display: block; }
 
     /* ABA DADOS */
     .section { margin-bottom: 32px; }
@@ -328,6 +353,28 @@
     .msg-copy-btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .msg-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 
+    /* PROTOTYPE INLINE EDIT */
+    .proto-edit-wrap { display: flex; align-items: center; gap: 6px; max-width: 220px; }
+    .proto-input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 5px 8px; width: 140px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .proto-input:focus { border-color: var(--accent); }
+    .proto-save-btn {
+      background: var(--accent); color: #0c0c0f; border: none; border-radius: 5px;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9px;
+      padding: 5px 8px; cursor: pointer; white-space: nowrap;
+    }
+    .proto-edit-icon {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 4px; font-size: 10px; width: 20px; height: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0; vertical-align: middle; margin-left: 4px;
+    }
+    .proto-edit-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
     /* EXPORT OPTIONS */
     .export-options { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
     .export-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 10px; }
@@ -374,10 +421,11 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('redirect')">Redirecionamento</button>
+    <button class="tab" onclick="switchTab('links')">Links</button>
     <button class="tab" onclick="switchTab('dados')">Dados & Excel</button>
   </div>
 
-  <!-- ABA 1 -->
+  <!-- ABA 1: REDIRECT -->
   <div class="panel active" id="panel-redirect">
     <div class="card">
       <div class="card-title">Gere seu link <span>inteligente.</span></div>
@@ -415,20 +463,47 @@
         <div class="result-url" id="resultUrl"></div>
         <button class="copy-btn" onclick="copyUrl()">Copiar link</button>
       </div>
-
-      <div class="links-panel">
-        <div class="links-header">
-          <span class="links-title">// LINKS DO DIA</span>
-          <span class="links-count" id="linksCount">0</span>
-        </div>
-        <div class="links-list" id="linksList">
-          <div class="links-empty">Nenhum link gerado ainda hoje</div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- ABA 2 -->
+  <!-- ABA 2: LINKS -->
+  <div class="panel" id="panel-links">
+    <div class="card">
+      <div class="card-title">Seus <span>links.</span></div>
+      <div class="card-sub">// histórico da semana · busca por nome · restaurar arquivados</div>
+
+      <!-- Seletor de dias -->
+      <div class="links-day-tabs" id="linksDayTabs"></div>
+
+      <!-- Barra de busca -->
+      <div class="links-toolbar">
+        <input class="links-search" id="linksSearch" type="text" placeholder="// buscar por nome da empresa..." oninput="renderLinksPanel()" />
+        <span class="search-count" id="linksSearchCount"></span>
+      </div>
+
+      <!-- Lista de links ativos -->
+      <div class="links-section-title">Ativos</div>
+      <div class="links-list-full" id="linksListFull">
+        <div class="links-empty">Nenhum link neste dia</div>
+      </div>
+
+      <!-- Arquivados -->
+      <div class="archived-section">
+        <div class="archived-header">
+          <div class="links-section-title" style="margin-bottom:0;flex:1">Arquivados <span id="archivedCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px"></span></div>
+          <button class="archived-toggle" id="archivedToggleBtn" onclick="toggleArchived()">Mostrar</button>
+        </div>
+        <div class="archived-content" id="archivedContent">
+          <div class="links-list-full" id="archivedListFull" style="margin-top:10px">
+            <div class="links-empty">Nenhum link arquivado neste dia</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ABA 3: DADOS -->
   <div class="panel" id="panel-dados">
     <div class="card">
       <div class="card-title">Dados & <span>Excel.</span></div>
@@ -570,7 +645,7 @@
 <div class="modal-overlay" id="archiveModal">
   <div class="modal">
     <div class="modal-title">Arquivar <span>link?</span></div>
-    <div class="modal-sub">// o link será removido da lista. Essa ação não pode ser desfeita.</div>
+    <div class="modal-sub">// o link será removido da lista de ativos. Você poderá restaurá-lo depois na aba Links.</div>
     <div class="modal-btns">
       <button class="modal-btn-ok" style="background:var(--error);color:#fff" onclick="confirmArchiveLink()">Arquivar mesmo assim</button>
       <button class="modal-btn-cancel" onclick="closeArchiveModal()">Cancelar</button>
@@ -593,9 +668,9 @@
 <div class="notify" id="notify"></div>
 
 <script>
-const LINKS_KEY = 'fr_links';
+const LINKS_KEY    = 'fr_links';
 const EMPRESAS_KEY = 'fr_empresas_v2';
-const HISTORY_KEY = 'fr_empresas_hist';
+const HISTORY_KEY  = 'fr_empresas_hist';
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 
 const MSG_BASE = `Olá, tudo bem?
@@ -609,10 +684,12 @@ Essa é apenas uma simulação de direção visual e posicionamento, para demons
 Quando puder, me diz o que achou e se faria sentido algo nesse formato para o escritório.`;
 
 let selectedMsgEmpresa = null;
+let selectedLinksDay   = todayStr();
+let archivedOpen       = false;
 
 // ── DATE HELPERS ──
 function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
-function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function timeStr()  { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
 function getWeekStart(d) {
   const dt = d ? new Date(d) : new Date();
@@ -620,13 +697,11 @@ function getWeekStart(d) {
   dt.setDate(dt.getDate() - dt.getDay());
   return dt;
 }
-
 function getWeekStartStr(d) { return getWeekStart(d).toLocaleDateString('pt-BR'); }
 function currentWeekStartStr() { return getWeekStartStr(); }
 
 function currentWeekDays() {
-  const days = [];
-  const start = getWeekStart();
+  const days = [], start = getWeekStart();
   for (let i = 0; i < 7; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
@@ -636,7 +711,6 @@ function currentWeekDays() {
 }
 
 const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-
 function dayLabel(dateStr, forSheet) {
   const [d,m,y] = dateStr.split('/').map(Number);
   const dt = new Date(y, m-1, d);
@@ -644,16 +718,16 @@ function dayLabel(dateStr, forSheet) {
   const mm = m < 10 ? '0' + m : String(m);
   return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + sep + mm;
 }
-
 function isSunday() { return new Date().getDay() === 0; }
 
 // ── TABS ──
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) =>
-    t.classList.toggle('active', ['redirect','dados'][i] === name));
+  const names = ['redirect','links','dados'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'dados') { renderDados(); }
+  if (name === 'links') renderLinksPanel();
+  if (name === 'dados') renderDados();
 }
 
 // ── NOTIFY ──
@@ -668,20 +742,17 @@ function notify(msg, type) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function normalizeAlias(name) {
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().trim()
     .replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,50);
 }
-
 function buildWhatsapp(raw) {
   if (!raw) return '';
   const num = raw.replace(/\D/g,'');
   if (!num) return '';
   return 'https://wa.me/' + (num.startsWith('55') ? num : '55' + num);
 }
-
 function stripPrefix(name) {
   return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim();
 }
@@ -689,18 +760,18 @@ function stripPrefix(name) {
 // ── MENSAGEM PRONTA ──
 function usarEmpresaMsg(nome, prototipo) {
   selectedMsgEmpresa = { nome, prototipo };
-  const labelEl = document.getElementById('msgEmpresaLabel');
-  const bodyEl = document.getElementById('msgBody');
-  const hintEl = document.getElementById('msgHint');
-  const copyBtn = document.getElementById('msgCopyBtn');
+  const labelEl  = document.getElementById('msgEmpresaLabel');
+  const bodyEl   = document.getElementById('msgBody');
+  const hintEl   = document.getElementById('msgHint');
+  const copyBtn  = document.getElementById('msgCopyBtn');
 
   labelEl.innerHTML = `empresa: <span>${escHtml(nome)}</span>`;
 
   if (!prototipo) {
-    bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado. Adicione o link na tabela antes de usar a mensagem.</span>`;
+    bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado.</span>`;
     hintEl.textContent = '// sem protótipo — adicione o link na coluna Protótipo';
     copyBtn.disabled = true;
-    document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('msgPanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
     return;
   }
 
@@ -713,7 +784,7 @@ function usarEmpresaMsg(nome, prototipo) {
 
   hintEl.textContent = `// ${escHtml(nome)} · link pronto para envio`;
   copyBtn.disabled = false;
-  document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('msgPanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
 
   document.querySelectorAll('.usar-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nome === nome);
@@ -741,7 +812,6 @@ function saveLink(name, url) {
   const today = todayStr();
   links.unshift({ name, url, date: today, time: timeStr(), ts: Date.now() });
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
-  renderLinks();
 
   const normName = normalizeAlias(stripPrefix(name));
   const weekData = getWeekData();
@@ -770,38 +840,125 @@ function findLinkByName(name) {
   });
 }
 
-function renderLinks() {
-  const today = todayStr();
-  const todayLinks = getLinks().filter(l => l.date === today && !l.hidden);
-  document.getElementById('linksCount').textContent = todayLinks.length;
-  const el = document.getElementById('linksList');
-  if (!todayLinks.length) {
-    el.innerHTML = '<div class="links-empty">Nenhum link gerado hoje</div>';
-    return;
-  }
-  el.innerHTML = todayLinks.map(l => `
-    <div class="link-item" id="link-item-${l.ts}">
-      <div class="link-item-info">
-        <div class="link-item-name">${escHtml(l.name)}</div>
-        <div class="link-item-url">${escHtml(l.url)}</div>
-      </div>
-      <div class="link-item-time">${l.time}</div>
-      <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
-      <button class="link-edit-btn" onclick="openEditModal(${l.ts})" title="Editar links Figma">✎</button>
-      <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar">✕</button>
-    </div>`).join('');
-}
-
-function hideLink(ts) {
-  const links = getLinks();
-  const idx = links.findIndex(l => l.ts === ts);
-  if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
-  renderLinks();
-}
-
 // ── ALIAS EXTRACTOR ──
 function extractAliasFromUrl(shortUrl) {
   try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
+}
+
+// ── ABA LINKS — RENDER ──
+function renderLinksPanel() {
+  const allLinks   = getLinks();
+  const weekDays   = currentWeekDays();
+  const today      = todayStr();
+  const query      = (document.getElementById('linksSearch')?.value || '').toLowerCase().trim();
+
+  // Tabs de dias
+  const tabsEl = document.getElementById('linksDayTabs');
+  tabsEl.innerHTML = weekDays.map(day => {
+    const dayLinks = allLinks.filter(l => l.date === day && !l.hidden);
+    const count    = dayLinks.length;
+    const isToday  = day === today;
+    const active   = day === selectedLinksDay;
+    return `<button class="links-day-tab${active ? ' active' : ''}" onclick="selectLinksDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
+      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  // Filtrar pelo dia e busca
+  const dayActive   = allLinks.filter(l => l.date === selectedLinksDay && !l.hidden);
+  const dayArchived = allLinks.filter(l => l.date === selectedLinksDay && l.hidden);
+
+  const filtered = query
+    ? dayActive.filter(l => l.name.toLowerCase().includes(query))
+    : dayActive;
+
+  const filteredArchived = query
+    ? dayArchived.filter(l => l.name.toLowerCase().includes(query))
+    : dayArchived;
+
+  // Contador de busca
+  const countEl = document.getElementById('linksSearchCount');
+  if (query) {
+    countEl.textContent = `${filtered.length + filteredArchived.length} resultado${filtered.length + filteredArchived.length !== 1 ? 's' : ''}`;
+  } else {
+    countEl.textContent = dayActive.length ? `${dayActive.length} link${dayActive.length !== 1 ? 's' : ''}` : '';
+  }
+
+  // Lista ativa
+  const activeEl = document.getElementById('linksListFull');
+  if (!filtered.length) {
+    activeEl.innerHTML = `<div class="links-empty">${query ? 'Nenhum resultado para "' + escHtml(query) + '"' : 'Nenhum link ativo neste dia'}</div>`;
+  } else {
+    activeEl.innerHTML = filtered.map(l => `
+      <div class="link-item" id="link-item-${l.ts}">
+        <div class="link-item-info">
+          <div class="link-item-name">${escHtml(l.name)}</div>
+          <div class="link-item-url">${escHtml(l.url)}</div>
+        </div>
+        <div class="link-item-time">${l.time}</div>
+        <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
+        <button class="link-edit-btn" onclick="openEditModal(${l.ts})" title="Editar links Figma">✎</button>
+        <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar">✕</button>
+      </div>`).join('');
+  }
+
+  // Contador de arquivados
+  document.getElementById('archivedCount').textContent =
+    dayArchived.length ? `(${dayArchived.length})` : '';
+
+  // Lista arquivados
+  const archEl = document.getElementById('archivedListFull');
+  if (!filteredArchived.length) {
+    archEl.innerHTML = `<div class="links-empty">${query ? 'Nenhum arquivado encontrado' : 'Nenhum link arquivado neste dia'}</div>`;
+  } else {
+    archEl.innerHTML = filteredArchived.map(l => `
+      <div class="link-item archived">
+        <div class="link-item-info">
+          <div class="link-item-name">${escHtml(l.name)}</div>
+          <div class="link-item-url">${escHtml(l.url)}</div>
+        </div>
+        <div class="link-item-time">${l.time}</div>
+        <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
+        <button class="link-restore-btn" onclick="restoreLink(${l.ts})">↩ Restaurar</button>
+      </div>`).join('');
+  }
+}
+
+function selectLinksDay(day) {
+  selectedLinksDay = day;
+  renderLinksPanel();
+}
+
+function toggleArchived() {
+  archivedOpen = !archivedOpen;
+  document.getElementById('archivedContent').classList.toggle('open', archivedOpen);
+  document.getElementById('archivedToggleBtn').textContent = archivedOpen ? 'Ocultar' : 'Mostrar';
+}
+
+function restoreLink(ts) {
+  const links = getLinks();
+  const idx   = links.findIndex(l => l.ts === ts);
+  if (idx < 0) return;
+  links[idx].hidden = false;
+  localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+
+  // Tenta recruzar com empresas do dia
+  const link = links[idx];
+  const normName = normalizeAlias(stripPrefix(link.name));
+  const weekData = getWeekData();
+  if (weekData && weekData.days[link.date]) {
+    weekData.days[link.date] = weekData.days[link.date].map(e => {
+      if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) {
+        return { ...e, prototipo: link.url };
+      }
+      return e;
+    });
+    saveWeekData(weekData);
+  }
+
+  renderLinksPanel();
+  notify('✓ Link restaurado');
 }
 
 // ── EDIT MODAL ──
@@ -810,7 +967,7 @@ let editingTs = null;
 function openEditModal(ts) {
   editingTs = ts;
   document.getElementById('editDeskUrl').value = '';
-  document.getElementById('editMobUrl').value = '';
+  document.getElementById('editMobUrl').value  = '';
   document.getElementById('editError').style.display = 'none';
   document.getElementById('editModal').classList.add('open');
 }
@@ -866,7 +1023,7 @@ async function saveEditLink() {
 
     closeEditModal();
     notify('✓ Links atualizados no banco com sucesso');
-    renderLinks();
+    renderLinksPanel();
   } catch {
     errEl.textContent = '// falha na conexão com o servidor';
     errEl.style.display = 'block';
@@ -882,7 +1039,6 @@ function openArchiveModal(ts) {
   archivingTs = ts;
   document.getElementById('archiveModal').classList.add('open');
 }
-
 function closeArchiveModal() {
   document.getElementById('archiveModal').classList.remove('open');
   archivingTs = null;
@@ -896,7 +1052,7 @@ async function confirmArchiveLink() {
   const idx = links.findIndex(l => l.ts === archivingTs);
   if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
 
-  const today = link.date || todayStr();
+  const today    = link.date || todayStr();
   const weekData = getWeekData();
   if (weekData && weekData.days[today]) {
     weekData.days[today] = weekData.days[today].map(e =>
@@ -906,8 +1062,8 @@ async function confirmArchiveLink() {
   }
 
   closeArchiveModal();
-  renderLinks();
-  notify('✓ Link removido da lista');
+  renderLinksPanel();
+  notify('✓ Link arquivado');
 }
 
 // ── EMPRESAS STORAGE ──
@@ -958,7 +1114,7 @@ let selectedDay = todayStr();
 
 // ── IMPORTAR JSON ──
 function importJson() {
-  const raw = document.getElementById('jsonInput').value.trim();
+  const raw   = document.getElementById('jsonInput').value.trim();
   const errEl = document.getElementById('jsonError');
   errEl.style.display = 'none';
 
@@ -973,7 +1129,7 @@ function importJson() {
     errEl.textContent = '// JSON sem projetos válidos'; errEl.style.display = 'block'; return;
   }
 
-  const data = ensureWeekData();
+  const data  = ensureWeekData();
   const today = todayStr();
   if (!data.days[today]) data.days[today] = [];
 
@@ -982,14 +1138,14 @@ function importJson() {
   let added = 0;
 
   projetos.forEach(p => {
-    const nome = stripPrefix(p.pagina || '').trim() || 'Sem nome';
+    const nome     = stripPrefix(p.pagina || '').trim() || 'Sem nome';
     const nomeNorm = normalizeAlias(nome);
 
     if (existingNomes.has(nomeNorm)) { duplicates.push(nome); return; }
 
-    const site = p.site || '';
+    const site     = p.site || '';
     const whatsapp = p.header?.whatsapp || '';
-    const proto = findLinkByName(nome)?.url || '';
+    const proto    = findLinkByName(nome)?.url || '';
 
     data.days[today].push({ nome, site, whatsapp, prototipo: proto, status: 'Não enviada' });
     existingNomes.add(nomeNorm);
@@ -1019,15 +1175,15 @@ function closeDupModal() { document.getElementById('dupModal').classList.remove(
 
 // ── RENDER DADOS ──
 function renderDados() {
-  const data = ensureWeekData();
+  const data     = ensureWeekData();
   const weekDays = currentWeekDays();
-  const today = todayStr();
+  const today    = todayStr();
 
   const tabsEl = document.getElementById('dayTabs');
   tabsEl.innerHTML = weekDays.map(day => {
-    const count = (data.days[day] || []).length;
+    const count   = (data.days[day] || []).length;
     const isToday = day === today;
-    const active = day === selectedDay;
+    const active  = day === selectedDay;
     return `<button class="day-tab${active ? ' active' : ''}" onclick="selectDay('${day}')">
       ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
       ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
@@ -1037,7 +1193,7 @@ function renderDados() {
   const total = flattenWeekData(data).length;
   document.getElementById('empresasCount').textContent = total ? `(${total} total)` : '';
 
-  const sel = document.getElementById('exportDaySelect');
+  const sel  = document.getElementById('exportDaySelect');
   const prev = sel.value;
   sel.innerHTML = '<option value="">Selecionar dia...</option>' +
     weekDays.filter(d => (data.days[d] || []).length > 0).map(d =>
@@ -1057,7 +1213,7 @@ function renderDados() {
 function selectDay(day) { selectedDay = day; renderDados(); }
 
 function renderDayTable(data, day) {
-  const tbody = document.getElementById('empresasTbody');
+  const tbody  = document.getElementById('empresasTbody');
   const dayArr = data.days[day] || [];
 
   if (!dayArr.length) {
@@ -1079,9 +1235,9 @@ function renderDayTable(data, day) {
     html += `<tr class="status-group-header"><td colspan="7">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
     groups[status].forEach(e => {
       const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
-      const hasProto = !!e.prototipo;
-      const waRaw = e.whatsapp || '';
-      const waBuilt = buildWhatsapp(waRaw);
+      const hasProto   = !!e.prototipo;
+      const waRaw      = e.whatsapp || '';
+      const waBuilt    = buildWhatsapp(waRaw);
 
       const waCell = waRaw
         ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
@@ -1126,21 +1282,20 @@ function renderDayTable(data, day) {
 }
 
 function showWaEdit(day, idx, btn) {
-  const td = btn.parentElement;
-  const data = ensureWeekData();
+  const td      = btn.parentElement;
+  const data    = ensureWeekData();
   const current = (data.days[day] && data.days[day][idx]) ? (data.days[day][idx].whatsapp || '') : '';
-  td.innerHTML = `<div class="proto-edit-wrap">
+  td.innerHTML  = `<div class="proto-edit-wrap">
     <input class="proto-input" value="${escHtml(current)}" id="wa-input-${day}-${idx}" placeholder="Número..." />
     <button class="proto-save-btn" onclick="saveWa('${day}',${idx})">OK</button>
   </div>`;
-  const inp = document.getElementById('wa-input-' + day + '-' + idx);
-  if (inp) inp.focus();
+  document.getElementById('wa-input-' + day + '-' + idx)?.focus();
 }
 
 function saveWa(day, idx) {
   const inp = document.getElementById('wa-input-' + day + '-' + idx);
   if (!inp) return;
-  const val = inp.value.trim().replace(/\D/g, '');
+  const val  = inp.value.trim().replace(/\D/g, '');
   const data = ensureWeekData();
   if (data.days[day] && data.days[day][idx] !== undefined) {
     data.days[day][idx].whatsapp = val;
@@ -1151,20 +1306,20 @@ function saveWa(day, idx) {
 }
 
 function showProtoEdit(day, idx, btn) {
-  const td = btn.parentElement;
-  const data = ensureWeekData();
+  const td      = btn.parentElement;
+  const data    = ensureWeekData();
   const current = (data.days[day] && data.days[day][idx]) ? data.days[day][idx].prototipo : '';
-  td.innerHTML = `<div class="proto-edit-wrap">
+  td.innerHTML  = `<div class="proto-edit-wrap">
     <input class="proto-input" value="${escHtml(current)}" id="proto-input-${day}-${idx}" />
     <button class="proto-save-btn" onclick="saveProto('${day}',${idx})">OK</button>
   </div>`;
-  document.getElementById(`proto-input-${day}-${idx}`).focus();
+  document.getElementById(`proto-input-${day}-${idx}`)?.focus();
 }
 
 function saveProto(day, idx) {
   const input = document.getElementById(`proto-input-${day}-${idx}`);
   if (!input) return;
-  const val = input.value.trim();
+  const val  = input.value.trim();
   const data = ensureWeekData();
   if (data.days[day] && data.days[day][idx] !== undefined) {
     data.days[day][idx].prototipo = val;
@@ -1187,7 +1342,7 @@ function updateStatus(day, idx, val) {
 }
 
 function deleteEmpresa(day, idx) {
-  const data = ensureWeekData();
+  const data    = ensureWeekData();
   if (data.days[day]) {
     const deleted = data.days[day][idx];
     data.days[day].splice(idx, 1);
@@ -1215,15 +1370,15 @@ function clearAll() {
 let historyOpen = false;
 
 function renderHistory() {
-  const hist = getHistoryData();
-  const sec = document.getElementById('historySection');
-  const badge = document.getElementById('historyBadge');
-  const tbody = document.getElementById('historyTbody');
+  const hist   = getHistoryData();
+  const sec    = document.getElementById('historySection');
+  const badge  = document.getElementById('historyBadge');
+  const tbody  = document.getElementById('historyTbody');
 
   if (!hist) {
     sec.style.opacity = '0.4';
     badge.textContent = 'nenhum dado';
-    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma semana anterior disponível</td></tr>';
+    tbody.innerHTML   = '<tr><td colspan="6" class="table-empty">Nenhuma semana anterior disponível</td></tr>';
     return;
   }
 
@@ -1285,13 +1440,11 @@ function archiveHistory() {
 function downloadWb(wb, filename) {
   try {
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
+    const blob  = new Blob([wbout], { type: 'application/octet-stream' });
+    const url   = URL.createObjectURL(blob);
+    const a     = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (err) {
@@ -1327,9 +1480,9 @@ function buildDaySheet(wb, sheetName, companies) {
       const waUrl = buildWhatsapp(e.whatsapp);
       const cells = [
         { v: e.nome, t: 's' },
-        e.site ? makeHyperlink(e.site) : { v: '', t: 's' },
-        waUrl ? makeHyperlink(waUrl) : { v: '', t: 's' },
-        e.prototipo ? makeHyperlink(e.prototipo) : { v: '', t: 's' },
+        e.site      ? makeHyperlink(e.site)      : { v: '', t: 's' },
+        waUrl       ? makeHyperlink(waUrl)        : { v: '', t: 's' },
+        e.prototipo ? makeHyperlink(e.prototipo)  : { v: '', t: 's' },
         { v: e.status || 'Não enviada', t: 's' },
       ];
       cells.forEach((cell, ci) => {
@@ -1339,21 +1492,20 @@ function buildDaySheet(wb, sheetName, companies) {
     });
   });
 
-  ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:row-1,c:4}});
+  ws['!ref']  = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:row-1,c:4}});
   ws['!cols'] = [{wch:30},{wch:44},{wch:46},{wch:46},{wch:16}];
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
 }
 
 function exportExcelWeek() {
-  const data = ensureWeekData();
+  const data     = ensureWeekData();
   const weekDays = currentWeekDays();
-  const hasData = weekDays.some(d => (data.days[d]||[]).length > 0);
+  const hasData  = weekDays.some(d => (data.days[d]||[]).length > 0);
   if (!hasData) { notify('Nenhuma empresa para exportar', 'err'); return; }
 
   const wb = XLSX.utils.book_new();
   weekDays.forEach(day => {
-    const companies = data.days[day] || [];
-    buildDaySheet(wb, dayLabel(day, true), companies);
+    buildDaySheet(wb, dayLabel(day, true), data.days[day] || []);
   });
 
   downloadWb(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
@@ -1364,7 +1516,7 @@ function exportExcelDay() {
   const day = document.getElementById('exportDaySelect').value;
   if (!day) { notify('Selecione um dia para exportar', 'warn'); return; }
 
-  const data = ensureWeekData();
+  const data      = ensureWeekData();
   const companies = data.days[day] || [];
   if (!companies.length) { notify('Nenhuma empresa neste dia', 'err'); return; }
 
@@ -1378,7 +1530,7 @@ function exportExcelHistory() {
   const hist = getHistoryData();
   if (!hist) { notify('Nenhum histórico disponível', 'err'); return; }
 
-  const wb = XLSX.utils.book_new();
+  const wb       = XLSX.utils.book_new();
   const weekDays = Object.keys(hist.days).sort();
   if (!weekDays.length) { notify('Histórico vazio', 'err'); return; }
 
@@ -1408,7 +1560,7 @@ function hideError() { document.getElementById('errorMsg').style.display = 'none
 function setLoading(val) {
   document.getElementById('generateBtn').disabled = val;
   document.getElementById('spinner').style.display = val ? 'block' : 'none';
-  document.getElementById('btnText').textContent = val ? 'Gerando...' : 'Gerar link TinyURL';
+  document.getElementById('btnText').textContent   = val ? 'Gerando...' : 'Gerar link TinyURL';
 }
 
 async function generate() {
@@ -1423,8 +1575,6 @@ async function generate() {
     showError('// informe o nome da empresa');
     document.getElementById('companyName').classList.add('error-field'); return;
   }
-
-  // ── CORREÇÃO PRINCIPAL: envia as URLs completas, não os node-ids ──
   if (!deskUrl || !deskUrl.includes('figma.com')) {
     showError('// link desktop inválido — precisa ser URL do Figma');
     document.getElementById('deskUrl').classList.add('error-field'); return;
@@ -1439,7 +1589,7 @@ async function generate() {
 
   setLoading(true);
   try {
-    const res = await fetch('/api/shorten', {
+    const res  = await fetch('/api/shorten', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deskUrl, mobUrl, companyName }),
@@ -1448,13 +1598,13 @@ async function generate() {
     if (!res.ok) { showError(`// ${data.error}`); return; }
 
     const shortUrl = data.shortUrl;
-    document.getElementById('resultUrl').textContent = shortUrl;
+    document.getElementById('resultUrl').textContent  = shortUrl;
     document.getElementById('resultBox').style.display = 'block';
     saveLink(companyName, shortUrl);
 
-    document.getElementById('companyName').value = '';
-    document.getElementById('deskUrl').value = '';
-    document.getElementById('mobUrl').value = '';
+    document.getElementById('companyName').value     = '';
+    document.getElementById('deskUrl').value         = '';
+    document.getElementById('mobUrl').value          = '';
     document.getElementById('aliasPreview').textContent = '';
   } catch {
     showError('// falha na conexão com o servidor');
@@ -1487,7 +1637,6 @@ document.addEventListener('keydown', e => {
 // ── INIT ──
 ensureWeekData();
 if (isSunday()) document.getElementById('sundayBanner').classList.remove('hidden');
-renderLinks();
 </script>
 </body>
 </html>
