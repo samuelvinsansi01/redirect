@@ -57,7 +57,6 @@
 
     /* SUNDAY BANNER */
     .sunday-banner {
-      display: none;
       background: rgba(240,164,41,0.10);
       border: 1px solid rgba(240,164,41,0.35);
       border-radius: 12px;
@@ -267,9 +266,7 @@
     .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
     /* DAY SELECTOR */
-    .day-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px;
-    }
+    .day-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
     .day-tab {
       padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
       background: var(--bg); color: var(--muted);
@@ -278,34 +275,15 @@
     }
     .day-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
     .day-tab:hover:not(.active) { color: var(--text); border-color: #333340; }
-    .day-tab .day-count {
-      display: inline-block; background: var(--border);
-      border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px;
-    }
+    .day-tab .day-count { display: inline-block; background: var(--border); border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px; }
     .day-tab.active .day-count { background: rgba(184,240,89,0.2); }
 
     /* HISTORY SECTION */
-    .history-section {
-      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
-    }
-    .history-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
-    }
-    .history-title {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
-      color: var(--muted); text-transform: uppercase;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .history-badge {
-      background: rgba(240,164,41,0.15); border: 1px solid rgba(240,164,41,0.3);
-      color: var(--warning); font-family: 'DM Mono', monospace; font-size: 9px;
-      padding: 2px 8px; border-radius: 100px; text-transform: none; letter-spacing: 0;
-    }
-    .history-toggle {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
-    }
+    .history-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .history-title { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .history-badge { background: rgba(240,164,41,0.15); border: 1px solid rgba(240,164,41,0.3); color: var(--warning); font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px; border-radius: 100px; text-transform: none; letter-spacing: 0; }
+    .history-toggle { background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
     .history-toggle:hover { border-color: var(--warning); color: var(--warning); }
     .history-content { display: none; }
     .history-content.open { display: block; }
@@ -314,11 +292,7 @@
     .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead tr { background: var(--surface2); }
-    th {
-      font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
-      color: var(--muted); text-transform: uppercase; padding: 12px 14px;
-      text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border);
-    }
+    th { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; padding: 12px 14px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
     td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(255,255,255,0.02); }
@@ -327,144 +301,54 @@
     .td-link a { color: inherit; text-decoration: none; }
     .td-link a:hover { text-decoration: underline; }
     .td-missing { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--warning); }
-    .status-select {
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px;
-      padding: 5px 8px; width: 100%; cursor: pointer; outline: none;
-    }
-    .del-btn {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      font-size: 14px; padding: 4px 6px; border-radius: 4px;
-      transition: color 0.2s, background 0.2s;
-    }
+    .status-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 8px; width: 100%; cursor: pointer; outline: none; }
+    .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 4px; transition: color 0.2s, background 0.2s; }
     .del-btn:hover { color: var(--error); background: rgba(255,92,92,0.1); }
     .table-empty { text-align: center; padding: 40px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
-
-    /* GROUP HEADER in table */
-    .status-group-header td {
-      background: var(--surface2); color: var(--muted);
-      font-family: 'DM Mono', monospace; font-size: 9px;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 8px 14px; border-bottom: 1px solid var(--border);
-    }
+    .status-group-header td { background: var(--surface2); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 14px; border-bottom: 1px solid var(--border); }
 
     /* USAR BUTTON */
-    .usar-btn {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px;
-      padding: 5px 10px; cursor: pointer; white-space: nowrap;
-      transition: all 0.2s; flex-shrink: 0;
-    }
+    .usar-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px; padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
     .usar-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
     .usar-btn.active { background: var(--accent); color: #0c0c0f; border-color: var(--accent); font-weight: 700; }
     .usar-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
     /* MENSAGEM PRONTA */
-    .msg-panel {
-      margin-top: 24px;
-      background: var(--bg);
-      border: 1px solid var(--accent-border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .msg-panel-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--accent-dim);
-      border-bottom: 1px solid var(--accent-border);
-    }
-    .msg-panel-label {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      letter-spacing: 0.1em; color: var(--accent);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .msg-panel-empresa {
-      font-family: 'DM Mono', monospace; font-size: 10px;
-      color: var(--muted);
-    }
-    .msg-panel-empresa span {
-      color: var(--text); font-weight: 600;
-    }
-    .msg-body {
-      padding: 16px;
-      font-family: 'DM Mono', monospace; font-size: 11px;
-      line-height: 1.8; color: var(--text);
-      white-space: pre-wrap;
-      min-height: 80px;
-    }
-    .msg-link-highlight {
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .msg-no-link {
-      color: var(--warning);
-      font-style: italic;
-    }
-    .msg-panel-footer {
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
-    .msg-copy-btn {
-      background: var(--accent); color: #0c0c0f; border: none;
-      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700;
-      font-size: 12px; padding: 10px 20px; cursor: pointer;
-      transition: opacity 0.2s; white-space: nowrap;
-    }
+    .msg-panel { margin-top: 24px; background: var(--bg); border: 1px solid var(--accent-border); border-radius: 12px; overflow: hidden; }
+    .msg-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--accent-dim); border-bottom: 1px solid var(--accent-border); }
+    .msg-panel-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .msg-panel-empresa { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+    .msg-panel-empresa span { color: var(--text); font-weight: 600; }
+    .msg-body { padding: 16px; font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.8; color: var(--text); white-space: pre-wrap; min-height: 80px; }
+    .msg-link-highlight { color: var(--accent); font-weight: 600; }
+    .msg-no-link { color: var(--warning); font-style: italic; }
+    .msg-panel-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .msg-copy-btn { background: var(--accent); color: #0c0c0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 10px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
     .msg-copy-btn:hover { opacity: 0.85; }
     .msg-copy-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .msg-hint {
-      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
-    }
+    .msg-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 
     /* EXPORT OPTIONS */
-    .export-options {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; margin-top: 16px;
-    }
+    .export-options { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
     .export-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 10px; }
-    .export-day-select {
-      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-    }
-    .export-day-select select {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace;
-      font-size: 11px; padding: 8px 12px; width: auto; cursor: pointer;
-    }
+    .export-day-select { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .export-day-select select { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 12px; width: auto; cursor: pointer; }
 
     /* NOTIFY */
-    .notify {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--surface); border: 1px solid var(--accent-border);
-      color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px;
-      padding: 12px 18px; border-radius: 10px; z-index: 999;
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s ease; pointer-events: none;
-    }
+    .notify { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent-border); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; padding: 12px 18px; border-radius: 10px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
     .notify.show { transform: translateY(0); opacity: 1; }
     .notify.err { border-color: rgba(255,92,92,0.4); color: var(--error); }
     .notify.warn { border-color: rgba(240,164,41,0.4); color: var(--warning); }
 
-    /* DUPLICATE MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7); z-index: 500;
-      align-items: center; justify-content: center;
-    }
+    /* MODALS */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px; max-width: 480px; width: 90%;
-    }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 480px; width: 90%; }
     .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
     .modal-title span { color: var(--warning); }
     .modal-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
     .modal-list { list-style: none; margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }
-    .modal-list li {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
-      padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 11px;
-      color: var(--warning);
-    }
+    .modal-list li { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warning); }
     .modal-btns { display: flex; gap: 10px; }
     .modal-btn-ok { background: var(--accent); color: #0c0c0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 10px 20px; cursor: pointer; }
     .modal-btn-cancel { background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; padding: 10px 20px; cursor: pointer; }
@@ -566,7 +450,6 @@
           <span id="empresasCount" style="color:var(--accent);font-size:11px;font-family:'DM Mono',monospace;font-weight:400;text-transform:none;letter-spacing:0"></span>
         </div>
 
-        <!-- Day tabs -->
         <div class="day-tabs" id="dayTabs"></div>
 
         <div class="table-wrap">
@@ -588,7 +471,6 @@
           </table>
         </div>
 
-        <!-- PAINEL MENSAGEM PRONTA -->
         <div class="msg-panel" id="msgPanel">
           <div class="msg-panel-header">
             <span class="msg-panel-label">// MENSAGEM PRONTA</span>
@@ -602,7 +484,6 @@
         </div>
       </div>
 
-      <!-- EXPORT OPTIONS -->
       <div class="export-options">
         <div class="export-label">// EXPORTAR EXCEL</div>
         <div class="btn-row" style="margin-top:10px">
@@ -623,7 +504,6 @@
         </div>
       </div>
 
-      <!-- HISTORY -->
       <div class="history-section" id="historySection">
         <div class="history-header">
           <div class="history-title">
@@ -737,15 +617,11 @@ function timeStr() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit
 function getWeekStart(d) {
   const dt = d ? new Date(d) : new Date();
   dt.setHours(0,0,0,0);
-  const day = dt.getDay();
-  dt.setDate(dt.getDate() - day);
+  dt.setDate(dt.getDate() - dt.getDay());
   return dt;
 }
 
-function getWeekStartStr(d) {
-  return getWeekStart(d).toLocaleDateString('pt-BR');
-}
-
+function getWeekStartStr(d) { return getWeekStart(d).toLocaleDateString('pt-BR'); }
 function currentWeekStartStr() { return getWeekStartStr(); }
 
 function currentWeekDays() {
@@ -760,10 +636,15 @@ function currentWeekDays() {
 }
 
 const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-function dayLabel(dateStr) {
+
+// ── CORREÇÃO PRINCIPAL: dayLabel com modo sheet ──
+// forSheet=true usa hífen em vez de barra, evitando erro do Excel
+function dayLabel(dateStr, forSheet) {
   const [d,m,y] = dateStr.split('/').map(Number);
   const dt = new Date(y, m-1, d);
-  return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + '/' + (m<10?'0'+m:m);
+  const sep = forSheet ? '-' : '/';
+  const mm = m < 10 ? '0' + m : String(m);
+  return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + sep + mm;
 }
 
 function isSunday() { return new Date().getDay() === 0; }
@@ -800,8 +681,7 @@ function buildWhatsapp(raw) {
   if (!raw) return '';
   const num = raw.replace(/\D/g,'');
   if (!num) return '';
-  const full = num.startsWith('55') ? num : '55' + num;
-  return 'https://wa.me/' + full;
+  return 'https://wa.me/' + (num.startsWith('55') ? num : '55' + num);
 }
 
 function stripPrefix(name) {
@@ -811,7 +691,6 @@ function stripPrefix(name) {
 // ── MENSAGEM PRONTA ──
 function usarEmpresaMsg(nome, prototipo) {
   selectedMsgEmpresa = { nome, prototipo };
-
   const labelEl = document.getElementById('msgEmpresaLabel');
   const bodyEl = document.getElementById('msgBody');
   const hintEl = document.getElementById('msgHint');
@@ -836,7 +715,6 @@ function usarEmpresaMsg(nome, prototipo) {
 
   hintEl.textContent = `// ${escHtml(nome)} · link pronto para envio`;
   copyBtn.disabled = false;
-
   document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   document.querySelectorAll('.usar-btn').forEach(btn => {
@@ -887,8 +765,7 @@ function saveLink(name, url) {
 }
 
 function findLinkByName(name) {
-  const clean = stripPrefix(name);
-  const norm = normalizeAlias(clean);
+  const norm = normalizeAlias(stripPrefix(name));
   return getLinks().find(l => {
     const lNorm = normalizeAlias(stripPrefix(l.name));
     return lNorm === norm || l.url.includes(norm);
@@ -925,30 +802,8 @@ function hideLink(ts) {
 }
 
 // ── TINYURL API ──
-const TINY_TOKEN = 'lkioSAXg3T1bMyxOXPDxdvP3M3jJvwYqvRoooc4G6ZQdiG5tBGpMPq8Kn6fx';
-
 function extractAliasFromUrl(shortUrl) {
   try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
-}
-
-async function tinyUpdate(alias, newDestUrl) {
-  const res = await fetch(`https://api.tinyurl.com/update/${alias}`, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${TINY_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url: newDestUrl }),
-  });
-  return res;
-}
-
-async function tinyArchive(alias) {
-  const res = await fetch(`https://api.tinyurl.com/archive/${alias}`, {
-    method: 'PATCH',
-    headers: { 'Authorization': `Bearer ${TINY_TOKEN}` },
-  });
-  return res;
 }
 
 // ── EDIT MODAL ──
@@ -995,11 +850,7 @@ async function saveEditLink() {
     const res = await fetch('/api/update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        alias,
-        deskUrl: deskUrl || undefined,
-        mobUrl:  mobUrl  || undefined,
-      }),
+      body: JSON.stringify({ alias, deskUrl: deskUrl || undefined, mobUrl: mobUrl || undefined }),
     });
 
     if (!res.ok) {
@@ -1050,7 +901,11 @@ async function confirmArchiveLink() {
 
   try {
     if (alias) {
-      const res = await tinyArchive(alias);
+      const res = await fetch('/api/archive', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alias }),
+      });
       if (!res.ok) {
         notify('Erro ao arquivar no TinyURL — removido apenas localmente', 'warn');
       } else {
@@ -1088,18 +943,14 @@ function ensureWeekData() {
   let data = getWeekData();
   const ws = currentWeekStartStr();
   if (!data || data.weekStart !== ws) {
-    if (data && data.weekStart !== ws) {
-      archiveWeekData(data);
-    }
+    if (data && data.weekStart !== ws) archiveWeekData(data);
     data = { weekStart: ws, days: {} };
     localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
   }
   return data;
 }
 
-function saveWeekData(data) {
-  localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
-}
+function saveWeekData(data) { localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data)); }
 
 function archiveWeekData(data) {
   if (!data) return;
@@ -1155,14 +1006,10 @@ function importJson() {
   let added = 0;
 
   projetos.forEach(p => {
-    const nomeRaw = (p.pagina || '').replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim() || 'Sem nome';
-    const nome = nomeRaw;
+    const nome = stripPrefix(p.pagina || '').trim() || 'Sem nome';
     const nomeNorm = normalizeAlias(nome);
 
-    if (existingNomes.has(nomeNorm)) {
-      duplicates.push(nome);
-      return;
-    }
+    if (existingNomes.has(nomeNorm)) { duplicates.push(nome); return; }
 
     const site = p.site || '';
     const whatsapp = p.header?.whatsapp || '';
@@ -1192,9 +1039,7 @@ function showDupModal(dups, added) {
   document.getElementById('dupModal').classList.add('open');
 }
 
-function closeDupModal() {
-  document.getElementById('dupModal').classList.remove('open');
-}
+function closeDupModal() { document.getElementById('dupModal').classList.remove('open'); }
 
 // ── RENDER DADOS ──
 function renderDados() {
@@ -1233,10 +1078,7 @@ function renderDados() {
   }
 }
 
-function selectDay(day) {
-  selectedDay = day;
-  renderDados();
-}
+function selectDay(day) { selectedDay = day; renderDados(); }
 
 function renderDayTable(data, day) {
   const tbody = document.getElementById('empresasTbody');
@@ -1262,9 +1104,9 @@ function renderDayTable(data, day) {
     groups[status].forEach(e => {
       const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
       const hasProto = !!e.prototipo;
-
       const waRaw = e.whatsapp || '';
       const waBuilt = buildWhatsapp(waRaw);
+
       const waCell = waRaw
         ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
            <button class="proto-edit-icon" onclick="showWaEdit('${day}',${e._idx},this)" title="Editar número">✎</button>`
@@ -1307,7 +1149,6 @@ function renderDayTable(data, day) {
   tbody.innerHTML = html;
 }
 
-// ── WhatsApp inline edit ──
 function showWaEdit(day, idx, btn) {
   const td = btn.parentElement;
   const data = ensureWeekData();
@@ -1352,11 +1193,9 @@ function saveProto(day, idx) {
   if (data.days[day] && data.days[day][idx] !== undefined) {
     data.days[day][idx].prototipo = val;
     saveWeekData(data);
-
     if (selectedMsgEmpresa && selectedMsgEmpresa.nome === data.days[day][idx].nome) {
       usarEmpresaMsg(data.days[day][idx].nome, val);
     }
-
     renderDados();
     notify(val ? '✓ Protótipo atualizado' : '✓ Protótipo removido');
   }
@@ -1377,7 +1216,6 @@ function deleteEmpresa(day, idx) {
     const deleted = data.days[day][idx];
     data.days[day].splice(idx, 1);
     saveWeekData(data);
-
     if (selectedMsgEmpresa && selectedMsgEmpresa.nome === deleted?.nome) {
       selectedMsgEmpresa = null;
       document.getElementById('msgEmpresaLabel').textContent = 'Selecione uma empresa na tabela acima';
@@ -1385,15 +1223,13 @@ function deleteEmpresa(day, idx) {
       document.getElementById('msgHint').textContent = '// nenhuma empresa selecionada';
       document.getElementById('msgCopyBtn').disabled = true;
     }
-
     renderDados();
   }
 }
 
 function clearAll() {
   if (!confirm('Limpar todas as empresas da semana atual?')) return;
-  const ws = currentWeekStartStr();
-  saveWeekData({ weekStart: ws, days: {} });
+  saveWeekData({ weekStart: currentWeekStartStr(), days: {} });
   selectedMsgEmpresa = null;
   renderDados();
   notify('Semana limpa');
@@ -1441,7 +1277,7 @@ function renderHistory() {
           <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
           <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
           <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠</span>'}</td>
-          <td><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${escHtml(e.status||'Não enviada')}</span></td>
+          <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${escHtml(e.status||'Não enviada')}</td>
         </tr>`;
       });
     });
@@ -1469,7 +1305,7 @@ function archiveHistory() {
   notify('Semana anterior arquivada');
 }
 
-// ── EXCEL DOWNLOAD HELPER (Blob — funciona em qualquer ambiente) ──
+// ── EXCEL DOWNLOAD VIA BLOB (funciona em qualquer ambiente) ──
 function downloadWb(wb, filename) {
   try {
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1489,8 +1325,6 @@ function downloadWb(wb, filename) {
 }
 
 // ── EXCEL HELPERS ──
-const STATUS_ORDER = STATUS_OPTIONS;
-
 function makeHyperlink(url) {
   if (!url) return { v: '', t: 's' };
   return { f: `HYPERLINK("${url}","${url}")` };
@@ -1506,7 +1340,7 @@ function buildDaySheet(wb, sheetName, companies) {
   });
   row++;
 
-  STATUS_ORDER.forEach(status => {
+  STATUS_OPTIONS.forEach(status => {
     const group = companies.filter(e => (e.status || 'Não enviada') === status);
     if (!group.length) return;
 
@@ -1535,6 +1369,7 @@ function buildDaySheet(wb, sheetName, companies) {
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
 }
 
+// ── EXPORTAR ──
 function exportExcelWeek() {
   const data = ensureWeekData();
   const weekDays = currentWeekDays();
@@ -1544,8 +1379,8 @@ function exportExcelWeek() {
   const wb = XLSX.utils.book_new();
   weekDays.forEach(day => {
     const companies = data.days[day] || [];
-    const label = dayLabel(day);
-    buildDaySheet(wb, label, companies);
+    // USA dayLabel(day, true) — barras viram hífens, sem erro no Excel
+    buildDaySheet(wb, dayLabel(day, true), companies);
   });
 
   downloadWb(wb, `figma-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
@@ -1561,7 +1396,8 @@ function exportExcelDay() {
   if (!companies.length) { notify('Nenhuma empresa neste dia', 'err'); return; }
 
   const wb = XLSX.utils.book_new();
-  buildDaySheet(wb, dayLabel(day), companies);
+  // USA dayLabel(day, true)
+  buildDaySheet(wb, dayLabel(day, true), companies);
   downloadWb(wb, `figma-${day.replace(/\//g,'-')}.xlsx`);
   notify(`✓ Excel de ${dayLabel(day)} gerado`);
 }
@@ -1572,13 +1408,13 @@ function exportExcelHistory() {
 
   const wb = XLSX.utils.book_new();
   const weekDays = Object.keys(hist.days).sort();
-
   if (!weekDays.length) { notify('Histórico vazio', 'err'); return; }
 
   weekDays.forEach(day => {
     const companies = hist.days[day] || [];
     if (!companies.length) return;
-    buildDaySheet(wb, dayLabel(day), companies);
+    // USA dayLabel(day, true)
+    buildDaySheet(wb, dayLabel(day, true), companies);
   });
 
   downloadWb(wb, `figma-semana-anterior-${hist.weekStart.replace(/\//g,'-')}.xlsx`);
@@ -1682,9 +1518,7 @@ document.addEventListener('keydown', e => {
 
 // ── INIT ──
 ensureWeekData();
-if (isSunday()) {
-  document.getElementById('sundayBanner').classList.remove('hidden');
-}
+if (isSunday()) document.getElementById('sundayBanner').classList.remove('hidden');
 renderLinks();
 </script>
 </body>
