@@ -718,7 +718,6 @@ const EMPRESAS_KEY = 'fr_empresas_v2';
 const HISTORY_KEY = 'fr_empresas_hist';
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 
-// Mensagem base — só o link muda
 const MSG_BASE = `Olá, tudo bem?
 Meu nome é Samuel, trabalho com criação e reformulação de sites institucionais, com foco em melhorar credibilidade e facilitar o recebimento de novos contatos.
 Observei o site de vocês e desenvolvi uma amostra de como uma nova estrutura poderia melhorar a apresentação do escritório, com uma comunicação mais clara e mais orientada à conversão de clientes.
@@ -729,7 +728,6 @@ Segue o link para visualizar:
 Essa é apenas uma simulação de direção visual e posicionamento, para demonstrar como o site poderia evoluir nesse cenário.
 Quando puder, me diz o que achou e se faria sentido algo nesse formato para o escritório.`;
 
-// Estado da empresa selecionada para a mensagem
 let selectedMsgEmpresa = null;
 
 // ── DATE HELPERS ──
@@ -825,14 +823,11 @@ function usarEmpresaMsg(nome, prototipo) {
     bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado. Adicione o link na tabela antes de usar a mensagem.</span>`;
     hintEl.textContent = '// sem protótipo — adicione o link na coluna Protótipo';
     copyBtn.disabled = true;
-    // Scroll suave até o painel
     document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
 
   const msgFinal = MSG_BASE.replace('{LINK}', prototipo);
-
-  // Renderiza a mensagem com o link destacado
   const parts = msgFinal.split(prototipo);
   bodyEl.innerHTML =
     escHtml(parts[0]) +
@@ -844,7 +839,6 @@ function usarEmpresaMsg(nome, prototipo) {
 
   document.getElementById('msgPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  // Atualiza visual dos botões Usar na tabela
   document.querySelectorAll('.usar-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nome === nome);
   });
@@ -1266,10 +1260,21 @@ function renderDayTable(data, day) {
     if (!groups[status].length) return;
     html += `<tr class="status-group-header"><td colspan="7">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
     groups[status].forEach(e => {
-      const wa = buildWhatsapp(e.whatsapp);
       const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
       const hasProto = !!e.prototipo;
 
+      // ── WhatsApp cell — editable, mirrors protoCell pattern ──
+      const waRaw = e.whatsapp || '';
+      const waBuilt = buildWhatsapp(waRaw);
+      const waCell = waRaw
+        ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
+           <button class="proto-edit-icon" onclick="showWaEdit('${day}',${e._idx},this)" title="Editar número">✎</button>`
+        : `<div class="proto-edit-wrap">
+             <input class="proto-input" placeholder="Número..." id="wa-input-${day}-${e._idx}" />
+             <button class="proto-save-btn" onclick="saveWa('${day}',${e._idx})">OK</button>
+           </div>`;
+
+      // ── Prototype cell ──
       const protoCell = e.prototipo
         ? `<span class="td-link" style="max-width:140px;display:inline-block"><a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a></span>
            <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar link">✎</button>`
@@ -1281,7 +1286,7 @@ function renderDayTable(data, day) {
       html += `<tr>
         <td class="td-name">${escHtml(e.nome)}</td>
         <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
-        <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
+        <td style="white-space:nowrap">${waCell}</td>
         <td style="white-space:nowrap">${protoCell}</td>
         <td>
           <select class="status-select" onchange="updateStatus('${day}',${e._idx},this.value)">
@@ -1304,6 +1309,33 @@ function renderDayTable(data, day) {
   tbody.innerHTML = html;
 }
 
+// ── WhatsApp inline edit ──
+function showWaEdit(day, idx, btn) {
+  const td = btn.parentElement;
+  const data = ensureWeekData();
+  const current = (data.days[day] && data.days[day][idx]) ? (data.days[day][idx].whatsapp || '') : '';
+  td.innerHTML = `<div class="proto-edit-wrap">
+    <input class="proto-input" value="${escHtml(current)}" id="wa-input-${day}-${idx}" placeholder="Número..." />
+    <button class="proto-save-btn" onclick="saveWa('${day}',${idx})">OK</button>
+  </div>`;
+  const inp = document.getElementById('wa-input-' + day + '-' + idx);
+  if (inp) inp.focus();
+}
+
+function saveWa(day, idx) {
+  const inp = document.getElementById('wa-input-' + day + '-' + idx);
+  if (!inp) return;
+  // Store only digits — buildWhatsapp handles the rest at render time
+  const val = inp.value.trim().replace(/\D/g, '');
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx] !== undefined) {
+    data.days[day][idx].whatsapp = val;
+    saveWeekData(data);
+    renderDados();
+    notify(val ? '✓ WhatsApp atualizado' : '✓ WhatsApp removido');
+  }
+}
+
 function showProtoEdit(day, idx, btn) {
   const td = btn.parentElement;
   const data = ensureWeekData();
@@ -1324,7 +1356,6 @@ function saveProto(day, idx) {
     data.days[day][idx].prototipo = val;
     saveWeekData(data);
 
-    // Se essa empresa estava selecionada na mensagem, atualiza o painel
     if (selectedMsgEmpresa && selectedMsgEmpresa.nome === data.days[day][idx].nome) {
       usarEmpresaMsg(data.days[day][idx].nome, val);
     }
@@ -1350,7 +1381,6 @@ function deleteEmpresa(day, idx) {
     data.days[day].splice(idx, 1);
     saveWeekData(data);
 
-    // Limpa painel se era a empresa selecionada
     if (selectedMsgEmpresa && selectedMsgEmpresa.nome === deleted?.nome) {
       selectedMsgEmpresa = null;
       document.getElementById('msgEmpresaLabel').textContent = 'Selecione uma empresa na tabela acima';
