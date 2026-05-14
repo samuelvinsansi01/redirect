@@ -7,14 +7,22 @@ async function redisGet(key) {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  console.log('Redis raw response:', JSON.stringify(data));
-  const raw = data.result;
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    if (typeof parsed === 'string') return JSON.parse(parsed);
-    return parsed;
-  } catch { return null; }
+  
+  let current = data.result;
+  // desempacota todas as camadas de string JSON até chegar no objeto
+  while (typeof current === 'string') {
+    try { current = JSON.parse(current); }
+    catch { break; }
+  }
+  // se ainda tiver uma camada { value: ... }, desempacota
+  if (current && typeof current === 'object' && current.value !== undefined) {
+    current = current.value;
+    while (typeof current === 'string') {
+      try { current = JSON.parse(current); }
+      catch { break; }
+    }
+  }
+  return current;
 }
 
 function isMobileUA(ua) {
