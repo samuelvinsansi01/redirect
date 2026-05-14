@@ -41,6 +41,11 @@ export default async function handler(req, res) {
   }
 
   console.log('record:', JSON.stringify(record));
+  console.log('record:', JSON.stringify(record));
+  console.log('record keys:', Object.keys(record || {}));
+  console.log('deskUrl:', record?.deskUrl);
+  console.log('mobUrl:', record?.mobUrl);
+  console.log('record type:', typeof record);
 
   if (!record)
     return res.status(404).send(`Link "${alias}" não encontrado ou expirado.`);
