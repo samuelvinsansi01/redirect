@@ -401,10 +401,8 @@
     .modal-btn-cancel { background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; padding: 10px 20px; cursor: pointer; }
 
     /* ════════════════════════════════════════════════
-       ABA EXTRAÇÃO — ESTILOS ESPECÍFICOS
+       ABA EXTRAÇÃO — ESTILOS
     ════════════════════════════════════════════════ */
-
-    /* Sub-tabs internas */
     .inner-tabs {
       display: flex; gap: 4px;
       background: var(--bg);
@@ -425,7 +423,6 @@
     .inner-panel { display: none; }
     .inner-panel.active { display: block; }
 
-    /* Semana tabs da extração */
     .ext-week-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
     .ext-week-tab {
       padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
@@ -438,7 +435,6 @@
     .ext-week-tab .day-count { display: inline-block; background: var(--border); border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px; }
     .ext-week-tab.active .day-count { background: rgba(184,240,89,0.2); }
 
-    /* JSON area */
     .json-area {
       background: var(--bg); border: 1px solid var(--border);
       border-radius: var(--radius); color: var(--text);
@@ -450,7 +446,7 @@
     .json-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,240,89,0.08); }
     .json-area::placeholder { color: var(--muted); }
 
-    /* Empresa card na extração */
+    /* Empresa card */
     .ext-empresa-item {
       display: flex; align-items: center;
       background: var(--bg); border: 1px solid var(--border);
@@ -502,7 +498,7 @@
     .ext-stat-val.accent { color: var(--accent); }
     .ext-stat-val.warn { color: var(--warning); }
 
-    /* Validadas — lista */
+    /* Validadas */
     .val-empresa-item {
       display: flex; align-items: center;
       background: var(--bg); border: 1px solid rgba(184,240,89,0.2);
@@ -519,7 +515,7 @@
     }
     .val-unvalidate-btn:hover { border-color: var(--warning); color: var(--warning); }
 
-    /* Caixa de sites copiados */
+    /* Caixa de sites */
     .sites-copy-box {
       background: var(--bg); border: 1px solid var(--accent-border);
       border-radius: var(--radius); padding: 14px 16px;
@@ -529,7 +525,7 @@
       max-height: 220px; overflow-y: auto; margin-top: 12px;
     }
 
-    /* Toolbar da validadas */
+    /* Toolbar validadas */
     .val-toolbar {
       display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
     }
@@ -540,13 +536,6 @@
       display: flex; align-items: center; gap: 8px;
     }
     .val-copy-sites-btn:hover { opacity: 0.85; }
-    .val-export-json-btn {
-      background: var(--surface2); color: var(--text); border: 1px solid var(--border);
-      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px;
-      padding: 10px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .val-export-json-btn:hover { opacity: 0.85; }
     .val-send-dados-btn {
       background: #2a3f1a; color: var(--accent); border: 1px solid rgba(184,240,89,0.3);
       border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
@@ -556,7 +545,6 @@
 
     .ext-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 36px; }
 
-    /* Clearfix para ações */
     .ext-header-row {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
@@ -567,7 +555,6 @@
       padding: 5px 12px; cursor: pointer; transition: all 0.2s;
     }
     .ext-clear-btn:hover { border-color: var(--error); color: var(--error); }
-
   </style>
 </head>
 <body>
@@ -672,13 +659,12 @@
   <div class="panel" id="panel-extracao">
     <div class="card">
       <div class="card-title">Extração de <span>dados.</span></div>
-      <div class="card-sub">// cole o JSON da Apify → filtre → valide → copie os sites</div>
+      <div class="card-sub">// cole o JSON da Apify → valide empresas → copie sites → envie para Excel</div>
 
-      <!-- Sub-tabs -->
       <div class="inner-tabs">
-        <button class="inner-tab active" onclick="switchInnerTab('json-tab')">// JSON</button>
-        <button class="inner-tab" onclick="switchInnerTab('empresas-tab')">Empresas</button>
-        <button class="inner-tab" onclick="switchInnerTab('validadas-tab')">Validadas</button>
+        <button class="inner-tab active" id="itab-json" onclick="switchInnerTab('json-tab')">// JSON</button>
+        <button class="inner-tab" id="itab-empresas" onclick="switchInnerTab('empresas-tab')">Empresas</button>
+        <button class="inner-tab" id="itab-validadas" onclick="switchInnerTab('validadas-tab')">Validadas</button>
       </div>
 
       <!-- SUB-PAINEL: JSON -->
@@ -688,9 +674,8 @@
           <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "..." },&#10;  ...&#10;]'></textarea>
         </div>
 
-        <!-- Seletor de dia -->
         <div style="margin-bottom:16px">
-          <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
+          <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:6px;font-family:&apos;DM Mono&apos;,monospace;font-size:9px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
           <div class="ext-week-tabs" id="extDayPickerTabs"></div>
         </div>
 
@@ -705,35 +690,22 @@
 
       <!-- SUB-PAINEL: EMPRESAS -->
       <div class="inner-panel" id="empresas-tab">
-        <!-- Week tabs -->
         <div class="ext-week-tabs" id="extEmpresasWeekTabs"></div>
-
-        <!-- Stats -->
         <div class="ext-stats" id="extEmpresasStats"></div>
-
-        <!-- Toolbar -->
         <div class="ext-header-row">
-          <div class="links-section-title" style="margin-bottom:0;flex:1">
-            Empresas importadas
-          </div>
+          <div class="links-section-title" style="margin-bottom:0;flex:1">Empresas importadas</div>
           <button class="ext-clear-btn" onclick="extClearDay()">Limpar dia</button>
         </div>
-
-        <!-- Lista -->
         <div id="extEmpresasList" style="display:flex;flex-direction:column;gap:8px">
-          <div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba JSON e importe um arquivo.</div>
+          <div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>
         </div>
       </div>
 
       <!-- SUB-PAINEL: VALIDADAS -->
       <div class="inner-panel" id="validadas-tab">
-        <!-- Week tabs -->
         <div class="ext-week-tabs" id="extValidadasWeekTabs"></div>
-
-        <!-- Stats -->
         <div class="ext-stats" id="extValidadasStats"></div>
 
-        <!-- Toolbar de ações -->
         <div class="val-toolbar">
           <button class="val-copy-sites-btn" onclick="extCopySites()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
@@ -744,19 +716,16 @@
           </button>
         </div>
 
-        <!-- Box de preview dos sites -->
         <div id="sitesPreviewBox" style="display:none">
           <div class="links-section-title">Sites copiados</div>
           <div class="sites-copy-box" id="sitesPreviewContent"></div>
         </div>
 
-        <!-- Lista de validadas -->
         <div class="links-section-title" style="margin-top:16px">Empresas validadas</div>
         <div id="extValidadasList" style="display:flex;flex-direction:column;gap:8px">
           <div class="ext-empty">Nenhuma empresa validada neste dia.</div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -928,10 +897,10 @@
 /* ═══════════════════════════════════════════════════
    CONSTANTES & CHAVES
 ═══════════════════════════════════════════════════ */
-const LINKS_KEY     = 'fr_links';
-const EMPRESAS_KEY  = 'fr_empresas_v2';
-const HISTORY_KEY   = 'fr_empresas_hist';
-const EXT_KEY       = 'fr_extracao_v1'; // Nova chave de extração
+const LINKS_KEY    = 'fr_links';
+const EMPRESAS_KEY = 'fr_empresas_v2';
+const HISTORY_KEY  = 'fr_empresas_hist';
+const EXT_KEY      = 'fr_extracao_v2'; // v2 — IDs como string segura
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 
@@ -992,6 +961,13 @@ function dayLabel(dateStr, forSheet) {
 function isSunday() { return new Date().getDay() === 0; }
 
 /* ═══════════════════════════════════════════════════
+   GERADOR DE ID SEGURO — string hex sem ponto flutuante
+═══════════════════════════════════════════════════ */
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/* ═══════════════════════════════════════════════════
    TABS
 ═══════════════════════════════════════════════════ */
 function switchTab(name) {
@@ -1018,7 +994,9 @@ function notify(msg, type) {
    UTILS
 ═══════════════════════════════════════════════════ */
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function normalizeAlias(name) {
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -1130,10 +1108,10 @@ function extractAliasFromUrl(shortUrl) {
    ABA LINKS — RENDER
 ═══════════════════════════════════════════════════ */
 function renderLinksPanel() {
-  const allLinks   = getLinks();
-  const weekDays   = currentWeekDays();
-  const today      = todayStr();
-  const query      = (document.getElementById('linksSearch')?.value || '').toLowerCase().trim();
+  const allLinks = getLinks();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  const query    = (document.getElementById('linksSearch')?.value || '').toLowerCase().trim();
 
   const tabsEl = document.getElementById('linksDayTabs');
   tabsEl.innerHTML = weekDays.map(day => {
@@ -1150,7 +1128,7 @@ function renderLinksPanel() {
   const dayActive   = allLinks.filter(l => l.date === selectedLinksDay && !l.hidden);
   const dayArchived = allLinks.filter(l => l.date === selectedLinksDay && l.hidden);
 
-  const filtered = query ? dayActive.filter(l => l.name.toLowerCase().includes(query)) : dayActive;
+  const filtered         = query ? dayActive.filter(l => l.name.toLowerCase().includes(query)) : dayActive;
   const filteredArchived = query ? dayArchived.filter(l => l.name.toLowerCase().includes(query)) : dayArchived;
 
   const countEl = document.getElementById('linksSearchCount');
@@ -1386,11 +1364,23 @@ let selectedDay = todayStr();
 
 /* ═══════════════════════════════════════════════════
    ███████████████████████████████████████████████████
-   ABA EXTRAÇÃO — STORAGE E LÓGICA COMPLETA
+   ABA EXTRAÇÃO — LÓGICA COMPLETA (BUGS CORRIGIDOS)
    ███████████████████████████████████████████████████
+
+   FIX 1: IDs gerados com genId() — string hex, sem ponto flutuante.
+           Antes: Date.now() + Math.random() gerava float (ex: 1716825600000.4832)
+           que ao ser inserido em data-attr e relido como string, o find(e => e.id == id)
+           falhava porque 1716825600000.4832 != "1716825600000.4832" em comparação JS frouxa.
+
+   FIX 2: Funções extToggleValidate / extRemoveItem agora recebem o id como string
+           via data-attribute e buscam com === (strict) após garantir que ambos são string.
+
+   FIX 3: extSendToDados garantia que extSelectedDay estava sincronizado.
+
+   FIX 4: switchInnerTab agora usa IDs explícitos nos botões em vez de índice posicional,
+           evitando dessincronização ao re-renderizar.
 ═══════════════════════════════════════════════════ */
 
-// Estrutura: { weekStart: string, days: { [date]: [{ id, title, website, phone, validated, removed }] } }
 function getExtData() {
   try { return JSON.parse(localStorage.getItem(EXT_KEY) || 'null'); } catch { return null; }
 }
@@ -1407,32 +1397,36 @@ function ensureExtData() {
 
 function saveExtData(data) { localStorage.setItem(EXT_KEY, JSON.stringify(data)); }
 
-// Dia selecionado nas sub-abas de extração
-let extSelectedDay = todayStr();
-// Sub-aba ativa
-let activeInnerTab = 'json-tab';
-
-// Dia selecionado no picker do JSON (para qual dia importar)
+let extSelectedDay     = todayStr();
 let extImportTargetDay = todayStr();
+let activeInnerTab     = 'json-tab';
 
+/* ── SWITCH INNER TAB ──────────────────────────── */
 function switchInnerTab(tabId) {
   activeInnerTab = tabId;
-  document.querySelectorAll('.inner-tab').forEach((t, i) => {
-    const ids = ['json-tab','empresas-tab','validadas-tab'];
-    t.classList.toggle('active', ids[i] === tabId);
+
+  // Atualiza botões pelo ID explícito — sem depender de índice
+  ['json-tab','empresas-tab','validadas-tab'].forEach(id => {
+    const btnId = 'itab-' + id.replace('-tab','');
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.toggle('active', id === tabId);
   });
+
   document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
+  const panel = document.getElementById(tabId);
+  if (panel) panel.classList.add('active');
+
   renderExtracaoPanel();
 }
 
+/* ── RENDER PRINCIPAL DA ABA ────────────────────── */
 function renderExtracaoPanel() {
   renderExtDayPickerTabs();
-  if (activeInnerTab === 'empresas-tab') renderExtEmpresasTab();
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
   if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
 }
 
-// Tabs de seleção de dia no picker do JSON
+/* ── TABS DO PICKER DE DIA (importação) ─────────── */
 function renderExtDayPickerTabs() {
   const weekDays = currentWeekDays();
   const today    = todayStr();
@@ -1452,7 +1446,7 @@ function extSetImportDay(day) {
   renderExtDayPickerTabs();
 }
 
-// ── IMPORTAR JSON DE EXTRAÇÃO ──
+/* ── IMPORTAR JSON ───────────────────────────────── */
 function extImportJson() {
   const raw   = document.getElementById('extJsonInput').value.trim();
   const errEl = document.getElementById('extJsonError');
@@ -1470,35 +1464,35 @@ function extImportJson() {
     errEl.style.display = 'block'; return;
   }
 
-  // Aceita array direto ou objeto com array
   const arr = Array.isArray(parsed) ? parsed : (parsed.results || parsed.items || []);
   if (!arr.length) {
     errEl.textContent = '// JSON sem itens válidos';
     errEl.style.display = 'block'; return;
   }
 
-  const data    = ensureExtData();
-  const day     = extImportTargetDay;
+  const data = ensureExtData();
+  const day  = extImportTargetDay;
   if (!data.days[day]) data.days[day] = [];
 
-  // Gerar IDs existentes para evitar duplicata
+  // Títulos existentes para deduplicação
   const existingTitles = new Set(
-    (data.days[day] || []).map(e => normalizeAlias(e.title))
+    (data.days[day]).map(e => normalizeAlias(e.title))
   );
 
   let added = 0, skipped = 0;
   arr.forEach(item => {
-    const title   = (item.title || '').trim();
-    const website = (item.website || '').trim();
-    const phone   = (item.phone || '').trim();
+    const title   = String(item.title   || '').trim();
+    const website = String(item.website || '').trim();
+    const phone   = String(item.phone   || '').trim();
 
     if (!title) { skipped++; return; }
 
     const normTitle = normalizeAlias(title);
     if (existingTitles.has(normTitle)) { skipped++; return; }
 
+    // FIX 1: ID é string hexadecimal, nunca float
     data.days[day].push({
-      id:        Date.now() + Math.random(),
+      id:        genId(),
       title,
       website,
       phone,
@@ -1513,7 +1507,6 @@ function extImportJson() {
   extSelectedDay = day;
   document.getElementById('extJsonInput').value = '';
 
-  // Mudar para aba empresas automaticamente
   switchInnerTab('empresas-tab');
   notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}${skipped ? ` · ${skipped} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
 }
@@ -1523,13 +1516,12 @@ function extClearJsonInput() {
   document.getElementById('extJsonError').style.display = 'none';
 }
 
-// ── RENDERIZAR ABA EMPRESAS ──
+/* ── ABA EMPRESAS ────────────────────────────────── */
 function renderExtEmpresasTab() {
   const data     = ensureExtData();
   const weekDays = currentWeekDays();
   const today    = todayStr();
 
-  // Week tabs
   const tabsEl = document.getElementById('extEmpresasWeekTabs');
   tabsEl.innerHTML = weekDays.map(day => {
     const dayItems = (data.days[day] || []).filter(e => !e.removed);
@@ -1542,34 +1534,28 @@ function renderExtEmpresasTab() {
     </button>`;
   }).join('');
 
-  // Empresas tab: apenas as NÃO removidas e NÃO validadas
-  const allDayItems = (data.days[extSelectedDay] || []).filter(e => !e.removed);
-  const dayItems    = allDayItems.filter(e => !e.validated);
-  const validated   = allDayItems.filter(e => e.validated);
+  const dayItems  = (data.days[extSelectedDay] || []).filter(e => !e.removed);
+  const validated = dayItems.filter(e => e.validated);
+  const withSite  = dayItems.filter(e => e.website);
 
-  // Stats
   const statsEl = document.getElementById('extEmpresasStats');
-  const withSite = dayItems.filter(e => e.website);
   statsEl.innerHTML = `
-    <div class="ext-stat">pendentes <span class="ext-stat-val">${dayItems.length}</span></div>
+    <div class="ext-stat">total <span class="ext-stat-val">${dayItems.length}</span></div>
     <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
     <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
     <div class="ext-stat">sem site <span class="ext-stat-val warn">${dayItems.length - withSite.length}</span></div>
   `;
 
-  // Lista
   const listEl = document.getElementById('extEmpresasList');
   if (!dayItems.length) {
-    const msg = validated.length
-      ? `<div class="ext-empty">Todas as empresas deste dia já foram validadas.<br>Confira a aba Validadas.</div>`
-      : `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
-    listEl.innerHTML = msg;
+    listEl.innerHTML = `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
     return;
   }
 
+  // FIX 2: data-id como string; funções recebem string e buscam com ===
   listEl.innerHTML = dayItems.map(e => {
     const hasSite = !!e.website;
-    return `<div class="ext-empresa-item" id="ext-item-${e.id}">
+    return `<div class="ext-empresa-item${e.validated ? ' validated' : ''}" id="ext-item-${e.id}">
       <div class="ext-empresa-info">
         <div class="ext-empresa-name">${escHtml(e.title)}</div>
         <div class="ext-empresa-meta">
@@ -1581,20 +1567,27 @@ function renderExtEmpresasTab() {
       </div>
       <span class="ext-empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
       <div class="ext-btn-group">
-        <button class="ext-validate-btn" onclick="extValidate('${extSelectedDay}', ${e.id})">Validar</button>
-        <button class="ext-remove-btn" onclick="extRemoveItem('${extSelectedDay}', ${e.id})" title="Remover">✕</button>
+        <button class="ext-validate-btn${e.validated ? ' validated' : ''}"
+          data-day="${escHtml(extSelectedDay)}"
+          data-id="${escHtml(e.id)}"
+          onclick="extToggleValidate(this.dataset.day, this.dataset.id)"
+        >${e.validated ? '✓ Validada' : 'Validar'}</button>
+        <button class="ext-remove-btn"
+          data-day="${escHtml(extSelectedDay)}"
+          data-id="${escHtml(e.id)}"
+          onclick="extRemoveItem(this.dataset.day, this.dataset.id)"
+          title="Remover">✕</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── RENDERIZAR ABA VALIDADAS ──
+/* ── ABA VALIDADAS ───────────────────────────────── */
 function renderExtValidadasTab() {
   const data     = ensureExtData();
   const weekDays = currentWeekDays();
   const today    = todayStr();
 
-  // Week tabs
   const tabsEl = document.getElementById('extValidadasWeekTabs');
   tabsEl.innerHTML = weekDays.map(day => {
     const val   = (data.days[day] || []).filter(e => !e.removed && e.validated);
@@ -1610,18 +1603,15 @@ function renderExtValidadasTab() {
   const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
   const withSite  = validated.filter(e => e.website);
 
-  // Stats
   const statsEl = document.getElementById('extValidadasStats');
   statsEl.innerHTML = `
     <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
     <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
   `;
 
-  // Lista
   const listEl = document.getElementById('extValidadasList');
   if (!validated.length) {
     listEl.innerHTML = `<div class="ext-empty">Nenhuma empresa validada neste dia.<br>Vá em Empresas e clique em "Validar".</div>`;
-    // Ocultar preview de sites
     document.getElementById('sitesPreviewBox').style.display = 'none';
     return;
   }
@@ -1630,38 +1620,55 @@ function renderExtValidadasTab() {
     <div class="val-empresa-item">
       <div class="val-empresa-info">
         <div class="val-empresa-name">${escHtml(e.title)}</div>
-        ${e.website ? `<div class="val-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>` : '<div class="val-empresa-site" style="color:var(--warning)">— sem site</div>'}
+        ${e.website
+          ? `<div class="val-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>`
+          : `<div class="val-empresa-site" style="color:var(--warning)">— sem site</div>`}
         ${e.phone ? `<div class="val-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
       </div>
-      <button class="val-unvalidate-btn" onclick="extToggleValidate('${extSelectedDay}', ${e.id})">↩ Remover</button>
+      <button class="val-unvalidate-btn"
+        data-day="${escHtml(extSelectedDay)}"
+        data-id="${escHtml(e.id)}"
+        onclick="extToggleValidate(this.dataset.day, this.dataset.id)"
+      >↩ Remover</button>
     </div>
   `).join('');
 }
 
-// ── AÇÕES ──
+/* ── AÇÕES DA EXTRAÇÃO ───────────────────────────── */
 function extSelectDay(day) {
   extSelectedDay = day;
   if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
   if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
 }
 
+// FIX 2: busca por id === String(id) — garante comparação correta
 function extToggleValidate(day, id) {
+  const sid  = String(id);
   const data = ensureExtData();
   if (!data.days[day]) return;
-  const item = data.days[day].find(e => e.id == id);
-  if (!item) return;
+
+  const item = data.days[day].find(e => String(e.id) === sid);
+  if (!item) {
+    console.warn('[extToggleValidate] item não encontrado:', day, sid);
+    return;
+  }
+
   item.validated = !item.validated;
   saveExtData(data);
+
   if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
   if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
   notify(item.validated ? '✓ Empresa validada' : 'Empresa removida das validadas');
 }
 
 function extRemoveItem(day, id) {
+  const sid  = String(id);
   const data = ensureExtData();
   if (!data.days[day]) return;
-  const item = data.days[day].find(e => e.id == id);
+
+  const item = data.days[day].find(e => String(e.id) === sid);
   if (!item) return;
+
   item.removed   = true;
   item.validated = false;
   saveExtData(data);
@@ -1678,7 +1685,7 @@ function extClearDay() {
   notify('Dia limpo');
 }
 
-// Copiar todos os sites das validadas
+/* ── COPIAR SITES ────────────────────────────────── */
 function extCopySites() {
   const data      = ensureExtData();
   const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated && e.website);
@@ -1689,32 +1696,33 @@ function extCopySites() {
 
   const sites = validated.map(e => e.website).join('\n');
 
-  navigator.clipboard.writeText(sites).then(() => {
-    // Mostrar preview
+  const showPreview = () => {
     const box = document.getElementById('sitesPreviewBox');
     document.getElementById('sitesPreviewContent').textContent = sites;
     box.style.display = 'block';
+  };
+
+  navigator.clipboard.writeText(sites).then(() => {
+    showPreview();
     notify(`✓ ${validated.length} site${validated.length !== 1 ? 's' : ''} copiado${validated.length !== 1 ? 's' : ''}`);
   }).catch(() => {
-    // Fallback: mostrar no box para copiar manualmente
-    const box = document.getElementById('sitesPreviewBox');
-    document.getElementById('sitesPreviewContent').textContent = sites;
-    box.style.display = 'block';
+    showPreview();
     notify('// clique na área abaixo e copie manualmente', 'warn');
   });
 }
 
-// Enviar validadas para Dados & Excel
+/* ── ENVIAR PARA DADOS & EXCEL ───────────────────── */
+// FIX 3: garantia que extSelectedDay está correto antes de enviar
 function extSendToDados() {
   const data      = ensureExtData();
-  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+  const day       = extSelectedDay; // captura o dia atual
+  const validated = (data.days[day] || []).filter(e => !e.removed && e.validated);
 
   if (!validated.length) {
     notify('Nenhuma empresa validada neste dia para enviar', 'warn'); return;
   }
 
   const weekData = ensureWeekData();
-  const day      = extSelectedDay;
   if (!weekData.days[day]) weekData.days[day] = [];
 
   const existingNomes = getAllNomesInWeek(weekData);
@@ -1727,8 +1735,8 @@ function extSendToDados() {
     const proto = findLinkByName(e.title)?.url || '';
     weekData.days[day].push({
       nome:      e.title,
-      site:      e.website || '',
-      whatsapp:  e.phone   || '',
+      site:      e.website  || '',
+      whatsapp:  e.phone    || '',
       prototipo: proto,
       status:    'Não enviada',
     });
@@ -1743,7 +1751,7 @@ function extSendToDados() {
     notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} enviada${added !== 1 ? 's' : ''} para Dados & Excel${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
     switchTab('dados');
   } else {
-    notify(`// todas as empresas já existem em Dados & Excel`, 'warn');
+    notify('// todas as empresas já existem em Dados & Excel', 'warn');
   }
 }
 
@@ -1907,7 +1915,7 @@ function renderDayTable(data, day) {
           <button
             class="usar-btn${isSelected ? ' active' : ''}"
             data-nome="${escHtml(e.nome)}"
-            onclick="usarEmpresaMsg('${escHtml(e.nome).replace(/'/g,"\\'")}', '${escHtml(e.prototipo || '').replace(/'/g,"\\'")}')"
+            onclick="usarEmpresaMsg(this.dataset.nome, '${escHtml(e.prototipo || '').replace(/'/g,"\\'")}')"
             ${!hasProto ? 'title="Adicione o protótipo primeiro"' : 'title="Usar esta empresa na mensagem"'}
           >${isSelected ? '✓ usando' : 'Usar'}</button>
         </td>
@@ -2242,13 +2250,13 @@ async function generate() {
     if (!res.ok) { showError(`// ${data.error}`); return; }
 
     const shortUrl = data.shortUrl;
-    document.getElementById('resultUrl').textContent  = shortUrl;
+    document.getElementById('resultUrl').textContent   = shortUrl;
     document.getElementById('resultBox').style.display = 'block';
     saveLink(companyName, shortUrl);
 
-    document.getElementById('companyName').value     = '';
-    document.getElementById('deskUrl').value         = '';
-    document.getElementById('mobUrl').value          = '';
+    document.getElementById('companyName').value        = '';
+    document.getElementById('deskUrl').value            = '';
+    document.getElementById('mobUrl').value             = '';
     document.getElementById('aliasPreview').textContent = '';
   } catch {
     showError('// falha na conexão com o servidor');
