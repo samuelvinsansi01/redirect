@@ -446,7 +446,7 @@
     .json-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,240,89,0.08); }
     .json-area::placeholder { color: var(--muted); }
 
-    /* ── FILTER BOX (NEW) ── */
+    /* ── FILTER BOX ── */
     .filter-box {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -503,12 +503,8 @@
       border-color: var(--border);
       color: var(--muted);
     }
-    .filter-keywords-wrap {
-      display: none;
-    }
-    .filter-keywords-wrap.open {
-      display: block;
-    }
+    .filter-keywords-wrap { display: none; }
+    .filter-keywords-wrap.open { display: block; }
     .filter-keywords-list {
       display: flex;
       flex-wrap: wrap;
@@ -543,6 +539,11 @@
     }
     .ext-empresa-item:hover { border-color: #333340; }
     .ext-empresa-item.validated { border-color: rgba(184,240,89,0.35); background: rgba(184,240,89,0.03); }
+    .ext-empresa-item.removed-item {
+      opacity: 0.5;
+      border-style: dashed;
+      border-color: var(--border);
+    }
     .ext-empresa-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .ext-empresa-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ext-empresa-meta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
@@ -574,6 +575,32 @@
       cursor: pointer; transition: all 0.2s; flex-shrink: 0;
     }
     .ext-remove-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
+    /* ── RESTORE BTN (novo) ── */
+    .ext-restore-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+    }
+    .ext-restore-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* ── SEÇÃO DE REMOVIDAS (novo) ── */
+    .ext-removed-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .ext-removed-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .ext-removed-toggle {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 12px;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .ext-removed-toggle:hover { border-color: var(--warning); color: var(--warning); }
+    .ext-removed-content { display: none; margin-top: 10px; }
+    .ext-removed-content.open { display: flex; flex-direction: column; gap: 8px; }
 
     /* Stats bar */
     .ext-stats {
@@ -585,6 +612,7 @@
     .ext-stat-val { color: var(--text); font-weight: 500; }
     .ext-stat-val.accent { color: var(--accent); }
     .ext-stat-val.warn { color: var(--warning); }
+    .ext-stat-val.muted { color: var(--muted); }
 
     /* Caixa de sites */
     .sites-copy-box {
@@ -745,7 +773,7 @@
           <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "...", "categoryName": "Escritório de contabilidade" },&#10;  ...&#10;]'></textarea>
         </div>
 
-        <!-- ── FILTRO CONTÁBIL (NEW) ── -->
+        <!-- ── FILTRO CONTÁBIL ── -->
         <div class="filter-box">
           <div class="filter-box-header">
             <label class="filter-toggle-label">
@@ -789,6 +817,18 @@
         </div>
         <div id="extEmpresasList" style="display:flex;flex-direction:column;gap:8px">
           <div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>
+        </div>
+
+        <!-- SEÇÃO REMOVIDAS -->
+        <div class="ext-removed-section" id="extRemovedSection" style="display:none">
+          <div class="ext-removed-header">
+            <div class="links-section-title" style="margin-bottom:0;flex:1">
+              Removidas
+              <span id="extRemovedCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px"></span>
+            </div>
+            <button class="ext-removed-toggle" id="extRemovedToggleBtn" onclick="toggleExtRemoved()">Mostrar</button>
+          </div>
+          <div class="ext-removed-content" id="extRemovedContent"></div>
         </div>
       </div>
 
@@ -995,29 +1035,12 @@ const EXT_KEY      = 'fr_extracao_v2';
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 
-/* ── FILTRO CONTÁBIL ────────────────────────────────
-   Palavras-chave verificadas em categoryName (case-insensitive).
-   Qualquer item da Apify cujo categoryName contenha ao menos
-   uma dessas palavras passa o filtro.
-─────────────────────────────────────────────────── */
+/* ── FILTRO CONTÁBIL ──────────────────────────────── */
 const ACCOUNTING_KEYWORDS = [
-  'contab',       // cobre: contabilidade, contábil, contabilista, contabilização
-  'contador',
-  'contabilist',
-  'assessoria contábil',
-  'assessoria contab',
-  'escritório de contab',
-  'escritorio de contab',
-  'consultoria contábil',
-  'consultoria contab',
-  'serviço de contab',
-  'servico de contab',
-  'auditoria',
-  'fiscal contab',
-  'departamento contab',
-  'bureau contab',
-  'office of account',
-  'accounting',
+  'contab','contador','contabilist','assessoria contábil','assessoria contab',
+  'escritório de contab','escritorio de contab','consultoria contábil','consultoria contab',
+  'serviço de contab','servico de contab','auditoria','fiscal contab',
+  'departamento contab','bureau contab','office of account','accounting',
 ];
 
 function isContabilidade(categoryName) {
@@ -1047,6 +1070,7 @@ Instagram - instagram.com/samuelvinsansi`;
 let selectedMsgEmpresa = null;
 let selectedLinksDay   = todayStr();
 let archivedOpen       = false;
+let extRemovedOpen     = false;
 
 /* ═══════════════════════════════════════════════════
    DATE HELPERS
@@ -1509,6 +1533,18 @@ let extSelectedDay     = todayStr();
 let extImportTargetDay = todayStr();
 let activeInnerTab     = 'json-tab';
 
+/* ── Helper: todos os títulos da semana (não removidos) ── */
+function getAllExtTitlesInWeek(data) {
+  const titles = new Set();
+  Object.values(data.days).forEach(dayArr => {
+    (dayArr || []).forEach(e => {
+      // Incluir mesmo removidos — eles já foram vistos/processados
+      titles.add(normalizeAlias(e.title));
+    });
+  });
+  return titles;
+}
+
 /* ── FILTRO UI ───────────────────────────────────── */
 function onFilterToggle() {
   const checked = document.getElementById('filterContabilCheck').checked;
@@ -1556,7 +1592,6 @@ function updateFilterPreview() {
   const passing = arr.filter(item => isContabilidade(item.categoryName || item.category || ''));
   const blocked = total - passing.length;
 
-  // Detectar categorias únicas presentes no JSON
   const categoriesFound = [...new Set(
     arr.map(i => String(i.categoryName || i.category || '').trim()).filter(Boolean)
   )].sort();
@@ -1570,7 +1605,18 @@ function updateFilterPreview() {
 
   kwWrap.classList.add('open');
 
-  preview.innerHTML = `<span class="acc">${passing.length}</span> contábil${passing.length !== 1 ? 's' : ''} passam · <span class="warn">${blocked}</span> de outros ramos serão ignoradas`;
+  // ── Prévia de duplicatas da semana ──
+  const extData    = ensureExtData();
+  const weekTitles = getAllExtTitlesInWeek(extData);
+  const dupCount   = passing.filter(item => weekTitles.has(normalizeAlias(String(item.title || '').trim()))).length;
+  const newCount   = passing.length - dupCount;
+
+  let previewHtml = `<span class="acc">${passing.length}</span> contábil${passing.length !== 1 ? 's' : ''} passam · <span class="warn">${blocked}</span> de outros ramos ignoradas`;
+  if (dupCount > 0) {
+    previewHtml += ` · <span style="color:var(--muted)">${dupCount} já na semana</span> · <span class="acc">${newCount} novas</span>`;
+  }
+
+  preview.innerHTML = previewHtml;
 }
 
 /* ── SWITCH INNER TAB ──────────────────────────── */
@@ -1663,20 +1709,22 @@ function extImportJson() {
   const day  = extImportTargetDay;
   if (!data.days[day]) data.days[day] = [];
 
-  const existingTitles = new Set(
-    (data.days[day]).map(e => normalizeAlias(e.title))
-  );
+  /* ── DEDUP: verifica TODA A SEMANA (incluindo removidas) ── */
+  const weekTitles = getAllExtTitlesInWeek(data);
 
-  let added = 0, skipped = 0;
+  let added = 0, skippedWeek = 0, skippedDay = 0;
+
   filteredArr.forEach(item => {
     const title   = String(item.title   || '').trim();
     const website = String(item.website || '').trim();
     const phone   = String(item.phone   || '').trim();
 
-    if (!title) { skipped++; return; }
+    if (!title) { skippedDay++; return; }
 
     const normTitle = normalizeAlias(title);
-    if (existingTitles.has(normTitle)) { skipped++; return; }
+
+    // Já existe em qualquer dia desta semana?
+    if (weekTitles.has(normTitle)) { skippedWeek++; return; }
 
     data.days[day].push({
       id:        genId(),
@@ -1686,7 +1734,7 @@ function extImportJson() {
       validated: false,
       removed:   false,
     });
-    existingTitles.add(normTitle);
+    weekTitles.add(normTitle); // evita dups dentro do mesmo JSON
     added++;
   });
 
@@ -1701,8 +1749,9 @@ function extImportJson() {
   switchInnerTab('empresas-tab');
 
   let msg = `✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`;
-  if (filteredOut > 0) msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
-  if (skipped > 0)     msg += ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}`;
+  if (filteredOut > 0)  msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
+  if (skippedWeek > 0)  msg += ` · ${skippedWeek} já na semana`;
+  if (skippedDay > 0)   msg += ` · ${skippedDay} sem título`;
   notify(msg);
 }
 
@@ -1721,8 +1770,8 @@ function renderExtEmpresasTab() {
 
   const tabsEl = document.getElementById('extEmpresasWeekTabs');
   tabsEl.innerHTML = weekDays.map(day => {
-    const dayItems = (data.days[day] || []).filter(e => !e.removed && !e.validated);
-    const count    = dayItems.length;
+    const active_items = (data.days[day] || []).filter(e => !e.removed && !e.validated);
+    const count = active_items.length;
     const isToday  = day === today;
     const active   = day === extSelectedDay;
     return `<button class="ext-week-tab${active ? ' active' : ''}" onclick="extSelectDay('${day}')">
@@ -1731,54 +1780,105 @@ function renderExtEmpresasTab() {
     </button>`;
   }).join('');
 
-  const dayItems  = (data.days[extSelectedDay] || []).filter(e => !e.removed && !e.validated);
-  const allForDay = (data.days[extSelectedDay] || []).filter(e => !e.removed);
-  const validated = allForDay.filter(e => e.validated);
-  const withSite  = dayItems.filter(e => e.website);
+  const allForDay  = data.days[extSelectedDay] || [];
+  const activeItems = allForDay.filter(e => !e.removed && !e.validated);
+  const validated   = allForDay.filter(e => !e.removed && e.validated);
+  const removedItems = allForDay.filter(e => e.removed);
+  const withSite    = activeItems.filter(e => e.website);
 
   const statsEl = document.getElementById('extEmpresasStats');
   statsEl.innerHTML = `
-    <div class="ext-stat">pendentes <span class="ext-stat-val">${dayItems.length}</span></div>
+    <div class="ext-stat">pendentes <span class="ext-stat-val">${activeItems.length}</span></div>
     <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
     <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
-    <div class="ext-stat">sem site <span class="ext-stat-val warn">${dayItems.length - withSite.length}</span></div>
+    <div class="ext-stat">sem site <span class="ext-stat-val warn">${activeItems.length - withSite.length}</span></div>
+    <div class="ext-stat">removidas <span class="ext-stat-val muted">${removedItems.length}</span></div>
   `;
 
   const listEl = document.getElementById('extEmpresasList');
-  if (!dayItems.length) {
+  if (!activeItems.length) {
     listEl.innerHTML = validated.length
       ? `<div class="ext-empty">Todas as empresas deste dia foram validadas.<br>Veja a aba Validadas.</div>`
-      : `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
-    return;
+      : removedItems.length
+        ? `<div class="ext-empty">Nenhuma empresa ativa neste dia.<br>${removedItems.length} empresa${removedItems.length !== 1 ? 's' : ''} na seção Removidas abaixo.</div>`
+        : `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
+  } else {
+    listEl.innerHTML = activeItems.map(e => {
+      const hasSite = !!e.website;
+      return `<div class="ext-empresa-item" id="ext-item-${e.id}">
+        <div class="ext-empresa-info">
+          <div class="ext-empresa-name">${escHtml(e.title)}</div>
+          <div class="ext-empresa-meta">
+            ${hasSite
+              ? `<div class="ext-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>`
+              : `<div class="ext-empresa-site" style="color:var(--warning)">— sem site</div>`}
+            ${e.phone ? `<div class="ext-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+          </div>
+        </div>
+        <span class="ext-empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
+        <div class="ext-btn-group">
+          <button class="ext-validate-btn"
+            data-day="${escHtml(extSelectedDay)}"
+            data-id="${escHtml(e.id)}"
+            onclick="extToggleValidate(this.dataset.day, this.dataset.id)"
+          >Validar</button>
+          <button class="ext-remove-btn"
+            data-day="${escHtml(extSelectedDay)}"
+            data-id="${escHtml(e.id)}"
+            onclick="extRemoveItem(this.dataset.day, this.dataset.id)"
+            title="Remover">✕</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  listEl.innerHTML = dayItems.map(e => {
-    const hasSite = !!e.website;
-    return `<div class="ext-empresa-item" id="ext-item-${e.id}">
-      <div class="ext-empresa-info">
-        <div class="ext-empresa-name">${escHtml(e.title)}</div>
-        <div class="ext-empresa-meta">
-          ${hasSite
-            ? `<div class="ext-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>`
-            : `<div class="ext-empresa-site" style="color:var(--warning)">— sem site</div>`}
-          ${e.phone ? `<div class="ext-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
-        </div>
-      </div>
-      <span class="ext-empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
-      <div class="ext-btn-group">
-        <button class="ext-validate-btn"
-          data-day="${escHtml(extSelectedDay)}"
-          data-id="${escHtml(e.id)}"
-          onclick="extToggleValidate(this.dataset.day, this.dataset.id)"
-        >Validar</button>
-        <button class="ext-remove-btn"
-          data-day="${escHtml(extSelectedDay)}"
-          data-id="${escHtml(e.id)}"
-          onclick="extRemoveItem(this.dataset.day, this.dataset.id)"
-          title="Remover">✕</button>
-      </div>
-    </div>`;
-  }).join('');
+  /* ── SEÇÃO REMOVIDAS ── */
+  const removedSection = document.getElementById('extRemovedSection');
+  const removedContent = document.getElementById('extRemovedContent');
+  const removedCount   = document.getElementById('extRemovedCount');
+
+  if (!removedItems.length) {
+    removedSection.style.display = 'none';
+    extRemovedOpen = false;
+  } else {
+    removedSection.style.display = 'block';
+    removedCount.textContent = `(${removedItems.length})`;
+    document.getElementById('extRemovedToggleBtn').textContent = extRemovedOpen ? 'Ocultar' : 'Mostrar';
+
+    if (extRemovedOpen) {
+      removedContent.classList.add('open');
+      removedContent.innerHTML = removedItems.map(e => {
+        const hasSite = !!e.website;
+        return `<div class="ext-empresa-item removed-item">
+          <div class="ext-empresa-info">
+            <div class="ext-empresa-name">${escHtml(e.title)}</div>
+            <div class="ext-empresa-meta">
+              ${hasSite
+                ? `<div class="ext-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>`
+                : `<div class="ext-empresa-site" style="color:var(--muted)">— sem site</div>`}
+              ${e.phone ? `<div class="ext-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+            </div>
+          </div>
+          <span class="ext-empresa-badge no-site" style="opacity:0.5">removida</span>
+          <div class="ext-btn-group">
+            <button class="ext-restore-btn"
+              data-day="${escHtml(extSelectedDay)}"
+              data-id="${escHtml(e.id)}"
+              onclick="extRestoreItem(this.dataset.day, this.dataset.id)"
+            >↩ Restaurar</button>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      removedContent.classList.remove('open');
+    }
+  }
+}
+
+/* ── TOGGLE SEÇÃO REMOVIDAS ── */
+function toggleExtRemoved() {
+  extRemovedOpen = !extRemovedOpen;
+  renderExtEmpresasTab();
 }
 
 /* ── ABA VALIDADAS ───────────────────────────────── */
@@ -1847,6 +1947,7 @@ function renderExtValidadasTab() {
 /* ── AÇÕES DA EXTRAÇÃO ───────────────────────────── */
 function extSelectDay(day) {
   extSelectedDay = day;
+  extRemovedOpen = false; // reset ao trocar de dia
   if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
   if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
 }
@@ -1867,6 +1968,7 @@ function extToggleValidate(day, id) {
   notify(item.validated ? '✓ Empresa validada' : 'Empresa removida das validadas');
 }
 
+/* ── REMOVER (soft delete — mantém no array) ── */
 function extRemoveItem(day, id) {
   const sid  = String(id);
   const data = ensureExtData();
@@ -1875,18 +1977,37 @@ function extRemoveItem(day, id) {
   const item = data.days[day].find(e => String(e.id) === sid);
   if (!item) return;
 
-  item.removed   = true;
-  item.validated = false;
+  item.removed = true;
+  // NÃO limpa validated — preservamos o estado
   saveExtData(data);
-  renderExtEmpresasTab();
-  notify('Empresa removida');
+
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+  notify('Empresa removida — aparece em Removidas abaixo');
 }
 
+/* ── RESTAURAR EMPRESA REMOVIDA (novo) ── */
+function extRestoreItem(day, id) {
+  const sid  = String(id);
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+
+  const item = data.days[day].find(e => String(e.id) === sid);
+  if (!item) return;
+
+  item.removed = false;
+  saveExtData(data);
+  renderExtEmpresasTab();
+  notify('✓ Empresa restaurada');
+}
+
+/* ── LIMPAR DIA — remove tudo incluindo removidas ── */
 function extClearDay() {
-  if (!confirm(`Limpar todas as empresas de ${dayLabel(extSelectedDay)}?`)) return;
+  if (!confirm(`Limpar TODAS as empresas de ${dayLabel(extSelectedDay)} (incluindo removidas)?`)) return;
   const data = ensureExtData();
   data.days[extSelectedDay] = [];
   saveExtData(data);
+  extRemovedOpen = false;
   renderExtracaoPanel();
   notify('Dia limpo');
 }
