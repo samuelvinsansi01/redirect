@@ -1542,14 +1542,16 @@ function renderExtEmpresasTab() {
     </button>`;
   }).join('');
 
-  const dayItems = (data.days[extSelectedDay] || []).filter(e => !e.removed);
-  const validated = dayItems.filter(e => e.validated);
+  // Empresas tab: apenas as NÃO removidas e NÃO validadas
+  const allDayItems = (data.days[extSelectedDay] || []).filter(e => !e.removed);
+  const dayItems    = allDayItems.filter(e => !e.validated);
+  const validated   = allDayItems.filter(e => e.validated);
 
   // Stats
   const statsEl = document.getElementById('extEmpresasStats');
   const withSite = dayItems.filter(e => e.website);
   statsEl.innerHTML = `
-    <div class="ext-stat">total <span class="ext-stat-val">${dayItems.length}</span></div>
+    <div class="ext-stat">pendentes <span class="ext-stat-val">${dayItems.length}</span></div>
     <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
     <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
     <div class="ext-stat">sem site <span class="ext-stat-val warn">${dayItems.length - withSite.length}</span></div>
@@ -1558,13 +1560,16 @@ function renderExtEmpresasTab() {
   // Lista
   const listEl = document.getElementById('extEmpresasList');
   if (!dayItems.length) {
-    listEl.innerHTML = `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
+    const msg = validated.length
+      ? `<div class="ext-empty">Todas as empresas deste dia já foram validadas.<br>Confira a aba Validadas.</div>`
+      : `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
+    listEl.innerHTML = msg;
     return;
   }
 
   listEl.innerHTML = dayItems.map(e => {
     const hasSite = !!e.website;
-    return `<div class="ext-empresa-item${e.validated ? ' validated' : ''}" id="ext-item-${e.id}">
+    return `<div class="ext-empresa-item" id="ext-item-${e.id}">
       <div class="ext-empresa-info">
         <div class="ext-empresa-name">${escHtml(e.title)}</div>
         <div class="ext-empresa-meta">
@@ -1576,9 +1581,7 @@ function renderExtEmpresasTab() {
       </div>
       <span class="ext-empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
       <div class="ext-btn-group">
-        <button class="ext-validate-btn${e.validated ? ' validated' : ''}"
-          onclick="extToggleValidate('${extSelectedDay}', ${e.id})"
-        >${e.validated ? '✓ Validada' : 'Validar'}</button>
+        <button class="ext-validate-btn" onclick="extValidate('${extSelectedDay}', ${e.id})">Validar</button>
         <button class="ext-remove-btn" onclick="extRemoveItem('${extSelectedDay}', ${e.id})" title="Remover">✕</button>
       </div>
     </div>`;
