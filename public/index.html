@@ -446,6 +446,94 @@
     .json-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,240,89,0.08); }
     .json-area::placeholder { color: var(--muted); }
 
+    /* ── FILTER BOX (NEW) ── */
+    .filter-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .filter-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .filter-toggle-label input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .filter-label-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    .filter-label-text strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .filter-badge {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .filter-badge.off {
+      background: var(--surface2);
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    .filter-keywords-wrap {
+      display: none;
+    }
+    .filter-keywords-wrap.open {
+      display: block;
+    }
+    .filter-keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .filter-keyword-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+    .filter-preview {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      min-height: 16px;
+    }
+    .filter-preview .acc { color: var(--accent); }
+    .filter-preview .warn { color: var(--warning); }
+
     /* Empresa card */
     .ext-empresa-item {
       display: flex; align-items: center;
@@ -642,7 +730,7 @@
   <div class="panel" id="panel-extracao">
     <div class="card">
       <div class="card-title">Extração de <span>dados.</span></div>
-      <div class="card-sub">// cole o JSON da Apify → valide empresas → copie sites → envie para Excel</div>
+      <div class="card-sub">// cole o JSON da Apify → filtre contabilidade → valide → envie para Excel</div>
 
       <div class="inner-tabs">
         <button class="inner-tab active" id="itab-json" onclick="switchInnerTab('json-tab')">// JSON</button>
@@ -654,11 +742,31 @@
       <div class="inner-panel active" id="json-tab">
         <div class="field-group" style="margin-bottom:16px">
           <label>JSON da Apify</label>
-          <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "..." },&#10;  ...&#10;]'></textarea>
+          <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "...", "categoryName": "Escritório de contabilidade" },&#10;  ...&#10;]'></textarea>
+        </div>
+
+        <!-- ── FILTRO CONTÁBIL (NEW) ── -->
+        <div class="filter-box">
+          <div class="filter-box-header">
+            <label class="filter-toggle-label">
+              <input type="checkbox" id="filterContabilCheck" checked onchange="onFilterToggle()" />
+              <span class="filter-label-text">Filtrar apenas <strong>empresas contábeis</strong> (campo categoryName)</span>
+            </label>
+            <span class="filter-badge" id="filterBadge">✓ ativo</span>
+          </div>
+
+          <div class="filter-keywords-wrap" id="filterKeywordsWrap">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:6px;letter-spacing:0.08em">PALAVRAS-CHAVE DETECTADAS EM categoryName</div>
+            <div class="filter-keywords-list" id="filterKeywordsList"></div>
+          </div>
+
+          <div class="filter-preview" id="filterPreview">
+            Cole o JSON acima para ver uma prévia do filtro.
+          </div>
         </div>
 
         <div style="margin-bottom:16px">
-          <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:6px;font-family:&apos;DM Mono&apos;,monospace;font-size:9px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
+          <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
           <div class="ext-week-tabs" id="extDayPickerTabs"></div>
         </div>
 
@@ -886,6 +994,38 @@ const HISTORY_KEY  = 'fr_empresas_hist';
 const EXT_KEY      = 'fr_extracao_v2';
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
+
+/* ── FILTRO CONTÁBIL ────────────────────────────────
+   Palavras-chave verificadas em categoryName (case-insensitive).
+   Qualquer item da Apify cujo categoryName contenha ao menos
+   uma dessas palavras passa o filtro.
+─────────────────────────────────────────────────── */
+const ACCOUNTING_KEYWORDS = [
+  'contab',       // cobre: contabilidade, contábil, contabilista, contabilização
+  'contador',
+  'contabilist',
+  'assessoria contábil',
+  'assessoria contab',
+  'escritório de contab',
+  'escritorio de contab',
+  'consultoria contábil',
+  'consultoria contab',
+  'serviço de contab',
+  'servico de contab',
+  'auditoria',
+  'fiscal contab',
+  'departamento contab',
+  'bureau contab',
+  'office of account',
+  'accounting',
+];
+
+function isContabilidade(categoryName) {
+  if (!categoryName) return false;
+  const lower = String(categoryName).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return ACCOUNTING_KEYWORDS.some(kw => lower.includes(kw));
+}
 
 const MSG_BASE = `Olá, tudo bem?
 
@@ -1369,6 +1509,70 @@ let extSelectedDay     = todayStr();
 let extImportTargetDay = todayStr();
 let activeInnerTab     = 'json-tab';
 
+/* ── FILTRO UI ───────────────────────────────────── */
+function onFilterToggle() {
+  const checked = document.getElementById('filterContabilCheck').checked;
+  const badge   = document.getElementById('filterBadge');
+  badge.textContent = checked ? '✓ ativo' : 'desativado';
+  badge.className   = 'filter-badge' + (checked ? '' : ' off');
+  updateFilterPreview();
+}
+
+function updateFilterPreview() {
+  const raw     = document.getElementById('extJsonInput').value.trim();
+  const preview = document.getElementById('filterPreview');
+  const kwWrap  = document.getElementById('filterKeywordsWrap');
+  const kwList  = document.getElementById('filterKeywordsList');
+  const checked = document.getElementById('filterContabilCheck').checked;
+
+  if (!raw) {
+    preview.innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.';
+    kwWrap.classList.remove('open');
+    return;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch {
+    preview.innerHTML = '<span class="warn">// JSON inválido</span>';
+    kwWrap.classList.remove('open');
+    return;
+  }
+
+  const arr = Array.isArray(parsed) ? parsed : (parsed.results || parsed.items || []);
+  const total = arr.length;
+
+  if (!total) {
+    preview.innerHTML = '<span class="warn">// nenhum item no JSON</span>';
+    kwWrap.classList.remove('open');
+    return;
+  }
+
+  if (!checked) {
+    preview.innerHTML = `Filtro desativado — <span class="acc">${total}</span> empresa${total !== 1 ? 's' : ''} serão importadas (sem filtro de categoria).`;
+    kwWrap.classList.remove('open');
+    return;
+  }
+
+  const passing = arr.filter(item => isContabilidade(item.categoryName || item.category || ''));
+  const blocked = total - passing.length;
+
+  // Detectar categorias únicas presentes no JSON
+  const categoriesFound = [...new Set(
+    arr.map(i => String(i.categoryName || i.category || '').trim()).filter(Boolean)
+  )].sort();
+  const contabCats = categoriesFound.filter(c => isContabilidade(c));
+  const otherCats  = categoriesFound.filter(c => !isContabilidade(c));
+
+  kwList.innerHTML = [
+    ...contabCats.map(c => `<span class="filter-keyword-chip" style="border-color:var(--accent-border);color:var(--accent)">✓ ${escHtml(c)}</span>`),
+    ...otherCats.map(c => `<span class="filter-keyword-chip">✕ ${escHtml(c)}</span>`),
+  ].join('') || '<span class="filter-keyword-chip" style="color:var(--muted)">nenhum categoryName encontrado</span>';
+
+  kwWrap.classList.add('open');
+
+  preview.innerHTML = `<span class="acc">${passing.length}</span> contábil${passing.length !== 1 ? 's' : ''} passam · <span class="warn">${blocked}</span> de outros ramos serão ignoradas`;
+}
+
 /* ── SWITCH INNER TAB ──────────────────────────── */
 function switchInnerTab(tabId) {
   activeInnerTab = tabId;
@@ -1437,6 +1641,24 @@ function extImportJson() {
     errEl.style.display = 'block'; return;
   }
 
+  /* ── APLICAR FILTRO CONTÁBIL ──────────────────── */
+  const filterEnabled = document.getElementById('filterContabilCheck').checked;
+  let filteredArr = arr;
+  let filteredOut = 0;
+
+  if (filterEnabled) {
+    filteredArr = arr.filter(item => {
+      const cat = item.categoryName || item.category || '';
+      return isContabilidade(cat);
+    });
+    filteredOut = arr.length - filteredArr.length;
+  }
+
+  if (filterEnabled && !filteredArr.length) {
+    errEl.textContent = `// nenhuma empresa contábil encontrada nos ${arr.length} itens do JSON. Verifique o campo categoryName ou desative o filtro.`;
+    errEl.style.display = 'block'; return;
+  }
+
   const data = ensureExtData();
   const day  = extImportTargetDay;
   if (!data.days[day]) data.days[day] = [];
@@ -1446,7 +1668,7 @@ function extImportJson() {
   );
 
   let added = 0, skipped = 0;
-  arr.forEach(item => {
+  filteredArr.forEach(item => {
     const title   = String(item.title   || '').trim();
     const website = String(item.website || '').trim();
     const phone   = String(item.phone   || '').trim();
@@ -1472,17 +1694,26 @@ function extImportJson() {
   extSelectedDay = day;
   document.getElementById('extJsonInput').value = '';
 
+  // Reset filter preview
+  document.getElementById('filterPreview').innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.';
+  document.getElementById('filterKeywordsWrap').classList.remove('open');
+
   switchInnerTab('empresas-tab');
-  notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}${skipped ? ` · ${skipped} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
+
+  let msg = `✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`;
+  if (filteredOut > 0) msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
+  if (skipped > 0)     msg += ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}`;
+  notify(msg);
 }
 
 function extClearJsonInput() {
   document.getElementById('extJsonInput').value = '';
   document.getElementById('extJsonError').style.display = 'none';
+  document.getElementById('filterPreview').innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.';
+  document.getElementById('filterKeywordsWrap').classList.remove('open');
 }
 
 /* ── ABA EMPRESAS ────────────────────────────────── */
-/* FIX: empresas validadas não aparecem nesta lista  */
 function renderExtEmpresasTab() {
   const data     = ensureExtData();
   const weekDays = currentWeekDays();
@@ -1490,7 +1721,6 @@ function renderExtEmpresasTab() {
 
   const tabsEl = document.getElementById('extEmpresasWeekTabs');
   tabsEl.innerHTML = weekDays.map(day => {
-    // Contagem do badge: apenas não-removidas e não-validadas
     const dayItems = (data.days[day] || []).filter(e => !e.removed && !e.validated);
     const count    = dayItems.length;
     const isToday  = day === today;
@@ -1501,7 +1731,6 @@ function renderExtEmpresasTab() {
     </button>`;
   }).join('');
 
-  // Lista: exclui removidas E validadas
   const dayItems  = (data.days[extSelectedDay] || []).filter(e => !e.removed && !e.validated);
   const allForDay = (data.days[extSelectedDay] || []).filter(e => !e.removed);
   const validated = allForDay.filter(e => e.validated);
@@ -1553,7 +1782,6 @@ function renderExtEmpresasTab() {
 }
 
 /* ── ABA VALIDADAS ───────────────────────────────── */
-/* FIX: cards idênticos ao layout da aba Empresas    */
 function renderExtValidadasTab() {
   const data     = ensureExtData();
   const weekDays = currentWeekDays();
@@ -1587,7 +1815,6 @@ function renderExtValidadasTab() {
     return;
   }
 
-  // Cards idênticos ao da aba Empresas, com botão "✓ Validada" que remove da validação
   listEl.innerHTML = validated.map(e => {
     const hasSite = !!e.website;
     return `<div class="ext-empresa-item validated" id="val-item-${e.id}">
@@ -1630,10 +1857,7 @@ function extToggleValidate(day, id) {
   if (!data.days[day]) return;
 
   const item = data.days[day].find(e => String(e.id) === sid);
-  if (!item) {
-    console.warn('[extToggleValidate] item não encontrado:', day, sid);
-    return;
-  }
+  if (!item) return;
 
   item.validated = !item.validated;
   saveExtData(data);
@@ -2266,6 +2490,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('panel-redirect').classList.contains('active'))
     generate();
 });
+
+/* ── Atualiza preview ao digitar no textarea ─────── */
+document.getElementById('extJsonInput').addEventListener('input', updateFilterPreview);
 
 /* ═══════════════════════════════════════════════════
    INIT
