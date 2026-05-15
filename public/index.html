@@ -90,9 +90,9 @@
       margin-bottom: 24px;
     }
     .tab {
-      flex: 1; padding: 10px 20px; border: none; border-radius: 8px;
+      flex: 1; padding: 10px 16px; border: none; border-radius: 8px;
       background: transparent; color: var(--muted);
-      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+      font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600;
       cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
     }
     .tab.active { background: var(--accent); color: #0c0c0f; }
@@ -399,6 +399,175 @@
     .modal-btns { display: flex; gap: 10px; }
     .modal-btn-ok { background: var(--accent); color: #0c0c0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 10px 20px; cursor: pointer; }
     .modal-btn-cancel { background: none; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px; padding: 10px 20px; cursor: pointer; }
+
+    /* ════════════════════════════════════════════════
+       ABA EXTRAÇÃO — ESTILOS ESPECÍFICOS
+    ════════════════════════════════════════════════ */
+
+    /* Sub-tabs internas */
+    .inner-tabs {
+      display: flex; gap: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: 24px;
+    }
+    .inner-tab {
+      flex: 1; padding: 8px 16px; border: none; border-radius: 7px;
+      background: transparent; color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em;
+    }
+    .inner-tab.active { background: var(--surface2); color: var(--accent); border: 1px solid var(--accent-border); }
+    .inner-tab:not(.active):hover { color: var(--text); }
+
+    .inner-panel { display: none; }
+    .inner-panel.active { display: block; }
+
+    /* Semana tabs da extração */
+    .ext-week-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+    .ext-week-tab {
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .ext-week-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .ext-week-tab:hover:not(.active) { color: var(--text); border-color: #333340; }
+    .ext-week-tab .day-count { display: inline-block; background: var(--border); border-radius: 100px; padding: 1px 6px; font-size: 9px; margin-left: 4px; }
+    .ext-week-tab.active .day-count { background: rgba(184,240,89,0.2); }
+
+    /* JSON area */
+    .json-area {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      padding: 14px 16px; width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+      resize: vertical; min-height: 160px;
+    }
+    .json-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,240,89,0.08); }
+    .json-area::placeholder { color: var(--muted); }
+
+    /* Empresa card na extração */
+    .ext-empresa-item {
+      display: flex; align-items: center;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; gap: 14px;
+      transition: border-color 0.15s;
+    }
+    .ext-empresa-item:hover { border-color: #333340; }
+    .ext-empresa-item.validated { border-color: rgba(184,240,89,0.35); background: rgba(184,240,89,0.03); }
+    .ext-empresa-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .ext-empresa-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ext-empresa-meta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .ext-empresa-site {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;
+    }
+    .ext-empresa-site a { color: inherit; text-decoration: none; }
+    .ext-empresa-site a:hover { text-decoration: underline; }
+    .ext-empresa-phone { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .ext-empresa-badge {
+      font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 8px;
+      border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+    }
+    .ext-empresa-badge.ok { background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); }
+    .ext-empresa-badge.no-site { background: rgba(240,164,41,0.1); border: 1px solid rgba(240,164,41,0.3); color: var(--warning); }
+    .ext-btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+    .ext-validate-btn {
+      background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent);
+      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    }
+    .ext-validate-btn:hover { background: var(--accent); color: #0c0c0f; border-color: var(--accent); }
+    .ext-validate-btn.validated { background: var(--accent); color: #0c0c0f; border-color: var(--accent); font-weight: 700; }
+    .ext-remove-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; font-size: 11px;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .ext-remove-btn:hover { border-color: var(--error); color: var(--error); background: rgba(255,92,92,0.08); }
+
+    /* Stats bar */
+    .ext-stats {
+      display: flex; gap: 16px; align-items: center;
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .ext-stat { display: flex; align-items: center; gap: 5px; }
+    .ext-stat-val { color: var(--text); font-weight: 500; }
+    .ext-stat-val.accent { color: var(--accent); }
+    .ext-stat-val.warn { color: var(--warning); }
+
+    /* Validadas — lista */
+    .val-empresa-item {
+      display: flex; align-items: center;
+      background: var(--bg); border: 1px solid rgba(184,240,89,0.2);
+      border-radius: 10px; padding: 12px 16px; gap: 14px;
+    }
+    .val-empresa-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .val-empresa-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .val-empresa-site { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .val-empresa-phone { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; }
+    .val-unvalidate-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 9px;
+      padding: 5px 10px; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    }
+    .val-unvalidate-btn:hover { border-color: var(--warning); color: var(--warning); }
+
+    /* Caixa de sites copiados */
+    .sites-copy-box {
+      background: var(--bg); border: 1px solid var(--accent-border);
+      border-radius: var(--radius); padding: 14px 16px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      line-height: 1.9; color: var(--accent);
+      white-space: pre-wrap; word-break: break-all;
+      max-height: 220px; overflow-y: auto; margin-top: 12px;
+    }
+
+    /* Toolbar da validadas */
+    .val-toolbar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .val-copy-sites-btn {
+      background: var(--accent); color: #0c0c0f; border: none;
+      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 10px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .val-copy-sites-btn:hover { opacity: 0.85; }
+    .val-export-json-btn {
+      background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 12px;
+      padding: 10px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .val-export-json-btn:hover { opacity: 0.85; }
+    .val-send-dados-btn {
+      background: #2a3f1a; color: var(--accent); border: 1px solid rgba(184,240,89,0.3);
+      border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 10px 20px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .val-send-dados-btn:hover { background: var(--accent); color: #0c0c0f; border-color: var(--accent); }
+
+    .ext-empty { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; padding: 36px; }
+
+    /* Clearfix para ações */
+    .ext-header-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .ext-clear-btn {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 5px 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .ext-clear-btn:hover { border-color: var(--error); color: var(--error); }
+
   </style>
 </head>
 <body>
@@ -422,6 +591,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('redirect')">Redirecionamento</button>
     <button class="tab" onclick="switchTab('links')">Links</button>
+    <button class="tab" onclick="switchTab('extracao')">Extração</button>
     <button class="tab" onclick="switchTab('dados')">Dados & Excel</button>
   </div>
 
@@ -472,22 +642,18 @@
       <div class="card-title">Seus <span>links.</span></div>
       <div class="card-sub">// histórico da semana · busca por nome · restaurar arquivados</div>
 
-      <!-- Seletor de dias -->
       <div class="links-day-tabs" id="linksDayTabs"></div>
 
-      <!-- Barra de busca -->
       <div class="links-toolbar">
         <input class="links-search" id="linksSearch" type="text" placeholder="// buscar por nome da empresa..." oninput="renderLinksPanel()" />
         <span class="search-count" id="linksSearchCount"></span>
       </div>
 
-      <!-- Lista de links ativos -->
       <div class="links-section-title">Ativos</div>
       <div class="links-list-full" id="linksListFull">
         <div class="links-empty">Nenhum link neste dia</div>
       </div>
 
-      <!-- Arquivados -->
       <div class="archived-section">
         <div class="archived-header">
           <div class="links-section-title" style="margin-bottom:0;flex:1">Arquivados <span id="archivedCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px"></span></div>
@@ -499,11 +665,102 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ABA 3: EXTRAÇÃO -->
+  <div class="panel" id="panel-extracao">
+    <div class="card">
+      <div class="card-title">Extração de <span>dados.</span></div>
+      <div class="card-sub">// cole o JSON da Apify → filtre → valide → copie os sites</div>
+
+      <!-- Sub-tabs -->
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInnerTab('json-tab')">// JSON</button>
+        <button class="inner-tab" onclick="switchInnerTab('empresas-tab')">Empresas</button>
+        <button class="inner-tab" onclick="switchInnerTab('validadas-tab')">Validadas</button>
+      </div>
+
+      <!-- SUB-PAINEL: JSON -->
+      <div class="inner-panel active" id="json-tab">
+        <div class="field-group" style="margin-bottom:16px">
+          <label>JSON da Apify</label>
+          <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "..." },&#10;  ...&#10;]'></textarea>
+        </div>
+
+        <!-- Seletor de dia -->
+        <div style="margin-bottom:16px">
+          <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:6px;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
+          <div class="ext-week-tabs" id="extDayPickerTabs"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" style="width:auto;flex:1;min-width:180px" onclick="extImportJson()">
+            <div class="btn-inner">↓ Extrair e importar</div>
+          </button>
+          <button class="btn btn-secondary" style="padding:13px 16px" onclick="extClearJsonInput()">Limpar</button>
+        </div>
+        <div class="error-msg" id="extJsonError" style="margin-top:10px"></div>
+      </div>
+
+      <!-- SUB-PAINEL: EMPRESAS -->
+      <div class="inner-panel" id="empresas-tab">
+        <!-- Week tabs -->
+        <div class="ext-week-tabs" id="extEmpresasWeekTabs"></div>
+
+        <!-- Stats -->
+        <div class="ext-stats" id="extEmpresasStats"></div>
+
+        <!-- Toolbar -->
+        <div class="ext-header-row">
+          <div class="links-section-title" style="margin-bottom:0;flex:1">
+            Empresas importadas
+          </div>
+          <button class="ext-clear-btn" onclick="extClearDay()">Limpar dia</button>
+        </div>
+
+        <!-- Lista -->
+        <div id="extEmpresasList" style="display:flex;flex-direction:column;gap:8px">
+          <div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba JSON e importe um arquivo.</div>
+        </div>
+      </div>
+
+      <!-- SUB-PAINEL: VALIDADAS -->
+      <div class="inner-panel" id="validadas-tab">
+        <!-- Week tabs -->
+        <div class="ext-week-tabs" id="extValidadasWeekTabs"></div>
+
+        <!-- Stats -->
+        <div class="ext-stats" id="extValidadasStats"></div>
+
+        <!-- Toolbar de ações -->
+        <div class="val-toolbar">
+          <button class="val-copy-sites-btn" onclick="extCopySites()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copiar todos os sites
+          </button>
+          <button class="val-send-dados-btn" onclick="extSendToDados()">
+            → Enviar para Dados &amp; Excel
+          </button>
+        </div>
+
+        <!-- Box de preview dos sites -->
+        <div id="sitesPreviewBox" style="display:none">
+          <div class="links-section-title">Sites copiados</div>
+          <div class="sites-copy-box" id="sitesPreviewContent"></div>
+        </div>
+
+        <!-- Lista de validadas -->
+        <div class="links-section-title" style="margin-top:16px">Empresas validadas</div>
+        <div id="extValidadasList" style="display:flex;flex-direction:column;gap:8px">
+          <div class="ext-empty">Nenhuma empresa validada neste dia.</div>
+        </div>
+      </div>
 
     </div>
   </div>
 
-  <!-- ABA 3: DADOS -->
+  <!-- ABA 4: DADOS -->
   <div class="panel" id="panel-dados">
     <div class="card">
       <div class="card-title">Dados & <span>Excel.</span></div>
@@ -668,12 +925,16 @@
 <div class="notify" id="notify"></div>
 
 <script>
-const LINKS_KEY    = 'fr_links';
-const EMPRESAS_KEY = 'fr_empresas_v2';
-const HISTORY_KEY  = 'fr_empresas_hist';
+/* ═══════════════════════════════════════════════════
+   CONSTANTES & CHAVES
+═══════════════════════════════════════════════════ */
+const LINKS_KEY     = 'fr_links';
+const EMPRESAS_KEY  = 'fr_empresas_v2';
+const HISTORY_KEY   = 'fr_empresas_hist';
+const EXT_KEY       = 'fr_extracao_v1'; // Nova chave de extração
+
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 
-// ── ÚNICA ALTERAÇÃO: assinatura adicionada ao final da mensagem ──
 const MSG_BASE = `Olá, tudo bem?
 
 Meu nome é Samuel, trabalho com criação e reformulação de sites institucionais, com foco em melhorar credibilidade e facilitar o recebimento de novos contatos.
@@ -695,7 +956,9 @@ let selectedMsgEmpresa = null;
 let selectedLinksDay   = todayStr();
 let archivedOpen       = false;
 
-// ── DATE HELPERS ──
+/* ═══════════════════════════════════════════════════
+   DATE HELPERS
+═══════════════════════════════════════════════════ */
 function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
 function timeStr()  { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
@@ -728,17 +991,22 @@ function dayLabel(dateStr, forSheet) {
 }
 function isSunday() { return new Date().getDay() === 0; }
 
-// ── TABS ──
+/* ═══════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════ */
 function switchTab(name) {
-  const names = ['redirect','links','dados'];
+  const names = ['redirect','links','extracao','dados'];
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'links') renderLinksPanel();
-  if (name === 'dados') renderDados();
+  if (name === 'links')    renderLinksPanel();
+  if (name === 'dados')    renderDados();
+  if (name === 'extracao') renderExtracaoPanel();
 }
 
-// ── NOTIFY ──
+/* ═══════════════════════════════════════════════════
+   NOTIFY
+═══════════════════════════════════════════════════ */
 function notify(msg, type) {
   const el = document.getElementById('notify');
   el.textContent = msg;
@@ -746,7 +1014,9 @@ function notify(msg, type) {
   setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-// ── UTILS ──
+/* ═══════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════ */
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -765,7 +1035,9 @@ function stripPrefix(name) {
   return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim();
 }
 
-// ── MENSAGEM PRONTA ──
+/* ═══════════════════════════════════════════════════
+   MENSAGEM PRONTA
+═══════════════════════════════════════════════════ */
 function usarEmpresaMsg(nome, prototipo) {
   selectedMsgEmpresa = { nome, prototipo };
   const labelEl  = document.getElementById('msgEmpresaLabel');
@@ -810,7 +1082,9 @@ function copyMsg() {
   });
 }
 
-// ── LINKS STORAGE ──
+/* ═══════════════════════════════════════════════════
+   LINKS STORAGE
+═══════════════════════════════════════════════════ */
 function getLinks() {
   try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; }
 }
@@ -848,19 +1122,19 @@ function findLinkByName(name) {
   });
 }
 
-// ── ALIAS EXTRACTOR ──
 function extractAliasFromUrl(shortUrl) {
   try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; }
 }
 
-// ── ABA LINKS — RENDER ──
+/* ═══════════════════════════════════════════════════
+   ABA LINKS — RENDER
+═══════════════════════════════════════════════════ */
 function renderLinksPanel() {
   const allLinks   = getLinks();
   const weekDays   = currentWeekDays();
   const today      = todayStr();
   const query      = (document.getElementById('linksSearch')?.value || '').toLowerCase().trim();
 
-  // Tabs de dias
   const tabsEl = document.getElementById('linksDayTabs');
   tabsEl.innerHTML = weekDays.map(day => {
     const dayLinks = allLinks.filter(l => l.date === day && !l.hidden);
@@ -873,19 +1147,12 @@ function renderLinksPanel() {
     </button>`;
   }).join('');
 
-  // Filtrar pelo dia e busca
   const dayActive   = allLinks.filter(l => l.date === selectedLinksDay && !l.hidden);
   const dayArchived = allLinks.filter(l => l.date === selectedLinksDay && l.hidden);
 
-  const filtered = query
-    ? dayActive.filter(l => l.name.toLowerCase().includes(query))
-    : dayActive;
+  const filtered = query ? dayActive.filter(l => l.name.toLowerCase().includes(query)) : dayActive;
+  const filteredArchived = query ? dayArchived.filter(l => l.name.toLowerCase().includes(query)) : dayArchived;
 
-  const filteredArchived = query
-    ? dayArchived.filter(l => l.name.toLowerCase().includes(query))
-    : dayArchived;
-
-  // Contador de busca
   const countEl = document.getElementById('linksSearchCount');
   if (query) {
     countEl.textContent = `${filtered.length + filteredArchived.length} resultado${filtered.length + filteredArchived.length !== 1 ? 's' : ''}`;
@@ -893,7 +1160,6 @@ function renderLinksPanel() {
     countEl.textContent = dayActive.length ? `${dayActive.length} link${dayActive.length !== 1 ? 's' : ''}` : '';
   }
 
-  // Lista ativa
   const activeEl = document.getElementById('linksListFull');
   if (!filtered.length) {
     activeEl.innerHTML = `<div class="links-empty">${query ? 'Nenhum resultado para "' + escHtml(query) + '"' : 'Nenhum link ativo neste dia'}</div>`;
@@ -911,11 +1177,8 @@ function renderLinksPanel() {
       </div>`).join('');
   }
 
-  // Contador de arquivados
-  document.getElementById('archivedCount').textContent =
-    dayArchived.length ? `(${dayArchived.length})` : '';
+  document.getElementById('archivedCount').textContent = dayArchived.length ? `(${dayArchived.length})` : '';
 
-  // Lista arquivados
   const archEl = document.getElementById('archivedListFull');
   if (!filteredArchived.length) {
     archEl.innerHTML = `<div class="links-empty">${query ? 'Nenhum arquivado encontrado' : 'Nenhum link arquivado neste dia'}</div>`;
@@ -933,10 +1196,7 @@ function renderLinksPanel() {
   }
 }
 
-function selectLinksDay(day) {
-  selectedLinksDay = day;
-  renderLinksPanel();
-}
+function selectLinksDay(day) { selectedLinksDay = day; renderLinksPanel(); }
 
 function toggleArchived() {
   archivedOpen = !archivedOpen;
@@ -951,7 +1211,6 @@ function restoreLink(ts) {
   links[idx].hidden = false;
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
 
-  // Tenta recruzar com empresas do dia
   const link = links[idx];
   const normName = normalizeAlias(stripPrefix(link.name));
   const weekData = getWeekData();
@@ -969,7 +1228,9 @@ function restoreLink(ts) {
   notify('✓ Link restaurado');
 }
 
-// ── EDIT MODAL ──
+/* ═══════════════════════════════════════════════════
+   EDIT MODAL
+═══════════════════════════════════════════════════ */
 let editingTs = null;
 
 function openEditModal(ts) {
@@ -979,7 +1240,6 @@ function openEditModal(ts) {
   document.getElementById('editError').style.display = 'none';
   document.getElementById('editModal').classList.add('open');
 }
-
 function closeEditModal() {
   document.getElementById('editModal').classList.remove('open');
   editingTs = null;
@@ -1040,7 +1300,9 @@ async function saveEditLink() {
   }
 }
 
-// ── ARCHIVE MODAL ──
+/* ═══════════════════════════════════════════════════
+   ARCHIVE MODAL
+═══════════════════════════════════════════════════ */
 let archivingTs = null;
 
 function openArchiveModal(ts) {
@@ -1074,7 +1336,9 @@ async function confirmArchiveLink() {
   notify('✓ Link arquivado');
 }
 
-// ── EMPRESAS STORAGE ──
+/* ═══════════════════════════════════════════════════
+   EMPRESAS STORAGE (Dados & Excel)
+═══════════════════════════════════════════════════ */
 function getWeekData() {
   try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || 'null'); } catch { return null; }
 }
@@ -1120,7 +1384,369 @@ function getAllNomesInWeek(data) {
 
 let selectedDay = todayStr();
 
-// ── IMPORTAR JSON ──
+/* ═══════════════════════════════════════════════════
+   ███████████████████████████████████████████████████
+   ABA EXTRAÇÃO — STORAGE E LÓGICA COMPLETA
+   ███████████████████████████████████████████████████
+═══════════════════════════════════════════════════ */
+
+// Estrutura: { weekStart: string, days: { [date]: [{ id, title, website, phone, validated, removed }] } }
+function getExtData() {
+  try { return JSON.parse(localStorage.getItem(EXT_KEY) || 'null'); } catch { return null; }
+}
+
+function ensureExtData() {
+  let data = getExtData();
+  const ws = currentWeekStartStr();
+  if (!data || data.weekStart !== ws) {
+    data = { weekStart: ws, days: {} };
+    localStorage.setItem(EXT_KEY, JSON.stringify(data));
+  }
+  return data;
+}
+
+function saveExtData(data) { localStorage.setItem(EXT_KEY, JSON.stringify(data)); }
+
+// Dia selecionado nas sub-abas de extração
+let extSelectedDay = todayStr();
+// Sub-aba ativa
+let activeInnerTab = 'json-tab';
+
+// Dia selecionado no picker do JSON (para qual dia importar)
+let extImportTargetDay = todayStr();
+
+function switchInnerTab(tabId) {
+  activeInnerTab = tabId;
+  document.querySelectorAll('.inner-tab').forEach((t, i) => {
+    const ids = ['json-tab','empresas-tab','validadas-tab'];
+    t.classList.toggle('active', ids[i] === tabId);
+  });
+  document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  renderExtracaoPanel();
+}
+
+function renderExtracaoPanel() {
+  renderExtDayPickerTabs();
+  if (activeInnerTab === 'empresas-tab') renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+}
+
+// Tabs de seleção de dia no picker do JSON
+function renderExtDayPickerTabs() {
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  const el       = document.getElementById('extDayPickerTabs');
+  if (!el) return;
+  el.innerHTML = weekDays.map(day => {
+    const isToday = day === today;
+    const active  = day === extImportTargetDay;
+    return `<button class="ext-week-tab${active ? ' active' : ''}" onclick="extSetImportDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
+    </button>`;
+  }).join('');
+}
+
+function extSetImportDay(day) {
+  extImportTargetDay = day;
+  renderExtDayPickerTabs();
+}
+
+// ── IMPORTAR JSON DE EXTRAÇÃO ──
+function extImportJson() {
+  const raw   = document.getElementById('extJsonInput').value.trim();
+  const errEl = document.getElementById('extJsonError');
+  errEl.style.display = 'none';
+
+  if (!raw) {
+    errEl.textContent = '// cole o JSON antes de importar';
+    errEl.style.display = 'block'; return;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); }
+  catch {
+    errEl.textContent = '// JSON inválido — verifique a estrutura';
+    errEl.style.display = 'block'; return;
+  }
+
+  // Aceita array direto ou objeto com array
+  const arr = Array.isArray(parsed) ? parsed : (parsed.results || parsed.items || []);
+  if (!arr.length) {
+    errEl.textContent = '// JSON sem itens válidos';
+    errEl.style.display = 'block'; return;
+  }
+
+  const data    = ensureExtData();
+  const day     = extImportTargetDay;
+  if (!data.days[day]) data.days[day] = [];
+
+  // Gerar IDs existentes para evitar duplicata
+  const existingTitles = new Set(
+    (data.days[day] || []).map(e => normalizeAlias(e.title))
+  );
+
+  let added = 0, skipped = 0;
+  arr.forEach(item => {
+    const title   = (item.title || '').trim();
+    const website = (item.website || '').trim();
+    const phone   = (item.phone || '').trim();
+
+    if (!title) { skipped++; return; }
+
+    const normTitle = normalizeAlias(title);
+    if (existingTitles.has(normTitle)) { skipped++; return; }
+
+    data.days[day].push({
+      id:        Date.now() + Math.random(),
+      title,
+      website,
+      phone,
+      validated: false,
+      removed:   false,
+    });
+    existingTitles.add(normTitle);
+    added++;
+  });
+
+  saveExtData(data);
+  extSelectedDay = day;
+  document.getElementById('extJsonInput').value = '';
+
+  // Mudar para aba empresas automaticamente
+  switchInnerTab('empresas-tab');
+  notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}${skipped ? ` · ${skipped} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
+}
+
+function extClearJsonInput() {
+  document.getElementById('extJsonInput').value = '';
+  document.getElementById('extJsonError').style.display = 'none';
+}
+
+// ── RENDERIZAR ABA EMPRESAS ──
+function renderExtEmpresasTab() {
+  const data     = ensureExtData();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+
+  // Week tabs
+  const tabsEl = document.getElementById('extEmpresasWeekTabs');
+  tabsEl.innerHTML = weekDays.map(day => {
+    const dayItems = (data.days[day] || []).filter(e => !e.removed);
+    const count    = dayItems.length;
+    const isToday  = day === today;
+    const active   = day === extSelectedDay;
+    return `<button class="ext-week-tab${active ? ' active' : ''}" onclick="extSelectDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
+      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  const dayItems = (data.days[extSelectedDay] || []).filter(e => !e.removed);
+  const validated = dayItems.filter(e => e.validated);
+
+  // Stats
+  const statsEl = document.getElementById('extEmpresasStats');
+  const withSite = dayItems.filter(e => e.website);
+  statsEl.innerHTML = `
+    <div class="ext-stat">total <span class="ext-stat-val">${dayItems.length}</span></div>
+    <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
+    <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
+    <div class="ext-stat">sem site <span class="ext-stat-val warn">${dayItems.length - withSite.length}</span></div>
+  `;
+
+  // Lista
+  const listEl = document.getElementById('extEmpresasList');
+  if (!dayItems.length) {
+    listEl.innerHTML = `<div class="ext-empty">Nenhuma empresa importada neste dia.<br>Vá na aba // JSON e importe um arquivo.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = dayItems.map(e => {
+    const hasSite = !!e.website;
+    return `<div class="ext-empresa-item${e.validated ? ' validated' : ''}" id="ext-item-${e.id}">
+      <div class="ext-empresa-info">
+        <div class="ext-empresa-name">${escHtml(e.title)}</div>
+        <div class="ext-empresa-meta">
+          ${hasSite
+            ? `<div class="ext-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>`
+            : `<div class="ext-empresa-site" style="color:var(--warning)">— sem site</div>`}
+          ${e.phone ? `<div class="ext-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+        </div>
+      </div>
+      <span class="ext-empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
+      <div class="ext-btn-group">
+        <button class="ext-validate-btn${e.validated ? ' validated' : ''}"
+          onclick="extToggleValidate('${extSelectedDay}', ${e.id})"
+        >${e.validated ? '✓ Validada' : 'Validar'}</button>
+        <button class="ext-remove-btn" onclick="extRemoveItem('${extSelectedDay}', ${e.id})" title="Remover">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDERIZAR ABA VALIDADAS ──
+function renderExtValidadasTab() {
+  const data     = ensureExtData();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+
+  // Week tabs
+  const tabsEl = document.getElementById('extValidadasWeekTabs');
+  tabsEl.innerHTML = weekDays.map(day => {
+    const val   = (data.days[day] || []).filter(e => !e.removed && e.validated);
+    const count = val.length;
+    const isToday = day === today;
+    const active  = day === extSelectedDay;
+    return `<button class="ext-week-tab${active ? ' active' : ''}" onclick="extSelectDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:9px">●</span>' : ''}
+      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+  const withSite  = validated.filter(e => e.website);
+
+  // Stats
+  const statsEl = document.getElementById('extValidadasStats');
+  statsEl.innerHTML = `
+    <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
+    <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
+  `;
+
+  // Lista
+  const listEl = document.getElementById('extValidadasList');
+  if (!validated.length) {
+    listEl.innerHTML = `<div class="ext-empty">Nenhuma empresa validada neste dia.<br>Vá em Empresas e clique em "Validar".</div>`;
+    // Ocultar preview de sites
+    document.getElementById('sitesPreviewBox').style.display = 'none';
+    return;
+  }
+
+  listEl.innerHTML = validated.map(e => `
+    <div class="val-empresa-item">
+      <div class="val-empresa-info">
+        <div class="val-empresa-name">${escHtml(e.title)}</div>
+        ${e.website ? `<div class="val-empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>` : '<div class="val-empresa-site" style="color:var(--warning)">— sem site</div>'}
+        ${e.phone ? `<div class="val-empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+      </div>
+      <button class="val-unvalidate-btn" onclick="extToggleValidate('${extSelectedDay}', ${e.id})">↩ Remover</button>
+    </div>
+  `).join('');
+}
+
+// ── AÇÕES ──
+function extSelectDay(day) {
+  extSelectedDay = day;
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+}
+
+function extToggleValidate(day, id) {
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const item = data.days[day].find(e => e.id == id);
+  if (!item) return;
+  item.validated = !item.validated;
+  saveExtData(data);
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+  notify(item.validated ? '✓ Empresa validada' : 'Empresa removida das validadas');
+}
+
+function extRemoveItem(day, id) {
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const item = data.days[day].find(e => e.id == id);
+  if (!item) return;
+  item.removed   = true;
+  item.validated = false;
+  saveExtData(data);
+  renderExtEmpresasTab();
+  notify('Empresa removida');
+}
+
+function extClearDay() {
+  if (!confirm(`Limpar todas as empresas de ${dayLabel(extSelectedDay)}?`)) return;
+  const data = ensureExtData();
+  data.days[extSelectedDay] = [];
+  saveExtData(data);
+  renderExtracaoPanel();
+  notify('Dia limpo');
+}
+
+// Copiar todos os sites das validadas
+function extCopySites() {
+  const data      = ensureExtData();
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated && e.website);
+
+  if (!validated.length) {
+    notify('Nenhuma empresa validada com site neste dia', 'warn'); return;
+  }
+
+  const sites = validated.map(e => e.website).join('\n');
+
+  navigator.clipboard.writeText(sites).then(() => {
+    // Mostrar preview
+    const box = document.getElementById('sitesPreviewBox');
+    document.getElementById('sitesPreviewContent').textContent = sites;
+    box.style.display = 'block';
+    notify(`✓ ${validated.length} site${validated.length !== 1 ? 's' : ''} copiado${validated.length !== 1 ? 's' : ''}`);
+  }).catch(() => {
+    // Fallback: mostrar no box para copiar manualmente
+    const box = document.getElementById('sitesPreviewBox');
+    document.getElementById('sitesPreviewContent').textContent = sites;
+    box.style.display = 'block';
+    notify('// clique na área abaixo e copie manualmente', 'warn');
+  });
+}
+
+// Enviar validadas para Dados & Excel
+function extSendToDados() {
+  const data      = ensureExtData();
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+
+  if (!validated.length) {
+    notify('Nenhuma empresa validada neste dia para enviar', 'warn'); return;
+  }
+
+  const weekData = ensureWeekData();
+  const day      = extSelectedDay;
+  if (!weekData.days[day]) weekData.days[day] = [];
+
+  const existingNomes = getAllNomesInWeek(weekData);
+  let added = 0, skipped = 0;
+
+  validated.forEach(e => {
+    const normNome = normalizeAlias(e.title);
+    if (existingNomes.has(normNome)) { skipped++; return; }
+
+    const proto = findLinkByName(e.title)?.url || '';
+    weekData.days[day].push({
+      nome:      e.title,
+      site:      e.website || '',
+      whatsapp:  e.phone   || '',
+      prototipo: proto,
+      status:    'Não enviada',
+    });
+    existingNomes.add(normNome);
+    added++;
+  });
+
+  saveWeekData(weekData);
+  selectedDay = day;
+
+  if (added > 0) {
+    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} enviada${added !== 1 ? 's' : ''} para Dados & Excel${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
+    switchTab('dados');
+  } else {
+    notify(`// todas as empresas já existem em Dados & Excel`, 'warn');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   IMPORTAR JSON (Dados & Excel)
+═══════════════════════════════════════════════════ */
 function importJson() {
   const raw   = document.getElementById('jsonInput').value.trim();
   const errEl = document.getElementById('jsonError');
@@ -1178,10 +1804,11 @@ function showDupModal(dups, added) {
   document.getElementById('dupModalList').innerHTML = dups.map(d => `<li>↪ ${escHtml(d)}</li>`).join('');
   document.getElementById('dupModal').classList.add('open');
 }
-
 function closeDupModal() { document.getElementById('dupModal').classList.remove('open'); }
 
-// ── RENDER DADOS ──
+/* ═══════════════════════════════════════════════════
+   RENDER DADOS
+═══════════════════════════════════════════════════ */
 function renderDados() {
   const data     = ensureWeekData();
   const weekDays = currentWeekDays();
@@ -1374,7 +2001,9 @@ function clearAll() {
   notify('Semana limpa');
 }
 
-// ── HISTORY ──
+/* ═══════════════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════════════ */
 let historyOpen = false;
 
 function renderHistory() {
@@ -1444,7 +2073,9 @@ function archiveHistory() {
   notify('Semana anterior arquivada');
 }
 
-// ── EXCEL ──
+/* ═══════════════════════════════════════════════════
+   EXCEL
+═══════════════════════════════════════════════════ */
 function downloadWb(wb, filename) {
   try {
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1552,7 +2183,9 @@ function exportExcelHistory() {
   notify('✓ Excel da semana anterior gerado');
 }
 
-// ── ABA 1 — GERAR LINK ──
+/* ═══════════════════════════════════════════════════
+   ABA 1 — GERAR LINK
+═══════════════════════════════════════════════════ */
 document.getElementById('companyName').addEventListener('input', function() {
   const val = this.value.trim();
   document.getElementById('aliasPreview').textContent = val
@@ -1642,8 +2275,13 @@ document.addEventListener('keydown', e => {
     generate();
 });
 
-// ── INIT ──
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
 ensureWeekData();
+ensureExtData();
+extImportTargetDay = todayStr();
+extSelectedDay     = todayStr();
 if (isSunday()) document.getElementById('sundayBanner').classList.remove('hidden');
 </script>
 </body>
