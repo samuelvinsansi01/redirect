@@ -1545,6 +1545,26 @@ function getAllExtTitlesInWeek(data) {
   return titles;
 }
 
+/* ── Helper: todos os sites da semana ── */
+function getAllExtSitesInWeek(data) {
+  const sites = new Set();
+  Object.values(data.days).forEach(dayArr => {
+    (dayArr || []).forEach(e => {
+      if (e.website) sites.add(normalizeWebsite(e.website));
+    });
+  });
+  return sites;
+}
+
+/* ── Helper: normaliza URL para comparação ── */
+function normalizeWebsite(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0].toLowerCase();
+  }
+}
+
 /* ── FILTRO UI ───────────────────────────────────── */
 function onFilterToggle() {
   const checked = document.getElementById('filterContabilCheck').checked;
@@ -1608,13 +1628,25 @@ function updateFilterPreview() {
   // ── Prévia de duplicatas da semana ──
   const extData    = ensureExtData();
   const weekTitles = getAllExtTitlesInWeek(extData);
+  const weekSites  = getAllExtSitesInWeek(extData);
   const dupCount   = passing.filter(item => weekTitles.has(normalizeAlias(String(item.title || '').trim()))).length;
-  const newCount   = passing.length - dupCount;
+  const noSiteCount = passing.filter(item => !String(item.website || '').trim()).length;
+  const withSitePassing = passing.filter(item => String(item.website || '').trim());
+  const dupSiteCount = withSitePassing.filter(item =>
+    !weekTitles.has(normalizeAlias(String(item.title || '').trim())) &&
+    weekSites.has(normalizeWebsite(String(item.website || '').trim()))
+  ).length;
+  const newCount   = passing.length - dupCount - noSiteCount - dupSiteCount;
 
   let previewHtml = `<span class="acc">${passing.length}</span> contábil${passing.length !== 1 ? 's' : ''} passam · <span class="warn">${blocked}</span> de outros ramos ignoradas`;
-  if (dupCount > 0) {
-    previewHtml += ` · <span style="color:var(--muted)">${dupCount} já na semana</span> · <span class="acc">${newCount} novas</span>`;
+  if (noSiteCount > 0) {
+    previewHtml += ` · <span style="color:var(--warning)">${noSiteCount} sem site</span>`;
   }
+  if (dupCount > 0 || dupSiteCount > 0) {
+    const totalDup = dupCount + dupSiteCount;
+    previewHtml += ` · <span style="color:var(--muted)">${totalDup} duplicada${totalDup !== 1 ? 's' : ''}</span>`;
+  }
+  previewHtml += ` · <span class="acc">${Math.max(0, newCount)} novas</span>`;
 
   preview.innerHTML = previewHtml;
 }
@@ -1710,9 +1742,10 @@ function extImportJson() {
   if (!data.days[day]) data.days[day] = [];
 
   /* ── DEDUP: verifica TODA A SEMANA (incluindo removidas) ── */
-  const weekTitles = getAllExtTitlesInWeek(data);
+  const weekTitles  = getAllExtTitlesInWeek(data);
+  const weekSites   = getAllExtSitesInWeek(data);
 
-  let added = 0, skippedWeek = 0, skippedDay = 0;
+  let added = 0, skippedWeek = 0, skippedDay = 0, skippedNoSite = 0, skippedSite = 0;
 
   filteredArr.forEach(item => {
     const title   = String(item.title   || '').trim();
@@ -1721,10 +1754,17 @@ function extImportJson() {
 
     if (!title) { skippedDay++; return; }
 
-    const normTitle = normalizeAlias(title);
+    // Sem site — ignorar
+    if (!website) { skippedNoSite++; return; }
 
-    // Já existe em qualquer dia desta semana?
+    const normTitle = normalizeAlias(title);
+    const normSite  = normalizeWebsite(website);
+
+    // Já existe título em qualquer dia desta semana?
     if (weekTitles.has(normTitle)) { skippedWeek++; return; }
+
+    // Já existe site em qualquer dia desta semana?
+    if (weekSites.has(normSite)) { skippedSite++; return; }
 
     data.days[day].push({
       id:        genId(),
@@ -1735,6 +1775,7 @@ function extImportJson() {
       removed:   false,
     });
     weekTitles.add(normTitle); // evita dups dentro do mesmo JSON
+    weekSites.add(normSite);   // evita dups de site dentro do mesmo JSON
     added++;
   });
 
@@ -1749,9 +1790,11 @@ function extImportJson() {
   switchInnerTab('empresas-tab');
 
   let msg = `✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`;
-  if (filteredOut > 0)  msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
-  if (skippedWeek > 0)  msg += ` · ${skippedWeek} já na semana`;
-  if (skippedDay > 0)   msg += ` · ${skippedDay} sem título`;
+  if (filteredOut > 0)   msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
+  if (skippedWeek > 0)   msg += ` · ${skippedWeek} já na semana`;
+  if (skippedSite > 0)   msg += ` · ${skippedSite} site duplicado`;
+  if (skippedNoSite > 0) msg += ` · ${skippedNoSite} sem site`;
+  if (skippedDay > 0)    msg += ` · ${skippedDay} sem título`;
   notify(msg);
 }
 
