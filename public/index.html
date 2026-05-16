@@ -636,7 +636,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         <input type="number" id="puxarNumeroInicial" value="1" min="1" style="width:120px"/>
       </div>
       <div class="btn-row">
-        <button class="btn btn-primary" style="width:auto;flex:1" onclick="puxarDadosGemini()">
+        <button class="btn btn-primary" style="width:auto;flex:1" onclick="()">
           <div class="spinner" id="geminiSpinner"></div>
           <span id="geminiBtn">✦ Gerar JSON com Gemini</span>
         </button>
@@ -1815,141 +1815,77 @@ function puxarClear() {
 }
 
 async function puxarDadosGemini() {
-  const apiKey       = document.getElementById('geminiApiKey').value.trim();
-  const sitesRaw     = document.getElementById('puxarSitesInput').value.trim();
-  const templatePage = document.getElementById('puxarTemplatePage').value.trim() || '↪    Template';
-  const numInicial   = parseInt(document.getElementById('puxarNumeroInicial').value) || 1;
+  const apiKey = document.getElementById('geminiApiKey').value.trim();
+  const sitesRaw = document.getElementById('puxarSitesInput').value.trim();
+  const templatePage = document.getElementById('puxarTemplatePage').value.trim() || "↪    Template";
+  const numInicial = parseInt(document.getElementById('puxarNumeroInicial').value) || 1;
 
-  if (!apiKey)    { notify('// informe a Gemini API Key', 'err'); return; }
-  if (!sitesRaw)  { notify('// informe os sites para processar', 'err'); return; }
+  if (!apiKey) { notify('// informe a Gemini API Key', 'err'); return; }
+  const sites = sitesRaw.split('\n').map(s => s.trim()).filter(s => s.startsWith('http'));
+  if (!sites.length) { notify('// URLs inválidas', 'err'); return; }
 
-  const sites = sitesRaw.split('\n').map(s => s.trim()).filter(s => s && s.startsWith('http'));
-  if (!sites.length) { notify('// nenhuma URL válida encontrada (precisam começar com http)', 'err'); return; }
-
-  const spinnerEl   = document.getElementById('geminiSpinner');
-  const btnEl       = document.getElementById('geminiBtn');
-  const statusEl    = document.getElementById('geminiStatus');
-  const statsEl     = document.getElementById('geminiJsonStats');
-  const progressWrap= document.getElementById('progressWrap');
+  const statusEl = document.getElementById('geminiStatus');
+  const outputEl = document.getElementById('puxarJsonOutput');
   const progressBar = document.getElementById('progressBar');
-  const outputEl    = document.getElementById('puxarJsonOutput');
-
-  spinnerEl.style.display = 'block';
-  btnEl.textContent       = 'Processando...';
-  progressWrap.style.display = 'block';
-  progressBar.style.width    = '0%';
-  outputEl.value = ''; statsEl.textContent = '';
+  document.getElementById('geminiSpinner').style.display = 'block';
 
   const projetos = [];
 
   for (let i = 0; i < sites.length; i++) {
     const site = sites[i];
-    const num  = numInicial + i;
-    statusEl.innerHTML = `<span class="acc">Processando ${i + 1}/${sites.length}</span> — ${escHtml(site)}`;
-    progressBar.style.width = `${Math.round((i / sites.length) * 100)}%`;
+    const num = numInicial + i;
+    statusEl.innerHTML = `<span class="acc">Analisando ${i+1}/${sites.length}:</span> ${site}`;
+    
+    // PROMPT RIGIDAMENTE ESTRUTURADO PARA O SEU PLUGIN
+    const prompt = `Analise o site ${site} e extraia os dados para este JSON. 
+    REGRAS:
+    1. whatsapp: Apenas números com DDI 55 (ex: 5511999999999).
+    2. pagina: Use o formato "↪    ${String(num).padStart(4,'0')}. NOME_DA_EMPRESA".
+    3. Retorne APENAS o JSON, sem textos extras ou marcações de markdown.
+
+    Estrutura:
+    {
+      "pagina": "",
+      "identidade": {"cor_primaria": "#hex", "logo_url": "url", "site_url": "${site}"},
+      "header": {"email": "", "telefone": "", "whatsapp": ""},
+      "hero": {"subtexto": ""},
+      "sobre": {"texto": ""},
+      "cards": [{"titulo": "", "texto": ""}],
+      "servicos": [{"titulo": "", "texto": ""}]
+    }`;
 
     try {
-      const prompt = `Você é um extrator de dados de sites. Analise o site ${site} e extraia informações reais para preencher a estrutura JSON abaixo.
-
-REGRAS IMPORTANTES:
-- Extraia apenas informações que existem no site. Não invente dados.
-- Se não encontrar uma informação, use string vazia "".
-- cor_primaria: detecte a cor principal do site em hexadecimal (ex: "#1e3a8a"). Se não conseguir, use "#1f2937".
-- logo_url: URL completa da logo do site. Tente encontrar a URL real da logo.
-- hero.subtexto: frase de impacto ou slogan da empresa, até 120 caracteres.
-- sobre.texto: descrição da empresa, 2-3 frases naturais, até 300 caracteres.
-- cards: exatamente 4 itens com titulo (1-2 palavras) e texto (1 frase curta, até 80 chars) representando valores/diferenciais.
-- servicos: exatamente 5 itens com titulo e texto (1 frase, até 80 chars) dos principais serviços.
-- whatsapp: somente números com DDI 55 e DDD, ex: "5511999999999".
-
-Retorne SOMENTE o JSON válido, sem markdown, sem explicações:
-
-{
-  "pagina": "↪    ${String(num).padStart(4,'0')}. NOME_DA_EMPRESA",
-  "identidade": {
-    "cor_primaria": "#XXXXXX",
-    "logo_url": "",
-    "site_url": "${site}"
-  },
-  "header": {
-    "email": "",
-    "telefone": "",
-    "whatsapp": ""
-  },
-  "hero": {
-    "subtexto": ""
-  },
-  "sobre": {
-    "texto": ""
-  },
-  "cards": [
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""}
-  ],
-  "servicos": [
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""}
-  ]
-}`;
-
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2048 },
-          tools: [{ googleSearch: {} }]
+          generationConfig: { 
+            temperature: 0.1, 
+            response_mime_type: "application/json" // Força o Gemini a responder em JSON puro
+          }
         })
       });
 
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        statusEl.innerHTML = `<span class="err">// erro Gemini ${response.status}: ${escHtml(err?.error?.message || 'desconhecido')}</span>`;
-        projetos.push(emptyProjeto(num, site));
-        continue;
-      }
-
-      const respData = await response.json();
-      let text = respData?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
-      // Strip markdown fences
-      text = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      // Extract first JSON object
-      const firstBrace = text.indexOf('{');
-      const lastBrace  = text.lastIndexOf('}');
-      if (firstBrace >= 0 && lastBrace >= 0) text = text.slice(firstBrace, lastBrace + 1);
-
-      let projeto;
-      try { projeto = JSON.parse(text); }
-      catch {
-        statusEl.innerHTML = `<span class="warn">// não foi possível parsear JSON de ${escHtml(site)}, usando template vazio</span>`;
-        projeto = emptyProjeto(num, site, 'SEM DADOS');
-      }
-      projetos.push(projeto);
-
+      const resData = await response.json();
+      const content = JSON.parse(resData.candidates[0].content.parts[0].text);
+      projetos.push(content);
+      
+      progressBar.style.width = `${((i + 1) / sites.length) * 100}%`;
     } catch (err) {
-      statusEl.innerHTML = `<span class="err">// falha em ${escHtml(site)}: ${escHtml(err.message)}</span>`;
-      projetos.push(emptyProjeto(num, site, 'ERRO'));
+      console.error("Erro no site " + site, err);
+      // Fallback para não travar a lista
+      projetos.push({ "pagina": `ERRO: ${site}`, "identidade": {"site_url": site} });
     }
-
-    if (i < sites.length - 1) await new Promise(r => setTimeout(r, 1200));
+    // Delay de 1 segundo para evitar bloqueio por excesso de requisições
+    await new Promise(r => setTimeout(r, 1000));
   }
 
-  progressBar.style.width = '100%';
-  const finalJson = { template_page: templatePage, projetos };
-  const jsonStr   = JSON.stringify(finalJson, null, 2);
-  outputEl.value  = jsonStr;
-  statusEl.innerHTML  = `<span class="acc">✓ Concluído — ${projetos.length} empresa${projetos.length !== 1 ? 's' : ''} processada${projetos.length !== 1 ? 's' : ''}</span>`;
-  statsEl.innerHTML   = `<span class="acc">${projetos.length} projetos</span> · ${Math.round(jsonStr.length / 1024)}kb`;
-
-  spinnerEl.style.display = 'none';
-  btnEl.textContent       = '✦ Gerar JSON com Gemini';
-  notify(`✓ JSON gerado com ${projetos.length} empresa${projetos.length !== 1 ? 's' : ''}`);
-  setTimeout(() => progressWrap.style.display = 'none', 2000);
+  const finalJson = { "template_page": templatePage, "projetos": projetos };
+  outputEl.value = JSON.stringify(finalJson, null, 2);
+  document.getElementById('geminiSpinner').style.display = 'none';
+  statusEl.innerHTML = `<span class="acc">✓ Concluído!</span>`;
+  notify('✓ JSON Gerado para o Figma');
 }
 
 function emptyProjeto(num, site, prefix) {
