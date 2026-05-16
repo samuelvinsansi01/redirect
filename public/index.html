@@ -370,6 +370,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 </head>
 <body>
 
+<!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-dot"></div>
@@ -408,8 +409,10 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </aside>
 
+<!-- ═══════════ MAIN ═══════════ -->
 <main class="main">
 
+<!-- ── INÍCIO ── -->
 <div class="panel active" id="panel-inicio">
   <div class="page-header">
     <div class="page-title">Empresas da <span>semana.</span></div>
@@ -466,6 +469,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         </div>
       </div>
     </div>
+    <!-- MENSAGEM -->
     <div>
       <div class="card">
         <div class="card-title">Mensagem pronta</div>
@@ -481,6 +485,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           </div>
         </div>
       </div>
+      <!-- Sem protótipo -->
       <div class="card sem-proto-section" id="semProtoCard">
         <div class="card-title">Aguardando protótipo <span id="semProtoCount" style="color:var(--warning);font-family:'DM Mono',monospace;font-size:9px;text-transform:none;letter-spacing:0;font-weight:400;margin-left:4px"></span></div>
         <div id="semProtoList">
@@ -491,6 +496,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
+<!-- ── EXTRAÇÃO ── -->
 <div class="panel" id="panel-extracao">
   <div class="page-header">
     <div class="page-title">Extração de <span>dados.</span></div>
@@ -503,54 +509,92 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <button class="inner-tab" id="itab-validadas" onclick="switchInnerTab('validadas-tab')">Validadas</button>
     </div>
 
+    <!-- JSON TAB -->
     <div class="inner-panel active" id="json-tab">
       <div class="field-group" style="margin-bottom:14px">
         <label>JSON da Apify</label>
-        <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...'></textarea>
+        <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "...", "categoryName": "Escritório de contabilidade" },&#10;  ...&#10;]'></textarea>
       </div>
       <div class="filter-box">
         <div style="display:flex;align-items:center">
           <label class="filter-toggle-label">
             <input type="checkbox" id="filterContabilCheck" checked onchange="onFilterToggle()"/>
-            <span class="filter-label-text">Filtrar apenas <strong>empresas contábeis</strong></span>
+            <span class="filter-label-text">Filtrar apenas <strong>empresas contábeis</strong> (categoryName)</span>
           </label>
           <span class="filter-badge" id="filterBadge">✓ ativo</span>
+        </div>
+        <div class="filter-keywords-wrap" id="filterKeywordsWrap">
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:5px;letter-spacing:0.08em">CATEGORIAS DETECTADAS</div>
+          <div class="filter-keywords-list" id="filterKeywordsList"></div>
         </div>
         <div class="filter-preview" id="filterPreview">Cole o JSON acima para ver uma prévia do filtro.</div>
       </div>
       <div style="margin-bottom:14px">
-        <label>Importar para o dia</label>
+        <label style="margin-bottom:8px;display:flex">Importar para o dia <span style="margin-left:5px;font-family:'DM Mono',monospace;font-size:8px;color:var(--accent);text-transform:none;letter-spacing:0">(semana atual)</span></label>
         <div class="week-tabs" id="extDayPickerTabs"></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="extImportJson()">↓ Extrair e importar</button>
+        <button class="btn btn-primary" style="width:auto;flex:1;min-width:180px" onclick="extImportJson()">↓ Extrair e importar</button>
+        <button class="btn btn-ghost" onclick="extClearJsonInput()">Limpar</button>
+      </div>
+      <div class="error-msg" id="extJsonError"></div>
+    </div>
+
+    <!-- EMPRESAS TAB -->
+    <div class="inner-panel" id="empresas-tab">
+      <div class="week-tabs" id="extEmpresasWeekTabs"></div>
+      <div class="ext-stats" id="extEmpresasStats"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-label" style="margin-bottom:0;flex:1">Empresas importadas</div>
+        <button class="btn btn-danger" style="font-size:9px;padding:5px 10px" onclick="extClearDay()">Limpar dia</button>
+      </div>
+      <div id="extEmpresasList" style="display:flex;flex-direction:column;gap:7px">
+        <div class="links-empty">Nenhuma empresa importada neste dia.</div>
+      </div>
+      <div class="removed-section" id="extRemovedSection" style="display:none">
+        <div class="removed-header">
+          <div class="section-label" style="margin-bottom:0;flex:1">Removidas <span id="extRemovedCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px"></span></div>
+          <button class="btn btn-ghost" style="font-size:9px;padding:4px 10px" id="extRemovedToggleBtn" onclick="toggleExtRemoved()">Mostrar</button>
+        </div>
+        <div class="removed-content" id="extRemovedContent"></div>
       </div>
     </div>
 
-    <div class="inner-panel" id="empresas-tab">
-      <div class="week-tabs" id="extEmpresasWeekTabs"></div>
-      <div id="extEmpresasList" style="display:flex;flex-direction:column;gap:7px"></div>
-    </div>
-
+    <!-- VALIDADAS TAB -->
     <div class="inner-panel" id="validadas-tab">
       <div class="week-tabs" id="extValidadasWeekTabs"></div>
+      <div class="ext-stats" id="extValidadasStats"></div>
       <div class="view-toggle">
         <button class="view-btn active" id="viewBtnLista" onclick="switchValidadasView('lista')">Lista</button>
         <button class="view-btn" id="viewBtnBlocos" onclick="switchValidadasView('blocos')">Blocos de 10</button>
       </div>
+      <!-- LISTA VIEW -->
       <div id="validadasListView">
         <div class="btn-row" style="margin-bottom:14px">
-          <button class="btn btn-primary" onclick="extSendToDados()">→ Enviar para Início</button>
+          <button class="btn btn-primary" style="width:auto" onclick="extCopySites()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copiar todos os sites
+          </button>
+          <button class="btn btn-ghost" onclick="extSendToDados()">→ Enviar para Início</button>
         </div>
-        <div id="extValidadasList"></div>
+        <div id="extValidadasList" style="display:flex;flex-direction:column;gap:7px">
+          <div class="links-empty">Nenhuma empresa validada neste dia.</div>
+        </div>
       </div>
+      <!-- BLOCOS VIEW -->
       <div id="validadasBlocosView" style="display:none">
-        <div class="blocos-container" id="blocosContainer"></div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">
+          Validadas distribuídas em blocos de 10. Cada bloco pode ser copiado para o Gemini.
+        </div>
+        <div class="blocos-container" id="blocosContainer">
+          <div class="links-empty">Nenhuma empresa validada neste dia.</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ── PUXAR DADOS ── -->
 <div class="panel" id="panel-puxar">
   <div class="page-header">
     <div class="page-title">Puxar <span>Dados.</span></div>
@@ -560,25 +604,44 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="card-title">Configuração Gemini</div>
     <div class="gemini-api-input">
       <span class="api-key-label">API Key</span>
-      <input type="password" id="geminiApiKey" placeholder="API Key..." oninput="saveApiKey()"/>
+      <input type="password" id="geminiApiKey" placeholder="Cole sua Gemini API Key aqui..." oninput="saveApiKey()"/>
+      <button class="btn btn-ghost" style="white-space:nowrap;font-size:10px" onclick="toggleApiKey()">Mostrar</button>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">// a chave é salva localmente no navegador e nunca é enviada para fora</div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Selecionar bloco das Validadas</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px">Escolha o dia e bloco para pré-carregar os sites:</div>
+    <div class="week-tabs" id="puxarWeekTabs"></div>
+    <div class="bloco-select-tabs" id="puxarBlocoTabs"></div>
+    <div id="sitesPreviewBox" style="display:none">
+      <div class="section-label">Sites do bloco selecionado</div>
+      <div class="sites-preview" id="sitesPreviewContent"></div>
+      <button class="btn btn-ghost" style="font-size:10px" onclick="carregarSitesNoInput()">↓ Carregar no campo abaixo</button>
     </div>
   </div>
   <div class="puxar-grid">
     <div class="card">
       <div class="card-title">Sites para processar</div>
-      <textarea class="json-area" id="puxarSitesInput" placeholder="Um site por linha..."></textarea>
-      <div class="field-group" style="margin-top:14px">
-        <label>Template page</label>
+      <div class="field-group" style="margin-bottom:12px">
+        <label>Um site por linha</label>
+        <textarea class="json-area" id="puxarSitesInput" placeholder="https://empresa1.com.br&#10;https://empresa2.com.br&#10;https://empresa3.com.br&#10;..." style="min-height:240px"></textarea>
+      </div>
+      <div class="field-group" style="margin-bottom:12px">
+        <label>Template page <span class="tag">padrão</span></label>
         <input type="text" id="puxarTemplatePage" value="↪    Template"/>
       </div>
-      <div class="field-group" style="margin-top:14px">
-        <label>Número inicial</label>
-        <input type="number" id="puxarNumeroInicial" value="1" style="width:100px"/>
+      <div class="field-group" style="margin-bottom:14px">
+        <label>Número inicial do projeto</label>
+        <input type="number" id="puxarNumeroInicial" value="1" min="1" style="width:120px"/>
       </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="puxarDadosGemini()">
-        <div class="spinner" id="geminiSpinner"></div>
-        <span id="geminiBtn">✦ Gerar JSON com Gemini</span>
-      </button>
+      <div class="btn-row">
+        <button class="btn btn-primary" style="width:auto;flex:1" onclick="()">
+          <div class="spinner" id="geminiSpinner"></div>
+          <span id="geminiBtn">✦ Gerar JSON com Gemini</span>
+        </button>
+        <button class="btn btn-ghost" onclick="puxarClear()">Limpar</button>
+      </div>
       <div class="progress-bar-wrap" id="progressWrap" style="display:none">
         <div class="progress-bar" id="progressBar"></div>
       </div>
@@ -586,72 +649,1171 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     </div>
     <div class="card">
       <div class="card-title">JSON gerado</div>
-      <textarea class="json-out" id="puxarJsonOutput" readonly></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="gemini-status" id="geminiJsonStats" style="margin-top:0"></span>
+        <div class="btn-row">
+          <button class="btn btn-ghost" style="font-size:10px" onclick="copyJsonOutput()">Copiar JSON</button>
+          <button class="btn btn-ghost" style="font-size:10px" onclick="downloadJsonOutput()">↓ Baixar</button>
+        </div>
+      </div>
+      <textarea class="json-out" id="puxarJsonOutput" readonly placeholder="// o JSON gerado pelo Gemini aparecerá aqui..." style="min-height:360px"></textarea>
     </div>
   </div>
 </div>
 
+<!-- ── LINKS & REDIRECT ── -->
 <div class="panel" id="panel-links">
   <div class="page-header">
     <div class="page-title">Links & <span>Redirect.</span></div>
+    <div class="page-sub">// gere TinyURL · geração em fila · histórico semanal</div>
   </div>
   <div class="links-redirect-grid">
-    <div class="card">
-      <div class="card-title">Gerar link inteligente</div>
-      <div class="fields">
-        <input type="text" id="companyName" placeholder="Nome da Empresa"/>
-        <input type="url" id="deskUrl" placeholder="Link Desktop Figma"/>
-        <input type="url" id="mobUrl" placeholder="Link Mobile Figma"/>
+    <div>
+      <div class="card">
+        <div class="card-title">Gerar link inteligente</div>
+        <div class="fields">
+          <div class="field-group">
+            <label>Nome da Empresa <span class="tag">ALIAS</span></label>
+            <input type="text" id="companyName" placeholder="Ex: Contabilidade America"/>
+            <span class="field-hint" id="aliasPreview"></span>
+          </div>
+          <div class="divider">—</div>
+          <div class="field-group">
+            <label>Link Desktop <span class="tag">FIGMA</span></label>
+            <input type="url" id="deskUrl" placeholder="https://www.figma.com/proto/..."/>
+          </div>
+          <div class="divider">↕</div>
+          <div class="field-group">
+            <label>Link Mobile <span class="tag">FIGMA</span></label>
+            <input type="url" id="mobUrl" placeholder="https://www.figma.com/proto/..."/>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="generateBtn" onclick="generate()" style="margin-top:12px">
+          <div class="spinner" id="spinner"></div>
+          <span id="btnText">Gerar link TinyURL</span>
+        </button>
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="result-box" id="resultBox">
+          <div class="result-label">// LINK GERADO</div>
+          <div class="result-url" id="resultUrl"></div>
+          <button class="copy-btn" onclick="copyUrl()">Copiar link</button>
+        </div>
       </div>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="generate()">Gerar link TinyURL</button>
-      <div class="result-box" id="resultBox">
-        <div class="result-url" id="resultUrl"></div>
+      <!-- FILA -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Geração em fila</div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label>Cole vários projetos <span class="tag">Nome / Desktop / Mobile por bloco</span></label>
+          <textarea id="filaInput" placeholder="Nome da Empresa&#10;https://figma.com/proto/xxx&#10;https://figma.com/proto/yyy&#10;&#10;Outra Empresa&#10;https://figma.com/proto/aaa&#10;https://figma.com/proto/bbb" style="min-height:150px"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="width:auto;flex:1" onclick="gerarFila()">
+            <div class="spinner" id="filaSpinner"></div>
+            <span id="filaBtn">Gerar links em fila</span>
+          </button>
+          <button class="btn btn-ghost" onclick="document.getElementById('filaInput').value=''">Limpar</button>
+        </div>
+        <div class="error-msg" id="filaError"></div>
+        <div id="filaResultado" style="display:none;margin-top:14px">
+          <div class="section-label">Links gerados</div>
+          <div id="filaResultList" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Histórico da semana</div>
-      <div id="linksListFull"></div>
+    <!-- HISTÓRICO DE LINKS -->
+    <div>
+      <div class="card">
+        <div class="card-title">Links da semana</div>
+        <div class="week-tabs" id="linksDayTabs"></div>
+        <input class="links-search" id="linksSearch" type="text" placeholder="// buscar por nome..." oninput="renderLinksPanel()"/>
+        <div class="section-label">Ativos <span id="linksActiveCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px"></span></div>
+        <div id="linksListFull" style="display:flex;flex-direction:column;gap:6px">
+          <div class="links-empty">Nenhum link neste dia</div>
+        </div>
+        <div class="archived-section">
+          <div class="archived-header">
+            <div class="section-label" style="margin-bottom:0;flex:1">Arquivados <span id="archivedCount" style="color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px"></span></div>
+            <button class="btn btn-ghost" style="font-size:9px;padding:4px 10px" id="archivedToggleBtn" onclick="toggleArchived()">Mostrar</button>
+          </div>
+          <div class="archived-content" id="archivedContent">
+            <div id="archivedListFull" style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+              <div class="links-empty">Nenhum link arquivado</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 </main>
 
+<!-- ═══ MODALS ═══ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">Editar links <span style="color:var(--accent)">Figma</span></div>
+    <div class="modal-sub">// os links do Figma serão atualizados. O link curto permanece o mesmo.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+      <div class="field-group">
+        <label>Link Desktop <span class="tag">FIGMA</span></label>
+        <input type="url" id="editDeskUrl" placeholder="https://www.figma.com/proto/..."/>
+      </div>
+      <div class="field-group">
+        <label>Link Mobile <span class="tag">FIGMA</span></label>
+        <input type="url" id="editMobUrl" placeholder="https://www.figma.com/proto/..."/>
+      </div>
+      <div class="error-msg" id="editError" style="display:none"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" id="editSaveBtn" onclick="saveEditLink()">Salvar</button>
+      <button class="modal-btn-cancel" onclick="closeEditModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal">
+    <div class="modal-title">Arquivar <span>link?</span></div>
+    <div class="modal-sub">// o link será removido da lista de ativos. Você poderá restaurá-lo depois.</div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" style="background:var(--error);color:#fff" onclick="confirmArchiveLink()">Arquivar mesmo assim</button>
+      <button class="modal-btn-cancel" onclick="closeArchiveModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="dupModal">
+  <div class="modal">
+    <div class="modal-title">Duplicatas <span>detectadas</span></div>
+    <div class="modal-sub" id="dupModalSub"></div>
+    <ul class="modal-list" id="dupModalList"></ul>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="closeDupModal()">Entendi, pular duplicatas</button>
+    </div>
+  </div>
+</div>
+
 <div class="notify" id="notify"></div>
 
 <script>
-/* ═══ STATE & UTILS ═══ */
-const LINKS_KEY = 'fr_links', EMPRESAS_KEY = 'fr_empresas_v2', EXT_KEY = 'fr_extracao_v2', GEMINI_KEY = 'vin_gemini_key';
+/* ════════════════════════════
+   CONSTANTS & CONFIG
+════════════════════════════ */
+const LINKS_KEY    = 'fr_links';
+const EMPRESAS_KEY = 'fr_empresas_v2';
+const HISTORY_KEY  = 'fr_empresas_hist';
+const EXT_KEY      = 'fr_extracao_v2';
+const GEMINI_KEY   = 'vin_gemini_key';
+
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
-const WEEKDAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-let selectedDay = todayStr(), selectedLinksDay = todayStr(), extSelectedDay = todayStr(), extImportTargetDay = todayStr();
-let validadasView = 'lista';
+const ACCOUNTING_KEYWORDS = [
+  'contab','contador','contabilist','assessoria contábil','assessoria contab',
+  'escritório de contab','escritorio de contab','consultoria contábil','consultoria contab',
+  'serviço de contab','servico de contab','auditoria','fiscal contab',
+  'departamento contab','bureau contab','office of account','accounting',
+];
 
+const MSG_BASE = `Olá, tudo bem?
+
+Meu nome é Samuel, trabalho com criação e reformulação de sites institucionais, com foco em melhorar credibilidade e facilitar o recebimento de novos contatos.
+
+Observei o site de vocês e desenvolvi uma amostra de como uma nova estrutura poderia melhorar a apresentação atual, com uma comunicação mais clara e mais orientada à conversão de clientes.
+
+Segue o link para visualizar:
+
+{LINK}
+
+Essa é apenas uma simulação de direção visual e posicionamento, para demonstrar como o site poderia evoluir nesse cenário. O que acha?
+
+Confira um pouco mais sobre mim:
+
+Meu site  - samuelvinsansi.com.br
+Instagram - instagram.com/samuelvinsansi`;
+
+/* ════════════════════════════
+   STATE
+════════════════════════════ */
+let selectedDay        = todayStr();
+let selectedLinksDay   = todayStr();
+let selectedMsgEmpresa = null;
+let archivedOpen       = false;
+let extRemovedOpen     = false;
+let historyOpen        = false;
+let activeInnerTab     = 'json-tab';
+let extSelectedDay     = todayStr();
+let extImportTargetDay = todayStr();
+let validadasView      = 'lista';
+let editingTs          = null;
+let archivingTs        = null;
+let puxarSelectedDay   = todayStr();
+let puxarSelectedBloco = 0;
+
+/* ════════════════════════════
+   DATE HELPERS
+════════════════════════════ */
 function todayStr() { return new Date().toLocaleDateString('pt-BR'); }
+function timeStr()  { return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+
+function getWeekStart(d) {
+  const dt = d ? new Date(d) : new Date();
+  dt.setHours(0, 0, 0, 0);
+  dt.setDate(dt.getDate() - dt.getDay());
+  return dt;
+}
+function getWeekStartStr(d) { return getWeekStart(d).toLocaleDateString('pt-BR'); }
+function currentWeekStartStr() { return getWeekStartStr(); }
+function currentWeekDays() {
+  const days = [], start = getWeekStart();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    days.push(d.toLocaleDateString('pt-BR'));
+  }
+  return days;
+}
+function dayLabel(dateStr, forSheet) {
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const sep = forSheet ? '-' : '/';
+  const mm = m < 10 ? '0' + m : String(m);
+  return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + sep + mm;
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('sidebarClock').textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('sidebarDate').textContent  = now.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ════════════════════════════
+   UTILS
+════════════════════════════ */
+function genId()          { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escHtml(s)       { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function normalizeAlias(n){ return n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,50); }
+function buildWhatsapp(raw){ if(!raw) return ''; const num=raw.replace(/\D/g,''); if(!num) return ''; return 'https://wa.me/'+(num.startsWith('55')?num:'55'+num); }
+function stripPrefix(name) { return name.replace(/↪\s*/g,'').replace(/^\d+\.\s*/,'').trim(); }
+function isContabilidade(cat) {
+  if (!cat) return false;
+  const lower = String(cat).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return ACCOUNTING_KEYWORDS.some(kw => lower.includes(kw));
+}
+function normalizeWebsite(url) {
+  try { return new URL(url).hostname.replace(/^www\./,'').toLowerCase(); }
+  catch { return url.replace(/^https?:\/\//i,'').replace(/^www\./i,'').split('/')[0].toLowerCase(); }
+}
+
+/* ════════════════════════════
+   NOTIFY
+════════════════════════════ */
 function notify(msg, type) {
   const el = document.getElementById('notify');
-  el.textContent = msg; el.className = 'notify show' + (type==='err'?' err':'');
-  setTimeout(() => el.classList.remove('show'), 3000);
+  el.textContent = msg;
+  el.className = 'notify show' + (type === 'err' ? ' err' : type === 'warn' ? ' warn' : '');
+  setTimeout(() => el.classList.remove('show'), 3400);
 }
 
-/* ═══ STORAGE ═══ */
-function getExtData() { return JSON.parse(localStorage.getItem(EXT_KEY) || '{"days":{}}'); }
-function saveExtData(d) { localStorage.setItem(EXT_KEY, JSON.stringify(d)); }
-function getWeekData() { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || '{"days":{}}'); }
-function saveWeekData(d) { localStorage.setItem(EMPRESAS_KEY, JSON.stringify(d)); }
-function saveApiKey() { localStorage.setItem(GEMINI_KEY, document.getElementById('geminiApiKey').value); }
+/* ════════════════════════════
+   NAVIGATION
+════════════════════════════ */
+const PANELS = ['inicio', 'extracao', 'puxar', 'links'];
 
-/* ═══ NAVIGATION ═══ */
 function switchPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-  if (name === 'inicio') renderInicio();
-  if (name === 'extracao') renderExtracao();
+  PANELS.forEach(p => {
+    document.getElementById('panel-' + p).classList.toggle('active', p === name);
+  });
+  document.querySelectorAll('.nav-item').forEach((item, i) => {
+    item.classList.toggle('active', PANELS[i] === name);
+  });
+  if (name === 'inicio')   renderInicio();
+  if (name === 'extracao') renderExtracaoPanel();
+  if (name === 'links')    renderLinksPanel();
+  if (name === 'puxar')    renderPuxarPanel();
+  updateBadges();
 }
 
-/* ═══ GEMINI INTEGRATION ═══ */
+function updateBadges() {
+  const data = ensureWeekData();
+  const flat = flattenWeekData(data);
+  document.getElementById('badge-inicio').textContent = flat.filter(e => e.prototipo).length;
+
+  const extData = ensureExtData();
+  const extFlat = Object.values(extData.days || {}).flat();
+  document.getElementById('badge-extracao').textContent = extFlat.filter(e => !e.removed).length;
+
+  const today = todayStr();
+  const links = getLinks().filter(l => l.date === today && !l.hidden);
+  document.getElementById('badge-links').textContent = links.length;
+}
+
+/* ════════════════════════════
+   STORAGE — LINKS
+════════════════════════════ */
+function getLinks()           { try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; } }
+function saveLink(name, url) {
+  const links = getLinks();
+  links.unshift({ name, url, date: todayStr(), time: timeStr(), ts: Date.now() });
+  localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+  // Cross-match with empresas
+  const normName  = normalizeAlias(stripPrefix(name));
+  const weekData  = getWeekData();
+  const today     = todayStr();
+  if (!weekData || !weekData.days[today]) return;
+  let filled = 0;
+  weekData.days[today] = weekData.days[today].map(e => {
+    if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) { filled++; return { ...e, prototipo: url }; }
+    return e;
+  });
+  if (filled > 0) { saveWeekData(weekData); notify(`✓ Protótipo preenchido em ${filled} empresa${filled > 1 ? 's' : ''} de hoje`); }
+}
+function findLinkByName(name) {
+  const norm = normalizeAlias(stripPrefix(name));
+  return getLinks().find(l => normalizeAlias(stripPrefix(l.name)) === norm);
+}
+function extractAliasFromUrl(shortUrl) { try { return new URL(shortUrl).pathname.replace(/^\//, ''); } catch { return null; } }
+
+/* ════════════════════════════
+   STORAGE — EMPRESAS (Início)
+════════════════════════════ */
+function getWeekData()    { try { return JSON.parse(localStorage.getItem(EMPRESAS_KEY) || 'null'); } catch { return null; } }
+function saveWeekData(d)  { localStorage.setItem(EMPRESAS_KEY, JSON.stringify(d)); }
+function ensureWeekData() {
+  let data = getWeekData(); const ws = currentWeekStartStr();
+  if (!data || data.weekStart !== ws) {
+    if (data && data.weekStart !== ws) archiveWeekData(data);
+    data = { weekStart: ws, days: {} };
+    localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
+  }
+  return data;
+}
+function archiveWeekData(data) { if (!data) return; localStorage.setItem(HISTORY_KEY, JSON.stringify({ ...data, archivedAt: todayStr() })); }
+function getHistoryData()      { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || 'null'); } catch { return null; } }
+function flattenWeekData(data) {
+  if (!data) return [];
+  const result = [];
+  Object.keys(data.days).sort().forEach(date => { (data.days[date] || []).forEach(e => result.push({ date, ...e })); });
+  return result;
+}
+function getAllNomesInWeek(data) {
+  const nomes = new Set();
+  Object.values(data.days).forEach(arr => (arr || []).forEach(e => nomes.add(normalizeAlias(e.nome))));
+  return nomes;
+}
+
+/* ════════════════════════════
+   STORAGE — EXTRAÇÃO
+════════════════════════════ */
+function getExtData()    { try { return JSON.parse(localStorage.getItem(EXT_KEY) || 'null'); } catch { return null; } }
+function saveExtData(d)  { localStorage.setItem(EXT_KEY, JSON.stringify(d)); }
+function ensureExtData() {
+  let data = getExtData(); const ws = currentWeekStartStr();
+  if (!data || data.weekStart !== ws) { data = { weekStart: ws, days: {} }; localStorage.setItem(EXT_KEY, JSON.stringify(data)); }
+  return data;
+}
+function getAllExtTitlesInWeek(data) {
+  const titles = new Set();
+  Object.values(data.days).forEach(arr => (arr || []).forEach(e => titles.add(normalizeAlias(e.title))));
+  return titles;
+}
+function getAllExtSitesInWeek(data) {
+  const sites = new Set();
+  Object.values(data.days).forEach(arr => (arr || []).forEach(e => { if (e.website) sites.add(normalizeWebsite(e.website)); }));
+  return sites;
+}
+
+/* ════════════════════════════
+   MENSAGEM
+════════════════════════════ */
+function usarEmpresaMsg(nome, prototipo) {
+  selectedMsgEmpresa = { nome, prototipo };
+  const labelEl  = document.getElementById('msgEmpresaLabel');
+  const bodyEl   = document.getElementById('msgBody');
+  const hintEl   = document.getElementById('msgHint');
+  const copyBtn  = document.getElementById('msgCopyBtn');
+  const panelEl  = document.getElementById('msgPanel');
+
+  labelEl.innerHTML = `empresa: <span>${escHtml(nome)}</span>`;
+
+  if (!prototipo) {
+    bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado.</span>`;
+    hintEl.textContent = '// sem protótipo';
+    copyBtn.disabled = true;
+    return;
+  }
+  const msgFinal = MSG_BASE.replace('{LINK}', prototipo);
+  const parts    = msgFinal.split(prototipo);
+  bodyEl.innerHTML = escHtml(parts[0]) + `<span class="msg-link-highlight">${escHtml(prototipo)}</span>` + escHtml(parts[1] || '');
+  hintEl.textContent = `// ${nome} · link pronto`;
+  copyBtn.disabled = false;
+
+  if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.querySelectorAll('.usar-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.nome === nome));
+}
+
+function copyMsg() {
+  if (!selectedMsgEmpresa || !selectedMsgEmpresa.prototipo) return;
+  const msgFinal = MSG_BASE.replace('{LINK}', selectedMsgEmpresa.prototipo);
+  navigator.clipboard.writeText(msgFinal).then(() => {
+    const btn = document.getElementById('msgCopyBtn');
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar mensagem', 2200);
+    notify(`✓ Mensagem de ${selectedMsgEmpresa.nome} copiada`);
+  });
+}
+
+/* ════════════════════════════
+   INÍCIO — RENDER
+════════════════════════════ */
+function renderInicio() {
+  const data     = ensureWeekData();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+
+  // Day tabs
+  const tabsEl = document.getElementById('inicioDayTabs');
+  tabsEl.innerHTML = weekDays.map(day => {
+    const withProto = (data.days[day] || []).filter(e => e.prototipo).length;
+    const total     = (data.days[day] || []).length;
+    const isToday   = day === today;
+    const active    = day === selectedDay;
+    return `<button class="day-tab${active ? ' active' : ''}" onclick="selectDay('${day}')">
+      ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}
+      ${total > 0 ? `<span class="day-count">${withProto}/${total}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  // Export day select
+  const sel = document.getElementById('exportDaySelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Selecionar dia...</option>' +
+    weekDays.filter(d => (data.days[d] || []).length > 0).map(d =>
+      `<option value="${d}"${d === prev ? ' selected' : ''}>${dayLabel(d)} (${data.days[d].length})</option>`
+    ).join('');
+
+  renderDayTable(data, selectedDay);
+  renderSemProto(data, selectedDay);
+  renderHistory();
+  updateBadges();
+}
+
+function selectDay(day) { selectedDay = day; renderInicio(); }
+
+function renderDayTable(data, day) {
+  const tbody   = document.getElementById('inicioTbody');
+  const fullArr = data.days[day] || [];
+  const withProto = fullArr.filter(e => e.prototipo);
+
+  if (!withProto.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa com protótipo em ${dayLabel(day)}</td></tr>`;
+    return;
+  }
+
+  const groups = {};
+  STATUS_OPTIONS.forEach(s => groups[s] = []);
+  withProto.forEach(e => {
+    const realIdx = fullArr.indexOf(e);
+    const st = e.status || 'Não enviada';
+    if (!groups[st]) groups[st] = [];
+    groups[st].push({ ...e, _idx: realIdx });
+  });
+
+  let html = '';
+  STATUS_OPTIONS.forEach(status => {
+    if (!groups[status].length) return;
+    html += `<tr class="status-group-header"><td colspan="7">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
+    groups[status].forEach(e => {
+      const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
+      const waRaw      = e.whatsapp || '';
+      const waBuilt    = buildWhatsapp(waRaw);
+      const proto      = e.prototipo || '';
+
+      const waCell = waRaw
+        ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
+           <button class="proto-edit-icon" onclick="showWaEdit('${day}',${e._idx},this)" title="Editar">✎</button>`
+        : `<div class="proto-edit-wrap">
+             <input class="proto-input" placeholder="Número..." id="wa-input-${day}-${e._idx}"/>
+             <button class="proto-save-btn" onclick="saveWa('${day}',${e._idx})">OK</button>
+           </div>`;
+
+      const protoCell = proto
+        ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(proto)}" target="_blank">${escHtml(proto)}</a></span>
+           <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar">✎</button>`
+        : `<div class="proto-edit-wrap">
+             <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${e._idx}"/>
+             <button class="proto-save-btn" onclick="saveProto('${day}',${e._idx})">OK</button>
+           </div>`;
+
+      // Safe proto for inline onclick
+      const safeProto = proto.replace(/'/g, "\\'");
+      const safeNome  = e.nome.replace(/'/g, "\\'");
+
+      html += `<tr>
+        <td class="td-name">${escHtml(e.nome)}</td>
+        <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+        <td style="white-space:nowrap">${waCell}</td>
+        <td style="white-space:nowrap">${protoCell}</td>
+        <td><select class="status-select" onchange="updateStatus('${day}',${e._idx},this.value)">${STATUS_OPTIONS.map(s => `<option${e.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select></td>
+        <td><button class="usar-btn${isSelected ? ' active' : ''}" data-nome="${escHtml(e.nome)}" data-proto="${escHtml(proto)}" onclick="usarEmpresaMsg(this.dataset.nome, this.dataset.proto)">${isSelected ? '✓ usando' : 'Usar'}</button></td>
+        <td><button class="del-btn" onclick="deleteEmpresa('${day}',${e._idx})">✕</button></td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML = html;
+}
+
+function renderSemProto(data, day) {
+  const dayArr = (data.days[day] || []).filter(e => !e.prototipo);
+  document.getElementById('semProtoCount').textContent = dayArr.length ? `(${dayArr.length})` : '';
+  const listEl = document.getElementById('semProtoList');
+  if (!dayArr.length) { listEl.innerHTML = '<div class="links-empty">Todas as empresas possuem protótipo</div>'; return; }
+  listEl.innerHTML = dayArr.map(e => `
+    <div class="empresa-card" style="margin-bottom:6px">
+      <div class="empresa-info">
+        <div class="empresa-name">${escHtml(e.nome)}</div>
+        ${e.site ? `<div class="empresa-site"><a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a></div>` : ''}
+      </div>
+      <span class="empresa-badge no-site">sem protótipo</span>
+    </div>`).join('');
+}
+
+function showWaEdit(day, idx, btn) {
+  const td = btn.parentElement;
+  const data = ensureWeekData();
+  const current = (data.days[day] && data.days[day][idx]) ? (data.days[day][idx].whatsapp || '') : '';
+  td.innerHTML = `<div class="proto-edit-wrap">
+    <input class="proto-input" value="${escHtml(current)}" id="wa-input-${day}-${idx}" placeholder="Número..."/>
+    <button class="proto-save-btn" onclick="saveWa('${day}',${idx})">OK</button>
+  </div>`;
+  document.getElementById('wa-input-' + day + '-' + idx)?.focus();
+}
+function saveWa(day, idx) {
+  const inp = document.getElementById('wa-input-' + day + '-' + idx);
+  if (!inp) return;
+  const val  = inp.value.trim().replace(/\D/g, '');
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx] !== undefined) {
+    data.days[day][idx].whatsapp = val;
+    saveWeekData(data); renderInicio();
+    notify(val ? '✓ WhatsApp atualizado' : '✓ WhatsApp removido');
+  }
+}
+function showProtoEdit(day, idx, btn) {
+  const td = btn.parentElement;
+  const data = ensureWeekData();
+  const current = (data.days[day] && data.days[day][idx]) ? (data.days[day][idx].prototipo || '') : '';
+  td.innerHTML = `<div class="proto-edit-wrap">
+    <input class="proto-input" value="${escHtml(current)}" id="proto-input-${day}-${idx}"/>
+    <button class="proto-save-btn" onclick="saveProto('${day}',${idx})">OK</button>
+  </div>`;
+  document.getElementById(`proto-input-${day}-${idx}`)?.focus();
+}
+function saveProto(day, idx) {
+  const input = document.getElementById(`proto-input-${day}-${idx}`);
+  if (!input) return;
+  const val  = input.value.trim();
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx] !== undefined) {
+    data.days[day][idx].prototipo = val;
+    saveWeekData(data);
+    if (selectedMsgEmpresa && selectedMsgEmpresa.nome === data.days[day][idx].nome) usarEmpresaMsg(data.days[day][idx].nome, val);
+    renderInicio();
+    notify(val ? '✓ Protótipo atualizado' : '✓ Protótipo removido');
+  }
+}
+function updateStatus(day, idx, val) {
+  const data = ensureWeekData();
+  if (data.days[day] && data.days[day][idx]) { data.days[day][idx].status = val; saveWeekData(data); renderInicio(); }
+}
+function deleteEmpresa(day, idx) {
+  const data    = ensureWeekData();
+  if (!data.days[day]) return;
+  const deleted = data.days[day][idx];
+  data.days[day].splice(idx, 1);
+  saveWeekData(data);
+  if (selectedMsgEmpresa && selectedMsgEmpresa.nome === deleted?.nome) {
+    selectedMsgEmpresa = null;
+    document.getElementById('msgEmpresaLabel').textContent = 'Selecione uma empresa';
+    document.getElementById('msgBody').innerHTML = '<span class="msg-no-link">← clique em "Usar" em uma empresa para carregar a mensagem</span>';
+    document.getElementById('msgHint').textContent = '// nenhuma empresa selecionada';
+    document.getElementById('msgCopyBtn').disabled = true;
+  }
+  renderInicio();
+}
+function clearAll() {
+  if (!confirm('Limpar todas as empresas da semana atual?')) return;
+  saveWeekData({ weekStart: currentWeekStartStr(), days: {} });
+  selectedMsgEmpresa = null;
+  renderInicio();
+  notify('Semana limpa');
+}
+
+/* HISTORY */
+function renderHistory() {
+  const hist  = getHistoryData();
+  const sec   = document.getElementById('historySection');
+  const badge = document.getElementById('historyBadge');
+  const tbody = document.getElementById('historyTbody');
+  if (!hist) {
+    sec.style.opacity = '0.4';
+    badge.textContent = 'nenhum dado';
+    tbody.innerHTML   = '<tr><td colspan="6" class="table-empty">Nenhuma semana anterior</td></tr>';
+    return;
+  }
+  sec.style.opacity = '1';
+  const flat = flattenWeekData(hist);
+  badge.textContent = `${flat.length} empresa${flat.length !== 1 ? 's' : ''} · ${hist.weekStart}`;
+  const dateGroups = {};
+  flat.forEach(e => {
+    if (!dateGroups[e.date]) dateGroups[e.date] = {};
+    const st = e.status || 'Não enviada';
+    if (!dateGroups[e.date][st]) dateGroups[e.date][st] = [];
+    dateGroups[e.date][st].push(e);
+  });
+  let html = '';
+  Object.keys(dateGroups).sort().forEach(date => {
+    STATUS_OPTIONS.forEach(status => {
+      const group = dateGroups[date][status];
+      if (!group || !group.length) return;
+      html += `<tr class="status-group-header"><td colspan="6">// ${dayLabel(date)} — ${escHtml(status)} (${group.length})</td></tr>`;
+      group.forEach(e => {
+        const wa = buildWhatsapp(e.whatsapp);
+        html += `<tr>
+          <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(date)}</td>
+          <td class="td-name">${escHtml(e.nome)}</td>
+          <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+          <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
+          <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠</span>'}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(e.status || 'Não enviada')}</td>
+        </tr>`;
+      });
+    });
+  });
+  tbody.innerHTML = html || '<tr><td colspan="6" class="table-empty">Sem dados</td></tr>';
+}
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('historyContent').classList.toggle('open', historyOpen);
+  document.getElementById('historyToggleBtn').textContent = historyOpen ? 'Ocultar' : 'Mostrar';
+}
+function archiveHistory() {
+  if (!confirm('Arquivar dados da semana anterior?')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  notify('Semana anterior arquivada');
+}
+
+/* ════════════════════════════
+   EXTRAÇÃO — FILTER
+════════════════════════════ */
+function onFilterToggle() {
+  const checked = document.getElementById('filterContabilCheck').checked;
+  const badge   = document.getElementById('filterBadge');
+  badge.textContent = checked ? '✓ ativo' : 'desativado';
+  badge.className   = 'filter-badge' + (checked ? '' : ' off');
+  updateFilterPreview();
+}
+
+function updateFilterPreview() {
+  const raw     = document.getElementById('extJsonInput').value.trim();
+  const preview = document.getElementById('filterPreview');
+  const kwWrap  = document.getElementById('filterKeywordsWrap');
+  const kwList  = document.getElementById('filterKeywordsList');
+  const checked = document.getElementById('filterContabilCheck').checked;
+
+  if (!raw) { preview.innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.'; kwWrap.classList.remove('open'); return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch { preview.innerHTML = '<span class="warn">// JSON inválido</span>'; kwWrap.classList.remove('open'); return; }
+
+  const arr   = Array.isArray(parsed) ? parsed : (parsed.results || parsed.items || []);
+  const total = arr.length;
+  if (!total) { preview.innerHTML = '<span class="warn">// nenhum item no JSON</span>'; kwWrap.classList.remove('open'); return; }
+
+  if (!checked) {
+    preview.innerHTML = `Filtro desativado — <span class="acc">${total}</span> empresa${total !== 1 ? 's' : ''} serão importadas.`;
+    kwWrap.classList.remove('open');
+    return;
+  }
+
+  const passing = arr.filter(item => isContabilidade(item.categoryName || item.category || ''));
+  const blocked = total - passing.length;
+  const cats    = [...new Set(arr.map(i => String(i.categoryName || i.category || '').trim()).filter(Boolean))].sort();
+  const contabCats = cats.filter(c => isContabilidade(c));
+  const otherCats  = cats.filter(c => !isContabilidade(c));
+
+  kwList.innerHTML = [
+    ...contabCats.map(c => `<span class="filter-keyword-chip" style="border-color:var(--accent-border);color:var(--accent)">✓ ${escHtml(c)}</span>`),
+    ...otherCats.map(c  => `<span class="filter-keyword-chip">✕ ${escHtml(c)}</span>`),
+  ].join('') || '<span class="filter-keyword-chip">nenhum categoryName</span>';
+  kwWrap.classList.add('open');
+
+  const extData  = ensureExtData();
+  const weekTitles = getAllExtTitlesInWeek(extData);
+  const weekSites  = getAllExtSitesInWeek(extData);
+  const dupCount   = passing.filter(item => weekTitles.has(normalizeAlias(String(item.title || '').trim()))).length;
+  const noSiteCount= passing.filter(item => !String(item.website || '').trim()).length;
+  const withSite   = passing.filter(item => String(item.website || '').trim());
+  const dupSiteCount = withSite.filter(item =>
+    !weekTitles.has(normalizeAlias(String(item.title || '').trim())) &&
+    weekSites.has(normalizeWebsite(String(item.website || '').trim()))
+  ).length;
+  const newCount = passing.length - dupCount - noSiteCount - dupSiteCount;
+
+  let html = `<span class="acc">${passing.length}</span> contábil${passing.length !== 1 ? 's' : ''} passam · <span class="warn">${blocked}</span> de outros ramos ignoradas`;
+  if (noSiteCount  > 0) html += ` · <span style="color:var(--warning)">${noSiteCount} sem site</span>`;
+  if (dupCount + dupSiteCount > 0) html += ` · <span style="color:var(--muted)">${dupCount + dupSiteCount} duplicadas</span>`;
+  html += ` · <span class="acc">${Math.max(0, newCount)} novas</span>`;
+  preview.innerHTML = html;
+}
+
+/* INNER TABS */
+function switchInnerTab(tabId) {
+  activeInnerTab = tabId;
+  ['json-tab', 'empresas-tab', 'validadas-tab'].forEach(id => {
+    const btnId = 'itab-' + id.replace('-tab', '');
+    document.getElementById(btnId)?.classList.toggle('active', id === tabId);
+  });
+  document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(tabId)?.classList.add('active');
+  renderExtracaoPanel();
+}
+
+function renderExtracaoPanel() {
+  renderExtDayPickerTabs();
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+}
+
+function renderExtDayPickerTabs() {
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  const el       = document.getElementById('extDayPickerTabs');
+  if (!el) return;
+  el.innerHTML = weekDays.map(day => {
+    const isToday = day === today;
+    const active  = day === extImportTargetDay;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="extSetImportDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}</button>`;
+  }).join('');
+}
+function extSetImportDay(day) { extImportTargetDay = day; renderExtDayPickerTabs(); }
+
+function extImportJson() {
+  const raw   = document.getElementById('extJsonInput').value.trim();
+  const errEl = document.getElementById('extJsonError');
+  errEl.style.display = 'none';
+
+  if (!raw) { errEl.textContent = '// cole o JSON antes de importar'; errEl.style.display = 'block'; return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch { errEl.textContent = '// JSON inválido'; errEl.style.display = 'block'; return; }
+
+  const arr = Array.isArray(parsed) ? parsed : (parsed.results || parsed.items || []);
+  if (!arr.length) { errEl.textContent = '// JSON sem itens válidos'; errEl.style.display = 'block'; return; }
+
+  const filterEnabled = document.getElementById('filterContabilCheck').checked;
+  let filteredArr = arr; let filteredOut = 0;
+  if (filterEnabled) {
+    filteredArr = arr.filter(item => isContabilidade(item.categoryName || item.category || ''));
+    filteredOut = arr.length - filteredArr.length;
+  }
+  if (filterEnabled && !filteredArr.length) {
+    errEl.textContent = `// nenhuma empresa contábil nos ${arr.length} itens. Verifique categoryName ou desative o filtro.`;
+    errEl.style.display = 'block'; return;
+  }
+
+  const data = ensureExtData();
+  const day  = extImportTargetDay;
+  if (!data.days[day]) data.days[day] = [];
+
+  const weekTitles = getAllExtTitlesInWeek(data);
+  const weekSites  = getAllExtSitesInWeek(data);
+  let added = 0, skippedWeek = 0, skippedNoSite = 0, skippedSite = 0;
+
+  filteredArr.forEach(item => {
+    const title   = String(item.title   || '').trim();
+    const website = String(item.website || '').trim();
+    const phone   = String(item.phone   || '').trim();
+    if (!title)   { skippedNoSite++; return; }
+    if (!website) { skippedNoSite++; return; }
+    const normTitle = normalizeAlias(title);
+    const normSite  = normalizeWebsite(website);
+    if (weekTitles.has(normTitle)) { skippedWeek++; return; }
+    if (weekSites.has(normSite))   { skippedSite++; return; }
+    data.days[day].push({ id: genId(), title, website, phone, validated: false, removed: false });
+    weekTitles.add(normTitle); weekSites.add(normSite); added++;
+  });
+
+  saveExtData(data);
+  extSelectedDay = day;
+  document.getElementById('extJsonInput').value = '';
+  document.getElementById('filterPreview').innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.';
+  document.getElementById('filterKeywordsWrap').classList.remove('open');
+
+  switchInnerTab('empresas-tab');
+  let msg = `✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`;
+  if (filteredOut  > 0) msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
+  if (skippedWeek  > 0) msg += ` · ${skippedWeek} já na semana`;
+  if (skippedSite  > 0) msg += ` · ${skippedSite} site dup.`;
+  if (skippedNoSite> 0) msg += ` · ${skippedNoSite} sem site/nome`;
+  notify(msg);
+  updateBadges();
+}
+
+function extClearJsonInput() {
+  document.getElementById('extJsonInput').value = '';
+  document.getElementById('extJsonError').style.display = 'none';
+  document.getElementById('filterPreview').innerHTML = 'Cole o JSON acima para ver uma prévia do filtro.';
+  document.getElementById('filterKeywordsWrap').classList.remove('open');
+}
+
+/* EMPRESAS TAB */
+function renderExtEmpresasTab() {
+  const data     = ensureExtData();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+
+  // Week tabs
+  document.getElementById('extEmpresasWeekTabs').innerHTML = weekDays.map(day => {
+    const count   = (data.days[day] || []).filter(e => !e.removed && !e.validated).length;
+    const isToday = day === today;
+    const active  = day === extSelectedDay;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="extSelectDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}${count > 0 ? `<span class="day-count">${count}</span>` : ''}</button>`;
+  }).join('');
+
+  const allForDay    = data.days[extSelectedDay] || [];
+  const activeItems  = allForDay.filter(e => !e.removed && !e.validated);
+  const validated    = allForDay.filter(e => !e.removed && e.validated);
+  const removedItems = allForDay.filter(e => e.removed);
+  const withSite     = activeItems.filter(e => e.website);
+
+  document.getElementById('extEmpresasStats').innerHTML = `
+    <div class="ext-stat">pendentes <span class="ext-stat-val">${activeItems.length}</span></div>
+    <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
+    <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
+    <div class="ext-stat">removidas <span class="ext-stat-val muted">${removedItems.length}</span></div>`;
+
+  const listEl = document.getElementById('extEmpresasList');
+  if (!activeItems.length) {
+    listEl.innerHTML = validated.length
+      ? `<div class="links-empty">Todas validadas. Veja a aba Validadas.</div>`
+      : removedItems.length
+        ? `<div class="links-empty">Nenhuma ativa. ${removedItems.length} na seção Removidas.</div>`
+        : `<div class="links-empty">Nenhuma empresa importada neste dia.</div>`;
+  } else {
+    listEl.innerHTML = activeItems.map(e => {
+      const hasSite = !!e.website;
+      return `<div class="empresa-card" id="ext-item-${e.id}">
+        <div class="empresa-info">
+          <div class="empresa-name">${escHtml(e.title)}</div>
+          <div class="empresa-meta">
+            ${hasSite ? `<div class="empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>` : `<div class="empresa-site" style="color:var(--warning)">— sem site</div>`}
+            ${e.phone ? `<div class="empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+          </div>
+        </div>
+        <span class="empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
+        <div class="btn-group">
+          <button class="validate-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extToggleValidate(this.dataset.day,this.dataset.id)">Validar</button>
+          <button class="remove-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extRemoveItem(this.dataset.day,this.dataset.id)" title="Remover">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Removed section
+  const removedSection  = document.getElementById('extRemovedSection');
+  const removedContent  = document.getElementById('extRemovedContent');
+  const removedCountEl  = document.getElementById('extRemovedCount');
+  if (!removedItems.length) { removedSection.style.display = 'none'; extRemovedOpen = false; }
+  else {
+    removedSection.style.display = 'block';
+    removedCountEl.textContent = `(${removedItems.length})`;
+    document.getElementById('extRemovedToggleBtn').textContent = extRemovedOpen ? 'Ocultar' : 'Mostrar';
+    if (extRemovedOpen) {
+      removedContent.classList.add('open');
+      removedContent.innerHTML = removedItems.map(e => `
+        <div class="empresa-card removed-item">
+          <div class="empresa-info">
+            <div class="empresa-name">${escHtml(e.title)}</div>
+            <div class="empresa-meta">${e.website ? `<div class="empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>` : `<div class="empresa-site" style="color:var(--muted)">— sem site</div>`}</div>
+          </div>
+          <span class="empresa-badge no-site" style="opacity:0.4">removida</span>
+          <button class="restore-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extRestoreItem(this.dataset.day,this.dataset.id)">↩ Restaurar</button>
+        </div>`).join('');
+    } else { removedContent.classList.remove('open'); }
+  }
+}
+function toggleExtRemoved() { extRemovedOpen = !extRemovedOpen; renderExtEmpresasTab(); }
+
+/* VALIDADAS TAB */
+function renderExtValidadasTab() {
+  const data     = ensureExtData();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+
+  document.getElementById('extValidadasWeekTabs').innerHTML = weekDays.map(day => {
+    const val     = (data.days[day] || []).filter(e => !e.removed && e.validated);
+    const count   = val.length;
+    const isToday = day === today;
+    const active  = day === extSelectedDay;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="extSelectDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}${count > 0 ? `<span class="day-count">${count}</span>` : ''}</button>`;
+  }).join('');
+
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+  const withSite  = validated.filter(e => e.website);
+
+  document.getElementById('extValidadasStats').innerHTML = `
+    <div class="ext-stat">validadas <span class="ext-stat-val accent">${validated.length}</span></div>
+    <div class="ext-stat">com site <span class="ext-stat-val accent">${withSite.length}</span></div>
+    <div class="ext-stat">blocos <span class="ext-stat-val">${Math.ceil(validated.length / 10) || 0}</span></div>`;
+
+  if (validadasView === 'lista') renderValidadasLista(validated);
+  else renderValidadasBlocos(validated);
+}
+
+function renderValidadasLista(validated) {
+  const listEl = document.getElementById('extValidadasList');
+  if (!validated.length) { listEl.innerHTML = '<div class="links-empty">Nenhuma empresa validada neste dia.</div>'; return; }
+  listEl.innerHTML = validated.map(e => {
+    const hasSite = !!e.website;
+    return `<div class="empresa-card validated" id="val-item-${e.id}">
+      <div class="empresa-info">
+        <div class="empresa-name">${escHtml(e.title)}</div>
+        <div class="empresa-meta">
+          ${hasSite ? `<div class="empresa-site"><a href="${escHtml(e.website)}" target="_blank">${escHtml(e.website)}</a></div>` : `<div class="empresa-site" style="color:var(--warning)">— sem site</div>`}
+          ${e.phone ? `<div class="empresa-phone">📱 ${escHtml(e.phone)}</div>` : ''}
+        </div>
+      </div>
+      <span class="empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
+      <div class="btn-group">
+        <button class="validate-btn validated" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extToggleValidate(this.dataset.day,this.dataset.id)">✓ Validada</button>
+        <button class="remove-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extRemoveItem(this.dataset.day,this.dataset.id)" title="Remover">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderValidadasBlocos(validated) {
+  const container  = document.getElementById('blocosContainer');
+  if (!validated.length) { container.innerHTML = '<div class="links-empty">Nenhuma empresa validada neste dia.</div>'; return; }
+
+  const BLOCK_SIZE = 10;
+  const blocos = [];
+  for (let i = 0; i < validated.length; i += BLOCK_SIZE) blocos.push(validated.slice(i, i + BLOCK_SIZE));
+
+  container.innerHTML = blocos.map((bloco, bi) => {
+    const sites = bloco.filter(e => e.website).map(e => e.website).join('\n');
+    const slotsHtml = bloco.map((e, si) => `
+      <div class="bloco-slot">
+        <span class="bloco-slot-num">${bi * BLOCK_SIZE + si + 1}</span>
+        <div class="bloco-slot-info">
+          <div class="bloco-slot-name">${escHtml(e.title)}</div>
+          <div class="bloco-slot-site">${e.website ? escHtml(e.website) : '<span class="bloco-slot-empty">sem site</span>'}</div>
+        </div>
+        <button class="bloco-devalidate" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extToggleValidate(this.dataset.day,this.dataset.id)">↩ retirar</button>
+        <button class="bloco-send-btn" onclick="enviarBlocoParaPuxar(${bi})">→ Gemini</button>
+      </div>`).join('');
+
+    let emptySlots = '';
+    for (let i = 0; i < BLOCK_SIZE - bloco.length; i++) {
+      emptySlots += `<div class="bloco-slot"><span class="bloco-slot-num" style="opacity:0.2">${bi * BLOCK_SIZE + bloco.length + i + 1}</span><div class="bloco-slot-info"><span class="bloco-slot-empty">— vazio</span></div></div>`;
+    }
+
+    return `<div class="bloco" id="bloco-${bi}">
+      <div class="bloco-number">Bloco ${bi + 1}</div>
+      <div class="bloco-header">
+        <span class="bloco-title">${bloco.length}/10 empresa${bloco.length !== 1 ? 's' : ''}</span>
+        <button class="bloco-copy-btn" id="bloco-copy-btn-${bi}" data-sites="${escHtml(sites)}" onclick="copyBlocoSites(${bi})">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          Copiar sites
+        </button>
+      </div>
+      <div class="bloco-items">${slotsHtml}${emptySlots}</div>
+    </div>`;
+  }).join('');
+}
+
+function copyBlocoSites(bi) {
+  const btn   = document.getElementById(`bloco-copy-btn-${bi}`);
+  const sites = btn?.dataset?.sites || '';
+  if (!sites) { notify('Nenhum site neste bloco', 'warn'); return; }
+  navigator.clipboard.writeText(sites).then(() => {
+    const origHTML = btn.innerHTML;
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.innerHTML = origHTML, 2000);
+    notify(`✓ Sites do Bloco ${bi + 1} copiados`);
+  });
+}
+
+function enviarBlocoParaPuxar(bi) {
+  const data      = ensureExtData();
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+  const BLOCK_SIZE = 10;
+  const bloco     = validated.slice(bi * BLOCK_SIZE, (bi + 1) * BLOCK_SIZE);
+  const sites     = bloco.filter(e => e.website).map(e => e.website).join('\n');
+  puxarSelectedDay   = extSelectedDay;
+  puxarSelectedBloco = bi;
+  document.getElementById('puxarSitesInput').value = sites;
+  switchPanel('puxar');
+  notify(`✓ Bloco ${bi + 1} carregado em Puxar Dados`);
+}
+
+function switchValidadasView(view) {
+  validadasView = view;
+  document.getElementById('viewBtnLista').classList.toggle('active', view === 'lista');
+  document.getElementById('viewBtnBlocos').classList.toggle('active', view === 'blocos');
+  document.getElementById('validadasListView').style.display  = view === 'lista'   ? 'block' : 'none';
+  document.getElementById('validadasBlocosView').style.display= view === 'blocos'  ? 'block' : 'none';
+  renderExtValidadasTab();
+}
+
+function extSelectDay(day) {
+  extSelectedDay = day;
+  extRemovedOpen = false;
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+}
+function extToggleValidate(day, id) {
+  const sid  = String(id);
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const item = data.days[day].find(e => String(e.id) === sid);
+  if (!item) return;
+  item.validated = !item.validated;
+  saveExtData(data);
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+  notify(item.validated ? '✓ Empresa validada' : 'Empresa removida das validadas');
+}
+function extRemoveItem(day, id) {
+  const sid  = String(id);
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const item = data.days[day].find(e => String(e.id) === sid);
+  if (!item) return;
+  item.removed = true;
+  saveExtData(data);
+  if (activeInnerTab === 'empresas-tab')  renderExtEmpresasTab();
+  if (activeInnerTab === 'validadas-tab') renderExtValidadasTab();
+  notify('Empresa removida');
+  updateBadges();
+}
+function extRestoreItem(day, id) {
+  const sid  = String(id);
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const item = data.days[day].find(e => String(e.id) === sid);
+  if (!item) return;
+  item.removed = false;
+  saveExtData(data);
+  renderExtEmpresasTab();
+  notify('✓ Empresa restaurada');
+  updateBadges();
+}
+function extClearDay() {
+  if (!confirm(`Limpar TODAS as empresas de ${dayLabel(extSelectedDay)} (incluindo removidas)?`)) return;
+  const data = ensureExtData();
+  data.days[extSelectedDay] = [];
+  saveExtData(data);
+  extRemovedOpen = false;
+  renderExtracaoPanel();
+  notify('Dia limpo');
+  updateBadges();
+}
+function extCopySites() {
+  const data      = ensureExtData();
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated && e.website);
+  if (!validated.length) { notify('Nenhuma empresa validada com site neste dia', 'warn'); return; }
+  const sites = validated.map(e => e.website).join('\n');
+  navigator.clipboard.writeText(sites).then(() => notify(`✓ ${validated.length} site${validated.length !== 1 ? 's' : ''} copiado${validated.length !== 1 ? 's' : ''}`)).catch(() => notify('// erro ao copiar', 'err'));
+}
+function extSendToDados() {
+  const data      = ensureExtData();
+  const day       = extSelectedDay;
+  const validated = (data.days[day] || []).filter(e => !e.removed && e.validated);
+  if (!validated.length) { notify('Nenhuma empresa validada neste dia para enviar', 'warn'); return; }
+
+  const weekData    = ensureWeekData();
+  if (!weekData.days[day]) weekData.days[day] = [];
+  const existingNomes = getAllNomesInWeek(weekData);
+  let added = 0, skipped = 0;
+
+  validated.forEach(e => {
+    const normNome = normalizeAlias(e.title);
+    if (existingNomes.has(normNome)) { skipped++; return; }
+    const proto = findLinkByName(e.title)?.url || '';
+    weekData.days[day].push({ nome: e.title, site: e.website || '', whatsapp: e.phone || '', prototipo: proto, status: 'Não enviada' });
+    existingNomes.add(normNome); added++;
+  });
+
+  saveWeekData(weekData);
+  selectedDay = day;
+  if (added > 0) {
+    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} enviada${added !== 1 ? 's' : ''} para Início${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
+    switchPanel('inicio');
+  } else notify('// todas as empresas já existem no Início', 'warn');
+}
+
+/* ════════════════════════════
+   PUXAR DADOS — GEMINI
+════════════════════════════ */
+function saveApiKey()    { localStorage.setItem(GEMINI_KEY, document.getElementById('geminiApiKey').value); }
+function toggleApiKey()  { const inp = document.getElementById('geminiApiKey'); inp.type = inp.type === 'password' ? 'text' : 'password'; }
+
+function renderPuxarPanel() {
+  const savedKey = localStorage.getItem(GEMINI_KEY) || '';
+  if (savedKey) document.getElementById('geminiApiKey').value = savedKey;
+
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  document.getElementById('puxarWeekTabs').innerHTML = weekDays.map(day => {
+    const data  = ensureExtData();
+    const val   = (data.days[day] || []).filter(e => !e.removed && e.validated && e.website);
+    const active= day === puxarSelectedDay;
+    const isToday= day === today;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="puxarSelectDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}${val.length > 0 ? `<span class="day-count">${val.length}</span>` : ''}</button>`;
+  }).join('');
+  renderPuxarBlocoTabs();
+}
+
+function puxarSelectDay(day) { puxarSelectedDay = day; puxarSelectedBloco = 0; renderPuxarBlocoTabs(); }
+function renderPuxarBlocoTabs() {
+  const data      = ensureExtData();
+  const validated = (data.days[puxarSelectedDay] || []).filter(e => !e.removed && e.validated && e.website);
+  const BLOCK_SIZE= 10;
+  const numBlocos = Math.ceil(validated.length / BLOCK_SIZE) || 0;
+  const tabsEl    = document.getElementById('puxarBlocoTabs');
+
+  if (!numBlocos) {
+    tabsEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Nenhuma empresa validada com site neste dia</span>';
+    document.getElementById('sitesPreviewBox').style.display = 'none';
+    return;
+  }
+  tabsEl.innerHTML = Array.from({ length: numBlocos }, (_, bi) => {
+    const bloco  = validated.slice(bi * BLOCK_SIZE, (bi + 1) * BLOCK_SIZE);
+    const active = bi === puxarSelectedBloco;
+    return `<button class="bloco-select-tab${active ? ' active' : ''}" onclick="puxarSelectBloco(${bi})">Bloco ${bi + 1} <span style="color:var(--muted);font-size:8px">(${bloco.length})</span></button>`;
+  }).join('');
+
+  const bloco = validated.slice(puxarSelectedBloco * BLOCK_SIZE, (puxarSelectedBloco + 1) * BLOCK_SIZE);
+  const sites = bloco.map(e => e.website).join('\n');
+  document.getElementById('sitesPreviewContent').textContent = sites;
+  document.getElementById('sitesPreviewBox').style.display   = 'block';
+}
+function puxarSelectBloco(bi) { puxarSelectedBloco = bi; renderPuxarBlocoTabs(); }
+function carregarSitesNoInput() {
+  const content = document.getElementById('sitesPreviewContent').textContent;
+  document.getElementById('puxarSitesInput').value = content;
+  notify('✓ Sites carregados no campo de entrada');
+}
+function puxarClear() {
+  document.getElementById('puxarSitesInput').value    = '';
+  document.getElementById('puxarJsonOutput').value    = '';
+  document.getElementById('geminiStatus').textContent = '';
+  document.getElementById('geminiJsonStats').textContent = '';
+}
+
 async function puxarDadosGemini() {
   const apiKey = document.getElementById('geminiApiKey').value.trim();
   const sitesRaw = document.getElementById('puxarSitesInput').value.trim();
@@ -665,23 +1827,21 @@ async function puxarDadosGemini() {
   const statusEl = document.getElementById('geminiStatus');
   const outputEl = document.getElementById('puxarJsonOutput');
   const progressBar = document.getElementById('progressBar');
-  const spinner = document.getElementById('geminiSpinner');
-  const progressWrap = document.getElementById('progressWrap');
+  document.getElementById('geminiSpinner').style.display = 'block';
 
-  spinner.style.display = 'block';
-  progressWrap.style.display = 'block';
   const projetos = [];
 
   for (let i = 0; i < sites.length; i++) {
     const site = sites[i];
     const num = numInicial + i;
-    statusEl.innerHTML = `<span class="acc">Processando ${i+1}/${sites.length}:</span> ${site}`;
+    statusEl.innerHTML = `<span class="acc">Analisando ${i+1}/${sites.length}:</span> ${site}`;
     
+    // PROMPT RIGIDAMENTE ESTRUTURADO PARA O SEU PLUGIN
     const prompt = `Analise o site ${site} e extraia os dados para este JSON. 
-    REGRAS: 
-    1. whatsapp: Apenas números com DDI 55 (ex: 5511999999999). 
-    2. pagina: Formato "↪    ${String(num).padStart(4,'0')}. NOME_DA_EMPRESA".
-    Retorne APENAS o JSON puro.
+    REGRAS:
+    1. whatsapp: Apenas números com DDI 55 (ex: 5511999999999).
+    2. pagina: Use o formato "↪    ${String(num).padStart(4,'0')}. NOME_DA_EMPRESA".
+    3. Retorne APENAS o JSON, sem textos extras ou marcações de markdown.
 
     Estrutura:
     {
@@ -690,42 +1850,438 @@ async function puxarDadosGemini() {
       "header": {"email": "", "telefone": "", "whatsapp": ""},
       "hero": {"subtexto": ""},
       "sobre": {"texto": ""},
-      "cards": [{"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}],
-      "servicos": [{"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}, {"titulo": "", "texto": ""}]
+      "cards": [{"titulo": "", "texto": ""}],
+      "servicos": [{"titulo": "", "texto": ""}]
     }`;
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, response_mime_type: "application/json" }
+          generationConfig: { 
+            temperature: 0.1, 
+            response_mime_type: "application/json" // Força o Gemini a responder em JSON puro
+          }
         })
       });
+
       const resData = await response.json();
       const content = JSON.parse(resData.candidates[0].content.parts[0].text);
       projetos.push(content);
-      progressBar.style.width = `${((i+1)/sites.length)*100}%`;
-    } catch (e) {
+      
+      progressBar.style.width = `${((i + 1) / sites.length) * 100}%`;
+    } catch (err) {
+      console.error("Erro no site " + site, err);
+      // Fallback para não travar a lista
       projetos.push({ "pagina": `ERRO: ${site}`, "identidade": {"site_url": site} });
     }
+    // Delay de 1 segundo para evitar bloqueio por excesso de requisições
     await new Promise(r => setTimeout(r, 1000));
   }
 
-  outputEl.value = JSON.stringify({ "template_page": templatePage, "projetos": projetos }, null, 2);
-  spinner.style.display = 'none';
-  statusEl.innerHTML = `<span class="acc">✓ Concluído</span>`;
+  const finalJson = { "template_page": templatePage, "projetos": projetos };
+  outputEl.value = JSON.stringify(finalJson, null, 2);
+  document.getElementById('geminiSpinner').style.display = 'none';
+  statusEl.innerHTML = `<span class="acc">✓ Concluído!</span>`;
+  notify('✓ JSON Gerado para o Figma');
 }
 
-/* ═══ OUTRAS FUNÇÕES (RESUMIDAS PARA O ARQUIVO NÃO QUEBRAR) ═══ */
-function renderInicio() { /* Lógica de renderização da aba Inicial */ }
-function renderExtracao() { /* Lógica de extração e blocos de 10 */ }
-function switchInnerTab(t) { /* Troca de abas internas */ }
+function emptyProjeto(num, site, prefix) {
+  const label = prefix ? `${prefix} — ${site}` : site;
+  return {
+    pagina: `↪    ${String(num).padStart(4,'0')}. ${label}`,
+    identidade: { cor_primaria: '#1f2937', logo_url: '', site_url: site },
+    header: { email: '', telefone: '', whatsapp: '' },
+    hero: { subtexto: '' },
+    sobre: { texto: '' },
+    cards: [{ titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }],
+    servicos: [{ titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }]
+  };
+}
 
-window.onload = () => {
-  const savedKey = localStorage.getItem(GEMINI_KEY);
-  if(savedKey) document.getElementById('geminiApiKey').value = savedKey;
-};
+function copyJsonOutput() {
+  const val = document.getElementById('puxarJsonOutput').value;
+  if (!val) { notify('Nenhum JSON para copiar', 'warn'); return; }
+  navigator.clipboard.writeText(val).then(() => notify('✓ JSON copiado para a área de transferência'));
+}
+function downloadJsonOutput() {
+  const val = document.getElementById('puxarJsonOutput').value;
+  if (!val) { notify('Nenhum JSON para baixar', 'warn'); return; }
+  const blob = new Blob([val], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url; a.download = `projetos-${todayStr().replace(/\//g,'-')}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notify('✓ JSON baixado');
+}
+
+/* ════════════════════════════
+   LINKS & REDIRECT
+════════════════════════════ */
+document.getElementById('companyName')?.addEventListener('input', function () {
+  const val = this.value.trim();
+  document.getElementById('aliasPreview').textContent = val ? `→ tinyurl.com/${normalizeAlias(val)}-vin` : '';
+});
+
+function showError(msg)  { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; }
+function hideError()     { document.getElementById('errorMsg').style.display = 'none'; }
+function setLoading(val) {
+  document.getElementById('generateBtn').disabled = val;
+  document.getElementById('spinner').style.display = val ? 'block' : 'none';
+  document.getElementById('btnText').textContent   = val ? 'Gerando...' : 'Gerar link TinyURL';
+}
+
+async function generate() {
+  hideError();
+  document.getElementById('resultBox').style.display = 'none';
+  const companyName = document.getElementById('companyName').value.trim();
+  const deskUrl     = document.getElementById('deskUrl').value.trim();
+  const mobUrl      = document.getElementById('mobUrl').value.trim();
+
+  if (!companyName) { showError('// informe o nome da empresa'); document.getElementById('companyName').classList.add('error-field'); return; }
+  if (!deskUrl || !deskUrl.includes('figma.com')) { showError('// link desktop inválido — precisa ser URL do Figma'); document.getElementById('deskUrl').classList.add('error-field'); return; }
+  if (!mobUrl  || !mobUrl.includes('figma.com'))  { showError('// link mobile inválido — precisa ser URL do Figma');  document.getElementById('mobUrl').classList.add('error-field');  return; }
+  ['companyName','deskUrl','mobUrl'].forEach(id => document.getElementById(id).classList.remove('error-field'));
+
+  setLoading(true);
+  try {
+    const res  = await fetch('/api/shorten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deskUrl, mobUrl, companyName }) });
+    const data = await res.json();
+    if (!res.ok) { showError(`// ${data.error}`); return; }
+    const shortUrl = data.shortUrl;
+    document.getElementById('resultUrl').textContent      = shortUrl;
+    document.getElementById('resultBox').style.display    = 'block';
+    saveLink(companyName, shortUrl);
+    document.getElementById('companyName').value = '';
+    document.getElementById('deskUrl').value     = '';
+    document.getElementById('mobUrl').value      = '';
+    document.getElementById('aliasPreview').textContent = '';
+    updateBadges();
+  } catch { showError('// falha na conexão com o servidor'); }
+  finally  { setLoading(false); }
+}
+
+function copyUrl() {
+  const url = document.getElementById('resultUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar link', 2000);
+  });
+}
+
+/* FILA */
+async function gerarFila() {
+  const raw   = document.getElementById('filaInput').value.trim();
+  const errEl = document.getElementById('filaError');
+  errEl.style.display = 'none';
+
+  if (!raw) { errEl.textContent = '// cole os projetos antes de gerar'; errEl.style.display = 'block'; return; }
+
+  const projetos = [];
+  const blocos   = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+  blocos.forEach(bloco => {
+    const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
+    if (linhas.length >= 3) {
+      projetos.push({
+        nome:    linhas[0],
+        desktop: linhas[1].replace(/\s*\(desktop\)/i,'').trim(),
+        mobile:  linhas[2].replace(/\s*\(mobile\)/i,'').trim()
+      });
+    }
+  });
+
+  if (!projetos.length) { errEl.textContent = '// formato inválido. Use: Nome / Desktop / Mobile separados por linha em branco'; errEl.style.display = 'block'; return; }
+
+  const spinnerEl = document.getElementById('filaSpinner');
+  const btnEl     = document.getElementById('filaBtn');
+  spinnerEl.style.display = 'block'; btnEl.textContent = `Gerando 0/${projetos.length}...`;
+  document.getElementById('filaResultado').style.display = 'none';
+
+  const resultados = [];
+  for (let i = 0; i < projetos.length; i++) {
+    const p = projetos[i];
+    btnEl.textContent = `Gerando ${i + 1}/${projetos.length}...`;
+    try {
+      const res  = await fetch('/api/shorten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deskUrl: p.desktop, mobUrl: p.mobile, companyName: p.nome }) });
+      const data = await res.json();
+      if (res.ok) { saveLink(p.nome, data.shortUrl); resultados.push({ nome: p.nome, url: data.shortUrl, ok: true }); }
+      else         resultados.push({ nome: p.nome, url: data.error || 'Erro', ok: false });
+    } catch { resultados.push({ nome: p.nome, url: 'Falha na conexão', ok: false }); }
+    if (i < projetos.length - 1) await new Promise(r => setTimeout(r, 600));
+  }
+
+  spinnerEl.style.display = 'none'; btnEl.textContent = 'Gerar links em fila';
+  const listEl = document.getElementById('filaResultList');
+  listEl.innerHTML = resultados.map(r => `
+    <div class="link-item${r.ok ? '' : ' archived'}">
+      <div class="link-item-info">
+        <div class="link-item-name">${escHtml(r.nome)}</div>
+        <div class="link-item-url">${escHtml(r.url)}</div>
+      </div>
+      ${r.ok ? `<button class="link-copy-btn" onclick="copyText('${escHtml(r.url)}',this)">Copiar</button>` : `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--error)">✕ erro</span>`}
+    </div>`).join('');
+  document.getElementById('filaResultado').style.display = 'block';
+  notify(`✓ ${resultados.filter(r => r.ok).length}/${resultados.length} links gerados`);
+  updateBadges();
+}
+
+/* LINKS PANEL */
+function renderLinksPanel() {
+  const allLinks = getLinks();
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  const query    = (document.getElementById('linksSearch')?.value || '').toLowerCase().trim();
+
+  document.getElementById('linksDayTabs').innerHTML = weekDays.map(day => {
+    const dayLinks= allLinks.filter(l => l.date === day && !l.hidden);
+    const count   = dayLinks.length;
+    const isToday = day === today;
+    const active  = day === selectedLinksDay;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="selectLinksDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}${count > 0 ? `<span class="day-count">${count}</span>` : ''}</button>`;
+  }).join('');
+
+  const dayActive   = allLinks.filter(l => l.date === selectedLinksDay && !l.hidden);
+  const dayArchived = allLinks.filter(l => l.date === selectedLinksDay && l.hidden);
+  const filtered    = query ? dayActive.filter(l   => l.name.toLowerCase().includes(query)) : dayActive;
+  const filteredArch= query ? dayArchived.filter(l  => l.name.toLowerCase().includes(query)) : dayArchived;
+
+  document.getElementById('linksActiveCount').textContent = dayActive.length ? `(${dayActive.length})` : '';
+
+  const activeEl = document.getElementById('linksListFull');
+  if (!filtered.length) {
+    activeEl.innerHTML = `<div class="links-empty">${query ? `Nenhum resultado para "${escHtml(query)}"` : 'Nenhum link ativo neste dia'}</div>`;
+  } else {
+    activeEl.innerHTML = filtered.map(l => `
+      <div class="link-item">
+        <div class="link-item-info">
+          <div class="link-item-name">${escHtml(l.name)}</div>
+          <div class="link-item-url">${escHtml(l.url)}</div>
+        </div>
+        <div class="link-item-time">${l.time}</div>
+        <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
+        <button class="link-edit-btn" onclick="openEditModal(${l.ts})" title="Editar links Figma">✎</button>
+        <button class="link-archive-btn" onclick="openArchiveModal(${l.ts})" title="Arquivar">✕</button>
+      </div>`).join('');
+  }
+
+  document.getElementById('archivedCount').textContent = dayArchived.length ? `(${dayArchived.length})` : '';
+  const archEl = document.getElementById('archivedListFull');
+  if (!filteredArch.length) {
+    archEl.innerHTML = `<div class="links-empty">${query ? 'Nenhum arquivado encontrado' : 'Nenhum link arquivado neste dia'}</div>`;
+  } else {
+    archEl.innerHTML = filteredArch.map(l => `
+      <div class="link-item archived">
+        <div class="link-item-info">
+          <div class="link-item-name">${escHtml(l.name)}</div>
+          <div class="link-item-url">${escHtml(l.url)}</div>
+        </div>
+        <div class="link-item-time">${l.time}</div>
+        <button class="link-copy-btn" onclick="copyText('${escHtml(l.url)}',this)">Copiar</button>
+        <button class="link-restore-btn" onclick="restoreLink(${l.ts})">↩ Restaurar</button>
+      </div>`).join('');
+  }
+}
+
+function selectLinksDay(day) { selectedLinksDay = day; renderLinksPanel(); }
+function toggleArchived() {
+  archivedOpen = !archivedOpen;
+  document.getElementById('archivedContent').classList.toggle('open', archivedOpen);
+  document.getElementById('archivedToggleBtn').textContent = archivedOpen ? 'Ocultar' : 'Mostrar';
+}
+function restoreLink(ts) {
+  const links = getLinks();
+  const idx   = links.findIndex(l => l.ts === ts);
+  if (idx < 0) return;
+  links[idx].hidden = false;
+  localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+  const link     = links[idx];
+  const normName = normalizeAlias(stripPrefix(link.name));
+  const weekData = getWeekData();
+  if (weekData && weekData.days[link.date]) {
+    weekData.days[link.date] = weekData.days[link.date].map(e => {
+      if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) return { ...e, prototipo: link.url };
+      return e;
+    });
+    saveWeekData(weekData);
+  }
+  renderLinksPanel();
+  notify('✓ Link restaurado');
+  updateBadges();
+}
+
+/* EDIT MODAL */
+function openEditModal(ts) {
+  editingTs = ts;
+  document.getElementById('editDeskUrl').value = '';
+  document.getElementById('editMobUrl').value  = '';
+  document.getElementById('editError').style.display = 'none';
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('open'); editingTs = null; }
+async function saveEditLink() {
+  const deskUrl = document.getElementById('editDeskUrl').value.trim();
+  const mobUrl  = document.getElementById('editMobUrl').value.trim();
+  const errEl   = document.getElementById('editError');
+  errEl.style.display = 'none';
+
+  if (!deskUrl && !mobUrl) { errEl.textContent = '// preencha ao menos um dos links'; errEl.style.display = 'block'; return; }
+  const links = getLinks();
+  const link  = links.find(l => l.ts === editingTs);
+  if (!link) { closeEditModal(); return; }
+
+  const alias = extractAliasFromUrl(link.url);
+  if (!alias) { errEl.textContent = '// não foi possível extrair o alias'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('editSaveBtn');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias, deskUrl: deskUrl || undefined, mobUrl: mobUrl || undefined })
+    });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); errEl.textContent = `// erro: ${d.error || res.status}`; errEl.style.display = 'block'; return; }
+    const idx = links.findIndex(l => l.ts === editingTs);
+    if (idx >= 0) {
+      if (deskUrl) links[idx].deskUrl = deskUrl;
+      if (mobUrl)  links[idx].mobUrl  = mobUrl;
+      localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+    }
+    closeEditModal(); notify('✓ Links atualizados'); renderLinksPanel();
+  } catch { errEl.textContent = '// falha na conexão'; errEl.style.display = 'block'; }
+  finally  { btn.textContent = 'Salvar'; btn.disabled = false; }
+}
+
+/* ARCHIVE MODAL */
+function openArchiveModal(ts) { archivingTs = ts; document.getElementById('archiveModal').classList.add('open'); }
+function closeArchiveModal()  { document.getElementById('archiveModal').classList.remove('open'); archivingTs = null; }
+async function confirmArchiveLink() {
+  const links = getLinks();
+  const link  = links.find(l => l.ts === archivingTs);
+  if (!link) { closeArchiveModal(); return; }
+  const idx = links.findIndex(l => l.ts === archivingTs);
+  if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
+  const today    = link.date || todayStr();
+  const weekData = getWeekData();
+  if (weekData && weekData.days[today]) {
+    weekData.days[today] = weekData.days[today].map(e => e.prototipo === link.url ? { ...e, prototipo: '' } : e);
+    saveWeekData(weekData);
+  }
+  closeArchiveModal(); renderLinksPanel(); notify('✓ Link arquivado'); updateBadges();
+}
+
+function closeDupModal() { document.getElementById('dupModal').classList.remove('open'); }
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = 'Copiar', 1800);
+  });
+}
+
+/* ════════════════════════════
+   EXCEL EXPORT
+════════════════════════════ */
+function downloadWb(wb, filename) {
+  try {
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob  = new Blob([wbout], { type: 'application/octet-stream' });
+    const url   = URL.createObjectURL(blob);
+    const a     = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch(err) { console.error(err); notify('// erro ao gerar Excel', 'err'); }
+}
+function makeHyperlink(url) {
+  if (!url) return { v: '', t: 's' };
+  return { f: `HYPERLINK("${url}","${url}")` };
+}
+function buildDaySheet(wb, sheetName, companies) {
+  const headers = ['Empresa','Site','WhatsApp','Protótipo','Status'];
+  const ws = {}; let row = 0;
+  headers.forEach((h, ci) => { ws[XLSX.utils.encode_cell({ r: row, c: ci })] = { v: h, t: 's' }; }); row++;
+
+  STATUS_OPTIONS.forEach(status => {
+    const group = companies.filter(e => (e.status || 'Não enviada') === status);
+    if (!group.length) return;
+    ws[XLSX.utils.encode_cell({ r: row, c: 0 })] = { v: `── ${status} (${group.length}) ──`, t: 's' };
+    for (let ci = 1; ci < 5; ci++) ws[XLSX.utils.encode_cell({ r: row, c: ci })] = { v: '', t: 's' }; row++;
+    group.forEach(e => {
+      const waUrl = buildWhatsapp(e.whatsapp);
+      const cells = [
+        { v: e.nome, t: 's' },
+        e.site    ? makeHyperlink(e.site)    : { v: '', t: 's' },
+        waUrl     ? makeHyperlink(waUrl)     : { v: '', t: 's' },
+        e.prototipo? makeHyperlink(e.prototipo):{ v: '', t: 's' },
+        { v: e.status || 'Não enviada', t: 's' }
+      ];
+      cells.forEach((cell, ci) => { ws[XLSX.utils.encode_cell({ r: row, c: ci })] = cell; }); row++;
+    });
+  });
+
+  ws['!ref']  = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: row - 1, c: 4 } });
+  ws['!cols'] = [{ wch: 30 }, { wch: 44 }, { wch: 46 }, { wch: 46 }, { wch: 16 }];
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+}
+
+function exportExcelWeek() {
+  const data     = ensureWeekData();
+  const weekDays = currentWeekDays();
+  const hasData  = weekDays.some(d => (data.days[d] || []).length > 0);
+  if (!hasData) { notify('Nenhuma empresa para exportar', 'err'); return; }
+  const wb = XLSX.utils.book_new();
+  weekDays.forEach(day => { buildDaySheet(wb, dayLabel(day, true), data.days[day] || []); });
+  downloadWb(wb, `studio-semana-${data.weekStart.replace(/\//g,'-')}.xlsx`);
+  notify('✓ Excel da semana gerado');
+}
+function exportExcelDay() {
+  const day      = document.getElementById('exportDaySelect').value;
+  if (!day)      { notify('Selecione um dia para exportar', 'warn'); return; }
+  const data     = ensureWeekData();
+  const companies= data.days[day] || [];
+  if (!companies.length) { notify('Nenhuma empresa neste dia', 'err'); return; }
+  const wb = XLSX.utils.book_new();
+  buildDaySheet(wb, dayLabel(day, true), companies);
+  downloadWb(wb, `studio-${day.replace(/\//g,'-')}.xlsx`);
+  notify(`✓ Excel de ${dayLabel(day)} gerado`);
+}
+function exportExcelHistory() {
+  const hist = getHistoryData();
+  if (!hist) { notify('Nenhum histórico', 'err'); return; }
+  const wb = XLSX.utils.book_new();
+  Object.keys(hist.days).sort().forEach(day => {
+    const companies = hist.days[day] || [];
+    if (!companies.length) return;
+    buildDaySheet(wb, dayLabel(day, true), companies);
+  });
+  downloadWb(wb, `studio-anterior-${hist.weekStart.replace(/\//g,'-')}.xlsx`);
+  notify('✓ Excel da semana anterior gerado');
+}
+
+/* ════════════════════════════
+   INIT
+════════════════════════════ */
+ensureWeekData();
+ensureExtData();
+extImportTargetDay = todayStr();
+extSelectedDay     = todayStr();
+renderInicio();
+updateBadges();
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('panel-links').classList.contains('active')) generate();
+});
+
+// JSON filter live preview
+document.getElementById('extJsonInput')?.addEventListener('input', updateFilterPreview);
+
+// Restore saved Gemini key
+const _savedKey = localStorage.getItem(GEMINI_KEY) || '';
+if (_savedKey) document.getElementById('geminiApiKey').value = _savedKey;
 </script>
 </body>
 </html>
