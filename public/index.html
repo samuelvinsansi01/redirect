@@ -796,7 +796,16 @@ function renderInicio() {
       return `<tr>
         <td class="td-name">${escHtml(e.nome)}</td>
         <td class="td-link">${hasSite ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>` : '<span class="td-missing">—</span>'}</td>
-        <td>${hasWa ? `<a href="${escHtml(waLink)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ok);text-decoration:none">📱 ${escHtml(e.whatsapp)}</a>` : '<span class="td-missing">—</span>'}</td>
+        <td>${hasWa
+          ? `<div style="display:flex;align-items:center;gap:5px">
+               <a href="${escHtml(waLink)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ok);text-decoration:none">📱 ${escHtml(e.whatsapp)}</a>
+               <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" title="Editar número">✏️</button>
+             </div>`
+          : `<div style="display:flex;align-items:center;gap:5px">
+               <span class="td-missing">—</span>
+               <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" title="Adicionar número">✏️</button>
+             </div>`
+        }</td>
         <td><select class="status-select" onchange="updateStatus('${e.id}','${selectedDay}',this.value)">${STATUS_OPTIONS.map(s=>`<option value="${s}"${(e.status||'Não enviada')===s?' selected':''}>${s}</option>`).join('')}</select></td>
         <td><button class="btn btn-ghost" style="font-size:9px;padding:4px 9px" onclick="showMsg('${e.id}','${selectedDay}')">Msg</button></td>
         <td><button class="del-btn" onclick="deleteEmpresa('${e.id}','${selectedDay}')">✕</button></td>
@@ -848,6 +857,48 @@ function updateStatus(id, day, status) {
   if (status === 'Enviada') emp.enviadoEm = todayStr();
   saveWeekData(data);
   updateBadges();
+}
+function editWhatsapp(id, day) {
+  const data = ensureWeekData();
+  const emp  = (data.days[day]||[]).find(e => e.id === id);
+  if (!emp) return;
+  const currentNum = emp.whatsapp || '';
+
+  // Encontra a célula do whatsapp pela linha da tabela
+  const allRows = document.querySelectorAll('#inicioTbody tr');
+  let targetCell = null;
+  allRows.forEach(row => {
+    const delBtn = row.querySelector('.del-btn');
+    if (delBtn && delBtn.getAttribute('onclick').includes(`'${id}'`)) {
+      targetCell = row.cells[2];
+    }
+  });
+  if (!targetCell) return;
+
+  targetCell.innerHTML = `
+    <div style="display:flex;align-items:center;gap:5px">
+      <input id="waInput_${id}" type="text" value="${escHtml(currentNum)}"
+        placeholder="ex: 11999999999"
+        style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;width:130px;outline:none"
+        onkeydown="if(event.key==='Enter')saveWhatsapp('${id}','${day}');if(event.key==='Escape')renderInicio();"
+      />
+      <button onclick="saveWhatsapp('${id}','${day}')" style="background:var(--accent);border:none;color:#0a0a0d;border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer;font-weight:700">✓</button>
+      <button onclick="renderInicio()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer">✕</button>
+    </div>`;
+  document.getElementById(`waInput_${id}`).focus();
+}
+function saveWhatsapp(id, day) {
+  const input = document.getElementById(`waInput_${id}`);
+  if (!input) return;
+  const raw = input.value.trim();
+  const data = ensureWeekData();
+  const emp  = (data.days[day]||[]).find(e => e.id === id);
+  if (!emp) return;
+  emp.whatsapp = raw;
+  saveWeekData(data);
+  updateBadges();
+  renderInicio();
+  notify(raw ? '✓ Número atualizado' : '✓ Número removido');
 }
 function deleteEmpresa(id, day) {
   const data = ensureWeekData();
