@@ -2263,6 +2263,22 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
         projetos.push(parsed);
         sucessos.push(parsed);
         numAtual++;
+
+        // Atualiza o whatsapp da empresa no weekData pelo site
+        const waGemini = parsed.header?.whatsapp || '';
+        if (waGemini) {
+          const wkData = ensureWeekData();
+          let updated = false;
+          Object.keys(wkData.days).forEach(day => {
+            wkData.days[day].forEach(emp => {
+              if ((emp.site || '').trim() === site && !emp.whatsapp) {
+                emp.whatsapp = waGemini;
+                updated = true;
+              }
+            });
+          });
+          if (updated) { saveWeekData(wkData); renderInicio(); updateBadges(); }
+        }
       }
     } catch (err) {
       erros.push(site);
@@ -2331,7 +2347,7 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
       const normNome = normalizeAlias(e.title);
       if (existingNomes.has(normNome)) { skipped++; return; }
       weekData.days[targetDay].push({
-        nome: e.title, site: e.website || '', whatsapp: e.phone || '',
+        nome: e.title, site: e.website || '', whatsapp: '',
         prototipo: '', status: 'Não enviada', criadoEm: targetDay,
       });
       existingNomes.add(normNome); added++;
