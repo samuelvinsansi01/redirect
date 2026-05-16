@@ -1288,10 +1288,17 @@ function addGerados(items) {
   const today = todayStr();
   const data  = ensureGeradosData();
   if (!data.days[today]) data.days[today] = [];
+  // Evita duplicatas pelo site_url
+  const existingSites = new Set(
+    data.days[today].map(e => (e.identidade?.site_url || e._siteUrl || '').trim().toLowerCase())
+  );
   let num = data.days[today].length + 1;
   items.forEach(item => {
+    const siteKey = (item.identidade?.site_url || item._siteUrl || '').trim().toLowerCase();
+    if (siteKey && existingSites.has(siteKey)) return; // duplicata, ignora
     item._num = num++;
     data.days[today].push(item);
+    if (siteKey) existingSites.add(siteKey);
   });
   saveGeradosData(data);
 }
@@ -2308,11 +2315,17 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
 
   // Salva nos Gerados
   if (sucessos.length) {
+    const antesCount = (ensureGeradosData().days[todayStr()] || []).length;
     addGerados(sucessos);
+    const depoisCount = (ensureGeradosData().days[todayStr()] || []).length;
+    const duplicatas  = sucessos.length - (depoisCount - antesCount);
     saveLastNumForToday(numAtual - 1);
     syncNumeroInicial();
     updateBadges();
-    notify(`✓ ${sucessos.length} gerado${sucessos.length>1?'s':''} · ${erros.length} erro${erros.length>1?'s':''}`);
+    const novos = depoisCount - antesCount;
+    let msg = `✓ ${novos} gerado${novos>1?'s':''} · ${erros.length} erro${erros.length>1?'s':''}`;
+    if (duplicatas > 0) msg += ` · ${duplicatas} duplicata${duplicatas>1?'s':''} ignorada${duplicatas>1?'s':''}`;
+    notify(msg);
   } else {
     notify('// nenhum projeto gerado com sucesso', 'err');
   }
