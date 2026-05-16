@@ -318,7 +318,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Empresa</th><th>Site</th><th>WhatsApp</th><th>Status</th><th>Msg</th><th></th></tr>
+              <tr><th>Empresa</th><th>Instagram</th><th>Site</th><th>WhatsApp</th><th>Status</th><th>Msg</th><th></th></tr>
             </thead>
             <tbody id="inicioTbody">
               <tr><td colspan="6" class="table-empty">Nenhuma empresa neste dia</td></tr>
@@ -814,7 +814,7 @@ function renderInicio() {
   const filtered = dayEmps.filter(e => (e.status||'Não enviada') === selectedStatus);
   const tbody = document.getElementById('inicioTbody');
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma empresa neste dia</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Nenhuma empresa neste dia</td></tr>';
   } else {
     tbody.innerHTML = filtered.map(e => {
       const waLink = buildWaLink(e.whatsapp);
@@ -822,6 +822,10 @@ function renderInicio() {
       const hasSite = !!e.site;
       return `<tr>
         <td class="td-name">${escHtml(e.nome)}</td>
+        <td class="td-link">${e.instagram
+          ? `<a href="${escHtml(e.instagram.startsWith('http') ? e.instagram : 'https://instagram.com/' + e.instagram.replace(/^@/,''))}" target="_blank" style="display:inline-flex;align-items:center;gap:4px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>${escHtml(e.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//,'@').replace(/\/$/,'').split('?')[0])}</a>`
+          : '<span class="td-missing">—</span>'
+        }</td>
         <td class="td-link">${hasSite ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>` : '<span class="td-missing">—</span>'}</td>
         <td>${hasWa
           ? `<div style="display:flex;align-items:center;gap:5px">
@@ -1104,6 +1108,21 @@ function hasValidPhone(item) {
 function extractSite(item) { return String(item.website || item.url || item.site || '').trim(); }
 function extractPhone(item) { return String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim(); }
 function extractName(item)  { return String(item.title || item.name || item.nome || '').trim(); }
+function extractInstagram(item) {
+  const ig = String(item.instagram || item.instagramUrl || item.instagram_url || item.social_instagram || '').trim();
+  if (ig) return ig;
+  // tenta achar em socialMedia[] ou profiles[]
+  const socials = item.socialMedia || item.profiles || item.social || [];
+  if (Array.isArray(socials)) {
+    const found = socials.find(s => {
+      const url = String(s.url || s.link || s.href || '').toLowerCase();
+      const type = String(s.type || s.platform || s.name || '').toLowerCase();
+      return url.includes('instagram.com') || type.includes('instagram');
+    });
+    if (found) return String(found.url || found.link || found.href || '').trim();
+  }
+  return '';
+}
 
 /* ════════════════════════════
    FILTRO — CATEGORIA CONTABILIDADE
@@ -1266,8 +1285,9 @@ function importarLeads() {
     const phone = extractPhone(item);
     if (!nome) { skipped++; return; }
     if (existNomes.has(normalizeStr(nome))) { skipped++; return; }
+    const instagram = extractInstagram(item);
     data.days[importTargetDay].push({
-      id: genId(), nome, site, whatsapp: phone,
+      id: genId(), nome, site, whatsapp: phone, instagram,
       status: 'Não enviada', criadoEm: importTargetDay,
     });
     existNomes.add(normalizeStr(nome));
