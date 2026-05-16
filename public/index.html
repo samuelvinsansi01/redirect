@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Studio — Vin</title>
+<title>Controle de Prospecção - Samuel Vinsansi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1220,15 +1220,15 @@ function saveLastNumForToday(lastNum) {
 
 /** Preenche o campo e mostra hint */
 function syncNumeroInicial() {
+  // Elementos removidos do HTML — função mantida para compatibilidade com saveLastNumForToday
   const next = getNextNumForToday();
-  document.getElementById('puxarNumeroInicial').value = next;
-  const d = getCounterData();
-  const today = todayStr();
-  const hintEl = document.getElementById('numAutoHint');
-  if (d && d.date === today && d.lastNum > 0) {
-    hintEl.textContent = `// último hoje: ${d.lastNum}`;
-  } else {
-    hintEl.textContent = '// primeiro do dia';
+  const inp = document.getElementById('puxarNumeroInicial');
+  const hint = document.getElementById('numAutoHint');
+  if (inp) inp.value = next;
+  if (hint) {
+    const d = getCounterData();
+    const today = todayStr();
+    hint.textContent = (d && d.date === today && d.lastNum > 0) ? `// último hoje: ${d.lastNum}` : '// primeiro do dia';
   }
 }
 
