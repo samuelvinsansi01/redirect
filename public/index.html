@@ -441,6 +441,44 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 
 /* Bloco send-to-inicio modal */
 .bloco-modal .modal{max-width:520px;}
+
+/* \u2550\u2550 DISPARO WHATSAPP \u2550\u2550 */
+.disparo-empresa-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.disparo-empresa-card.na-fila{border-color:var(--accent-border);background:var(--accent-dim);}
+.disparo-empresa-header{display:flex;align-items:center;gap:10px;}
+.disparo-empresa-nome{font-size:13px;font-weight:700;flex:1;}
+.disparo-empresa-wa{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);}
+.disparo-empresa-sem-wa{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);font-style:italic;}
+.disparo-add-btn{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all 0.18s;flex-shrink:0;}
+.disparo-add-btn:hover{background:var(--accent);color:#0a0a0d;}
+.disparo-add-btn.na-fila{background:var(--surface2);border-color:var(--border2);color:var(--muted);}
+.fila-item{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px;position:relative;}
+.fila-item.enviado{border-color:rgba(184,240,89,0.4);opacity:0.7;}
+.fila-item.erro{border-color:rgba(255,92,92,0.4);}
+.fila-item.enviando{border-color:var(--accent);animation:pulseItem 1s ease-in-out infinite;}
+@keyframes pulseItem{0%,100%{box-shadow:0 0 0 0 rgba(184,240,89,0.2)}50%{box-shadow:0 0 0 6px rgba(184,240,89,0)}}
+.fila-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fila-item-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);width:20px;flex-shrink:0;}
+.fila-item-nome{font-size:12px;font-weight:700;flex:1;}
+.fila-item-wa{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);}
+.fila-item-status{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:100px;flex-shrink:0;}
+.fila-item-status.aguardando{background:var(--surface3);color:var(--muted);}
+.fila-item-status.enviando{background:rgba(184,240,89,0.12);color:var(--accent);}
+.fila-item-status.enviado{background:rgba(184,240,89,0.2);color:var(--accent);}
+.fila-item-status.erro{background:rgba(255,92,92,0.1);color:var(--error);}
+.fila-item-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:700px){.fila-item-body{grid-template-columns:1fr;}}
+.fila-msg-area{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px;font-family:'DM Mono',monospace;font-size:9px;line-height:1.7;color:var(--text);white-space:pre-wrap;min-height:80px;position:relative;}
+.fila-msg-shuffle{position:absolute;top:6px;right:6px;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:4px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;transition:all 0.15s;}
+.fila-msg-shuffle:hover{border-color:var(--accent);color:var(--accent);}
+.fila-img-area{background:var(--bg);border:2px dashed var(--border2);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:80px;cursor:pointer;transition:border-color 0.18s;position:relative;overflow:hidden;}
+.fila-img-area:hover{border-color:var(--accent);}
+.fila-img-area.has-img{border-style:solid;border-color:var(--accent-border);}
+.fila-img-area img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:5px;}
+.fila-img-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:center;z-index:1;}
+.fila-img-input{display:none;}
+.fila-remove-btn{position:absolute;top:8px;right:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted);border-radius:4px;font-size:10px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;z-index:2;}
+.fila-remove-btn:hover{border-color:var(--error);color:var(--error);}
 </style>
 </head>
 <body>
@@ -481,6 +519,12 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <div class="nav-icon">🔗</div>
       <span class="nav-label">Links & Redirect</span>
       <span class="nav-badge" id="badge-links">0</span>
+    </div>
+    <div class="nav-section-label">Envio</div>
+    <div class="nav-item" onclick="switchPanel('disparo')" data-label="Disparo WhatsApp">
+      <div class="nav-icon">🟢</div>
+      <span class="nav-label">Disparo WhatsApp</span>
+      <span class="nav-badge" id="badge-disparo">0</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -850,6 +894,79 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
+<!-- \u2500\u2500 DISPARO WHATSAPP \u2500\u2500 -->
+<div class="panel" id="panel-disparo">
+  <div class="page-header">
+    <div class="page-title">Disparo <span>WhatsApp.</span></div>
+    <div class="page-sub">// empresas n\u00e3o enviadas \u00b7 mensagem aleat\u00f3ria \u00b7 imagem por empresa</div>
+  </div>
+
+  <!-- CONFIG EVOLUTION API -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Configura\u00e7\u00e3o Evolution API</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="field-group" style="flex:1;min-width:200px">
+        <label>URL da API</label>
+        <input type="text" id="evoUrl" placeholder="http://localhost:8080" oninput="saveEvoConfig()"/>
+      </div>
+      <div class="field-group" style="flex:1;min-width:200px">
+        <label>API Key</label>
+        <input type="password" id="evoKey" placeholder="minha-chave-secreta" oninput="saveEvoConfig()"/>
+      </div>
+      <div class="field-group" style="min-width:160px">
+        <label>Nome da Inst\u00e2ncia</label>
+        <input type="text" id="evoInstance" placeholder="minha-instancia" oninput="saveEvoConfig()"/>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+      <button class="btn btn-ghost" style="font-size:10px" onclick="testarConexaoEvo()">Testar conex\u00e3o</button>
+      <span id="evoStatus" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <!-- SELETOR DE DIA -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Empresas para disparar</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px">Mostrando apenas empresas com status <span style="color:var(--accent)">"N\u00e3o enviada"</span> que possuem WhatsApp</div>
+    <div class="week-tabs" id="disparoDayTabs"></div>
+    <div id="disparoEmpresas" style="display:flex;flex-direction:column;gap:10px">
+      <div class="links-empty">Nenhuma empresa dispon\u00edvel.</div>
+    </div>
+  </div>
+
+  <!-- FILA DE DISPARO -->
+  <div class="card">
+    <div class="card-title">
+      Fila de disparo
+      <span id="filaCount" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px">(0 empresas)</span>
+    </div>
+    <div id="filaVazia" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:24px">
+      \u2190 adicione empresas acima para montar a fila
+    </div>
+    <div id="filaItens" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="filaAcoes" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <div class="field-group" style="min-width:180px">
+          <label>Delay entre envios</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="number" id="delayMin" value="30" min="5" style="width:70px" oninput="saveEvoConfig()"/> 
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">a</span>
+            <input type="number" id="delayMax" value="90" min="5" style="width:70px" oninput="saveEvoConfig()"/>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">seg</span>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn btn-danger" onclick="limparFila()">Limpar fila</button>
+        <button class="btn btn-primary" style="width:auto;min-width:160px" id="btnDisparar" onclick="iniciarDisparo()">
+          <div class="spinner" id="disparoSpinner"></div>
+          <span id="disparoBtn">🟢 Disparar fila</span>
+        </button>
+      </div>
+      <div id="disparoLog" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- ═══ MODALS ═══ -->
@@ -1124,7 +1241,7 @@ function notify(msg, type) {
 /* ════════════════════════════
    NAVIGATION
 ════════════════════════════ */
-const PANELS = ['inicio', 'extracao', 'puxar', 'gerados', 'links'];
+const PANELS = ['inicio', 'extracao', 'puxar', 'gerados', 'links', 'disparo'];
 
 function switchPanel(name) {
   PANELS.forEach(p => {
@@ -1138,6 +1255,7 @@ function switchPanel(name) {
   if (name === 'links')    renderLinksPanel();
   if (name === 'puxar')    renderPuxarPanel();
   if (name === 'gerados')  renderGeradosPanel();
+  if (name === 'disparo')  renderDisparoPanel();
   updateBadges();
 }
 
@@ -1153,6 +1271,12 @@ function updateBadges() {
   const today = todayStr();
   const links = getLinks().filter(l => l.date === today && !l.hidden);
   document.getElementById('badge-links').textContent = links.length;
+  const badgeDisparo = document.getElementById('badge-disparo');
+  if (badgeDisparo) {
+    const dispData = ensureWeekData();
+    const naoEnv = Object.values(dispData.days).flat().filter(e => (e.status||'Não enviada')==='Não enviada' && e.whatsapp).length;
+    badgeDisparo.textContent = naoEnv;
+  }
 
   const geradosData = ensureGeradosData();
   const geradosHoje = (geradosData.days[today] || []).length;
@@ -2776,6 +2900,348 @@ async function saveEditLink() {
   finally  { btn.textContent = 'Salvar'; btn.disabled = false; }
 }
 
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   DISPARO WHATSAPP
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+const EVO_CONFIG_KEY = 'vin_evo_config';
+let filaDisparo = []; // [{id, nome, whatsapp, mensagem, templateIdx, imagemBase64, imagemNome, status}]
+let disparoEmAndamento = false;
+let disparoDaySelected = todayStr();
+
+function loadEvoConfig() {
+  try { return JSON.parse(localStorage.getItem(EVO_CONFIG_KEY) || '{}'); } catch { return {}; }
+}
+function saveEvoConfig() {
+  const cfg = {
+    url: document.getElementById('evoUrl')?.value || '',
+    key: document.getElementById('evoKey')?.value || '',
+    instance: document.getElementById('evoInstance')?.value || '',
+    delayMin: document.getElementById('delayMin')?.value || '30',
+    delayMax: document.getElementById('delayMax')?.value || '90',
+  };
+  localStorage.setItem(EVO_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+function initEvoConfig() {
+  const cfg = loadEvoConfig();
+  if (cfg.url)      document.getElementById('evoUrl').value      = cfg.url;
+  if (cfg.key)      document.getElementById('evoKey').value      = cfg.key;
+  if (cfg.instance) document.getElementById('evoInstance').value = cfg.instance;
+  if (cfg.delayMin) document.getElementById('delayMin').value    = cfg.delayMin;
+  if (cfg.delayMax) document.getElementById('delayMax').value    = cfg.delayMax;
+}
+
+async function testarConexaoEvo() {
+  const cfg = loadEvoConfig();
+  const statusEl = document.getElementById('evoStatus');
+  if (!cfg.url || !cfg.key || !cfg.instance) {
+    statusEl.innerHTML = '<span style="color:var(--error)">// preencha URL, Key e Inst\u00e2ncia</span>'; return;
+  }
+  statusEl.innerHTML = '<span style="color:var(--muted)">// testando...</span>';
+  try {
+    const res = await fetch(`${cfg.url}/instance/connectionState/${cfg.instance}`, {
+      headers: { 'apikey': cfg.key }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const state = data?.instance?.state || data?.state || 'desconhecido';
+      const ok = state === 'open';
+      statusEl.innerHTML = ok
+        ? '<span style="color:var(--accent)">\u2713 conectado \u00b7 ' + state + '</span>'
+        : '<span style="color:var(--warning)">// ' + state + ' \u2014 verifique o QR Code</span>';
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--error)">// erro ' + res.status + '</span>';
+    }
+  } catch {
+    statusEl.innerHTML = '<span style="color:var(--error)">// falha de conex\u00e3o \u2014 API rodando?</span>';
+  }
+}
+
+function renderDisparoPanel() {
+  initEvoConfig();
+  renderDisparoDayTabs();
+  renderDisparoEmpresas();
+  renderFila();
+}
+
+function renderDisparoDayTabs() {
+  const tabs = document.getElementById('disparoDayTabs');
+  if (!tabs) return;
+  const days = currentWeekDays();
+  tabs.innerHTML = days.map(d => {
+    const data  = ensureWeekData();
+    const emps  = (data.days[d] || []).filter(e => (e.status || 'N\u00e3o enviada') === 'N\u00e3o enviada' && e.whatsapp);
+    const active = d === disparoDaySelected ? ' active' : '';
+    return `<div class="week-tab${active}" onclick="disparoSetDay('${d}')">${dayLabel(d)}<span class="day-count">${emps.length}</span></div>`;
+  }).join('');
+}
+
+function disparoSetDay(day) {
+  disparoDaySelected = day;
+  renderDisparoDayTabs();
+  renderDisparoEmpresas();
+}
+
+function renderDisparoEmpresas() {
+  const container = document.getElementById('disparoEmpresas');
+  if (!container) return;
+  const data  = ensureWeekData();
+  const emps  = (data.days[disparoDaySelected] || []).filter(e => (e.status || 'N\u00e3o enviada') === 'N\u00e3o enviada');
+
+  if (!emps.length) {
+    container.innerHTML = '<div class="links-empty">Nenhuma empresa com status "N\u00e3o enviada" neste dia.</div>';
+    return;
+  }
+
+  const naFilaIds = new Set(filaDisparo.map(f => f.id));
+
+  container.innerHTML = emps.map(e => {
+    const naFila = naFilaIds.has(e.id);
+    const waNum  = e.whatsapp ? e.whatsapp.replace(/\D/g,'') : '';
+    return `
+    <div class="disparo-empresa-card${naFila ? ' na-fila' : ''}" id="decard-${e.id}">
+      <div class="disparo-empresa-header">
+        <div style="flex:1">
+          <div class="disparo-empresa-nome">${escHtml(e.nome)}</div>
+          ${waNum
+            ? `<div class="disparo-empresa-wa">📱 +${waNum}</div>`
+            : `<div class="disparo-empresa-sem-wa">sem WhatsApp \u2014 n\u00e3o pode ser adicionada</div>`}
+        </div>
+        ${waNum
+          ? `<button class="disparo-add-btn${naFila ? ' na-fila' : ''}" onclick="toggleFilaEmpresa('${e.id}')">${naFila ? '\u2713 na fila' : '+ Adicionar'}</button>`
+          : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFilaEmpresa(empId) {
+  const idx = filaDisparo.findIndex(f => f.id === empId);
+  if (idx >= 0) {
+    filaDisparo.splice(idx, 1);
+  } else {
+    const data = ensureWeekData();
+    const all  = Object.values(data.days).flat();
+    const emp  = all.find(e => e.id === empId);
+    if (!emp || !emp.whatsapp) return;
+    const { text, idx: tIdx } = pickRandomTemplate(emp.nome);
+    filaDisparo.push({
+      id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp,
+      mensagem: text, templateIdx: tIdx,
+      imagemBase64: null, imagemNome: null, status: 'aguardando'
+    });
+  }
+  renderDisparoEmpresas();
+  renderFila();
+}
+
+function renderFila() {
+  const countEl  = document.getElementById('filaCount');
+  const vaziEl   = document.getElementById('filaVazia');
+  const itensEl  = document.getElementById('filaItens');
+  const acoesEl  = document.getElementById('filaAcoes');
+  if (!countEl) return;
+
+  countEl.textContent = `(${filaDisparo.length} empresa${filaDisparo.length !== 1 ? 's' : ''})`;
+  const vazia = filaDisparo.length === 0;
+  vaziEl.style.display  = vazia ? 'block' : 'none';
+  itensEl.style.display = vazia ? 'none' : 'flex';
+  acoesEl.style.display = vazia ? 'none' : 'block';
+  if (vazia) { itensEl.innerHTML = ''; return; }
+
+  itensEl.innerHTML = filaDisparo.map((item, i) => {
+    const waNum = item.whatsapp.replace(/\D/g,'');
+    const statusLabel = { aguardando: 'aguardando', enviando: 'enviando...', enviado: '\u2713 enviado', erro: '\u2717 erro' }[item.status] || item.status;
+    return `
+    <div class="fila-item ${item.status}" id="fila-item-${item.id}">
+      <button class="fila-remove-btn" onclick="removerDaFila('${item.id}')" title="Remover">\u00d7</button>
+      <div class="fila-item-header">
+        <div class="fila-item-num">${i+1}</div>
+        <div class="fila-item-nome">${escHtml(item.nome)}</div>
+        <div class="fila-item-wa">+${waNum}</div>
+        <div class="fila-item-status ${item.status}">${statusLabel}</div>
+      </div>
+      <div class="fila-item-body">
+        <div style="position:relative">
+          <div class="fila-msg-area" id="fila-msg-${item.id}">${escHtml(item.mensagem)}</div>
+          <button class="fila-msg-shuffle" onclick="shuffleFilaMsg('${item.id}')">\u21bb sortear</button>
+        </div>
+        <label class="fila-img-area${item.imagemBase64 ? ' has-img' : ''}" id="fila-img-${item.id}" title="Clique para enviar imagem">
+          ${item.imagemBase64 ? `<img src="${item.imagemBase64}" alt="imagem"/>` : ''}
+          <div class="fila-img-label">${item.imagemBase64 ? `<span style="background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:4px;position:relative">${escHtml(item.imagemNome || 'imagem.jpg')}</span>` : '🖼\ufe0f Clique para enviar JPG'}</div>
+          <input type="file" accept="image/jpeg,image/jpg,image/png" class="fila-img-input" onchange="onFilaImgChange('${item.id}', this)"/>
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shuffleFilaMsg(empId) {
+  const item = filaDisparo.find(f => f.id === empId);
+  if (!item) return;
+  const { text, idx } = pickOtherTemplate(item.nome, item.templateIdx);
+  item.mensagem = text;
+  item.templateIdx = idx;
+  const msgEl = document.getElementById(`fila-msg-${empId}`);
+  if (msgEl) msgEl.textContent = item.mensagem;
+}
+
+function onFilaImgChange(empId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const item = filaDisparo.find(f => f.id === empId);
+    if (!item) return;
+    item.imagemBase64 = e.target.result;
+    item.imagemNome   = file.name;
+    renderFila();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerDaFila(empId) {
+  filaDisparo = filaDisparo.filter(f => f.id !== empId);
+  renderDisparoEmpresas();
+  renderFila();
+}
+
+function limparFila() {
+  if (disparoEmAndamento) { notify('// disparo em andamento', 'warn'); return; }
+  filaDisparo = [];
+  renderDisparoEmpresas();
+  renderFila();
+}
+
+async function iniciarDisparo() {
+  if (disparoEmAndamento) return;
+  const cfg = loadEvoConfig();
+  if (!cfg.url || !cfg.key || !cfg.instance) {
+    notify('// configure a Evolution API primeiro', 'err'); return;
+  }
+  const semImagem = filaDisparo.filter(f => !f.imagemBase64);
+  if (semImagem.length) {
+    notify(`// ${semImagem.length} empresa${semImagem.length>1?'s':''} sem imagem`, 'err'); return;
+  }
+  if (!filaDisparo.length) { notify('// fila vazia', 'warn'); return; }
+
+  disparoEmAndamento = true;
+  document.getElementById('btnDisparar').disabled = true;
+  document.getElementById('disparoSpinner').style.display = 'block';
+  document.getElementById('disparoBtn').textContent = 'Disparando...';
+  const logEl = document.getElementById('disparoLog');
+  logEl.style.display = 'block';
+  logEl.innerHTML = '';
+
+  const delayMin = parseInt(document.getElementById('delayMin').value) || 30;
+  const delayMax = parseInt(document.getElementById('delayMax').value) || 90;
+
+  function log(msg) {
+    const line = document.createElement('div');
+    line.style.marginBottom = '3px';
+    line.innerHTML = `<span style="color:var(--muted)">[${timeStr()}]</span> ${msg}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  log(`Iniciando disparo de ${filaDisparo.length} mensagem${filaDisparo.length>1?'s':''}...`);
+
+  for (let i = 0; i < filaDisparo.length; i++) {
+    const item = filaDisparo[i];
+    if (item.status === 'enviado') continue;
+
+    // Atualiza status visual
+    item.status = 'enviando';
+    atualizarStatusFilaItem(item.id, 'enviando');
+    log(`Enviando para <span style="color:var(--text)">${escHtml(item.nome)}</span>...`);
+
+    try {
+      const waNum = item.whatsapp.replace(/\D/g,'');
+      const numero = waNum.startsWith('55') ? waNum : '55' + waNum;
+
+      // Extrai base64 puro sem o prefixo data:image/...;base64,
+      const base64Data = item.imagemBase64.split(',')[1];
+      const mimeType   = item.imagemBase64.split(';')[0].replace('data:','');
+
+      const payload = {
+        number: numero,
+        mediatype: 'image',
+        mimetype: mimeType,
+        caption: item.mensagem,
+        media: base64Data,
+        fileName: item.imagemNome || 'imagem.jpg'
+      };
+
+      const res = await fetch(`${cfg.url}/message/sendMedia/${cfg.instance}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': cfg.key },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        item.status = 'enviado';
+        atualizarStatusFilaItem(item.id, 'enviado');
+        log(`<span style="color:var(--accent)">\u2713 Enviado para ${escHtml(item.nome)}</span>`);
+        // Atualiza status da empresa no weekData
+        atualizarStatusEmpresa(item.id, 'Enviada');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        item.status = 'erro';
+        atualizarStatusFilaItem(item.id, 'erro');
+        log(`<span style="color:var(--error)">\u2717 Erro ${res.status} \u2014 ${err.message || 'falha'}</span>`);
+      }
+    } catch(e) {
+      item.status = 'erro';
+      atualizarStatusFilaItem(item.id, 'erro');
+      log(`<span style="color:var(--error)">\u2717 Falha de conex\u00e3o \u2014 ${e.message}</span>`);
+    }
+
+    // Delay aleat\u00f3rio antes do pr\u00f3ximo (exceto no \u00faltimo)
+    if (i < filaDisparo.length - 1) {
+      const delay = (delayMin + Math.random() * (delayMax - delayMin)) * 1000;
+      const seg   = Math.round(delay / 1000);
+      log(`Aguardando ${seg}s antes do pr\u00f3ximo...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  const enviados = filaDisparo.filter(f => f.status === 'enviado').length;
+  const erros    = filaDisparo.filter(f => f.status === 'erro').length;
+  log(`<span style="color:var(--accent)">\u2713 Disparo conclu\u00eddo! ${enviados} enviado${enviados>1?'s':''} \u00b7 ${erros} erro${erros>1?'s':''}</span>`);
+  notify(`\u2713 ${enviados} enviado${enviados>1?'s':''} \u00b7 ${erros} com erro`);
+
+  disparoEmAndamento = false;
+  document.getElementById('btnDisparar').disabled = false;
+  document.getElementById('disparoSpinner').style.display = 'none';
+  document.getElementById('disparoBtn').textContent = '🟢 Disparar fila';
+  renderInicio();
+  renderDisparoDayTabs();
+}
+
+function atualizarStatusFilaItem(empId, status) {
+  const itemEl = document.getElementById(`fila-item-${empId}`);
+  if (!itemEl) return;
+  itemEl.className = `fila-item ${status}`;
+  const statusEl = itemEl.querySelector('.fila-item-status');
+  if (!statusEl) return;
+  const labels = { aguardando: 'aguardando', enviando: 'enviando...', enviado: '\u2713 enviado', erro: '\u2717 erro' };
+  statusEl.className = `fila-item-status ${status}`;
+  statusEl.textContent = labels[status] || status;
+}
+
+function atualizarStatusEmpresa(empId, novoStatus) {
+  const data = ensureWeekData();
+  Object.keys(data.days).forEach(day => {
+    const idx = data.days[day].findIndex(e => e.id === empId);
+    if (idx >= 0) {
+      data.days[day][idx].status = novoStatus;
+      data.days[day][idx].prospectadoEm = todayStr();
+    }
+  });
+  saveWeekData(data);
+  updateBadges();
+}
+
 /* ARCHIVE MODAL */
 function openArchiveModal(ts) { archivingTs = ts; document.getElementById('archiveModal').classList.add('open'); }
 function closeArchiveModal()  { document.getElementById('archiveModal').classList.remove('open'); archivingTs = null; }
@@ -2895,6 +3361,8 @@ ensureWeekData();
 ensureExtData();
 ensureGeradosData();
 ensureErrosData();
+// Pré-carregar config da Evolution API se já salva
+(function(){ const cfg = loadEvoConfig(); if (document.getElementById('evoUrl') && cfg.url) { document.getElementById('evoUrl').value = cfg.url||''; document.getElementById('evoKey').value = cfg.key||''; document.getElementById('evoInstance').value = cfg.instance||''; document.getElementById('delayMin').value = cfg.delayMin||'30'; document.getElementById('delayMax').value = cfg.delayMax||'90'; } })();
 extImportTargetDay = todayStr();
 extSelectedDay     = todayStr();
 renderInicio();
