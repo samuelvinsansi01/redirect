@@ -525,7 +525,7 @@ const HISTORY_KEY   = 'vs_history_v1';
 const EVO_KEY       = 'vs_evo_config';
 const SIDEBAR_KEY   = 'vs_sidebar';
 
-const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
+const STATUS_OPTIONS = ['Não enviada','Em fila','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 const MSG_TEMPLATES = [
@@ -634,7 +634,7 @@ Faz sentido conversarmos?`,
    STATE
 ════════════════════════════ */
 let selectedDay      = todayStr();
-let selectedStatus   = 'Todos';
+let selectedStatus   = 'Não enviada';
 let importTargetDay  = todayStr();
 let disparoDay       = todayStr();
 let msgEmpresaId     = null;
@@ -774,17 +774,16 @@ function renderInicio() {
   // Status tabs
   const dayEmps = data.days[selectedDay] || [];
   const statusTabsEl = document.getElementById('inicioStatusTabs');
-  const allStatuses = ['Todos', ...STATUS_OPTIONS];
-  statusTabsEl.innerHTML = allStatuses.map(st => {
-    const count = st === 'Todos' ? dayEmps.length : dayEmps.filter(e => (e.status||'Não enviada') === st).length;
-    if (count === 0 && st !== 'Todos' && st !== 'Não enviada') return '';
+  statusTabsEl.innerHTML = STATUS_OPTIONS.map(st => {
+    const count = dayEmps.filter(e => (e.status||'Não enviada') === st).length;
+    if (count === 0 && st !== 'Não enviada') return '';
     return `<div class="status-tab${selectedStatus===st?' active':''}" onclick="setStatus('${st}')">
       ${st} <span class="st-count">${count}</span>
     </div>`;
   }).join('');
 
   // Table
-  const filtered = selectedStatus === 'Todos' ? dayEmps : dayEmps.filter(e => (e.status||'Não enviada') === selectedStatus);
+  const filtered = dayEmps.filter(e => (e.status||'Não enviada') === selectedStatus);
   const tbody = document.getElementById('inicioTbody');
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhuma empresa neste dia</td></tr>';
@@ -820,7 +819,7 @@ function renderInicio() {
   renderHistory();
 }
 
-function setDay(day)    { selectedDay = day; selectedStatus = 'Todos'; renderInicio(); }
+function setDay(day)    { selectedDay = day; selectedStatus = 'Não enviada'; renderInicio(); }
 function setStatus(st)  { selectedStatus = st; renderInicio(); }
 
 function showMsg(id, day) {
@@ -1228,16 +1227,30 @@ function toggleFila(empId) {
   const idx = filaDisparo.findIndex(f => f.id === empId);
   if (idx >= 0) {
     filaDisparo.splice(idx, 1);
+    // Volta pra Não enviada ao remover da fila
+    const data = ensureWeekData();
+    Object.keys(data.days).forEach(day => {
+      const emp = (data.days[day]||[]).find(e => e.id === empId);
+      if (emp && emp.status === 'Em fila') emp.status = 'Não enviada';
+    });
+    saveWeekData(data);
   } else {
     const data = ensureWeekData();
     const all  = Object.values(data.days).flat();
     const emp  = all.find(e => e.id === empId);
     if (!emp || !emp.whatsapp) return;
     const { text, idx: tIdx } = pickTemplate(emp.nome);
-    filaDisparo.push({ id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp, mensagem: text, templateIdx: tIdx, imagemBase64: null, imagemNome: null, status: 'aguardando' });
+    filaDisparo.push({ id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp, mensagem: text, templateIdx: tIdx, status: 'aguardando' });
+    // Marca como Em fila
+    Object.keys(data.days).forEach(day => {
+      const e = (data.days[day]||[]).find(e => e.id === empId);
+      if (e) e.status = 'Em fila';
+    });
+    saveWeekData(data);
   }
   renderDisparoEmpresas();
   renderFila();
+  updateBadges();
 }
 
 function renderFila() {
@@ -1290,11 +1303,30 @@ function onImgChange(id, input) {
   };
   reader.readAsDataURL(file);
 }
-function removerFila(id) { filaDisparo = filaDisparo.filter(f => f.id !== id); renderDisparoEmpresas(); renderFila(); }
+function removerFila(id) {
+  filaDisparo = filaDisparo.filter(f => f.id !== id);
+  const data = ensureWeekData();
+  Object.keys(data.days).forEach(day => {
+    const emp = (data.days[day]||[]).find(e => e.id === id);
+    if (emp && emp.status === 'Em fila') emp.status = 'Não enviada';
+  });
+  saveWeekData(data);
+  updateBadges();
+  renderDisparoEmpresas();
+  renderFila();
+}
 function limparFila() {
   if (disparoEmAndamento) { notify('// disparo em andamento', 'warn'); return; }
   if (aguardandoLote) cancelarLotes();
-  filaDisparo = []; renderDisparoEmpresas(); renderFila();
+  const data = ensureWeekData();
+  Object.keys(data.days).forEach(day => {
+    (data.days[day]||[]).forEach(emp => { if (emp.status === 'Em fila') emp.status = 'Não enviada'; });
+  });
+  saveWeekData(data);
+  filaDisparo = [];
+  updateBadges();
+  renderDisparoEmpresas();
+  renderFila();
 }
 
 /* ════════════════════════════
