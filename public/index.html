@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Controle de Prospecção - Samuel Vinsansi</title>
+<title>Studio — Vin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -736,29 +736,51 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel" id="panel-gerados">
   <div class="page-header">
     <div class="page-title">Projetos <span>Gerados.</span></div>
-    <div class="page-sub">// acumulado diário · blocos de 10 · json por bloco</div>
+    <div class="page-sub">// erros para retry · sucessos acumulados · json por bloco</div>
   </div>
   <div class="card">
     <div class="week-tabs" id="geradosDayTabs"></div>
     <div class="ext-stats" id="geradosStats"></div>
-    <div class="view-toggle" style="margin-bottom:18px">
-      <button class="view-btn active" id="geradosBtnLinks" onclick="switchGeradosView('links')">Links</button>
-      <button class="view-btn" id="geradosBtnJson" onclick="switchGeradosView('json')">JSON</button>
+
+    <!-- Inner tabs: Gerar | Gerados -->
+    <div class="inner-tabs" style="margin-bottom:20px">
+      <button class="inner-tab" id="itab-gerar" onclick="switchGeradosInnerTab('gerar')">// Gerar</button>
+      <button class="inner-tab active" id="itab-gerados" onclick="switchGeradosInnerTab('gerados')">Gerados</button>
     </div>
-    <!-- LINKS VIEW -->
-    <div id="geradosLinksView">
-      <div class="blocos-container" id="geradosBlocosLinks">
-        <div class="links-empty">Nenhum projeto gerado hoje.</div>
+
+    <!-- ══ ABA GERAR (erros/pendentes) ══ -->
+    <div class="inner-panel" id="gtab-gerar">
+      <div class="view-toggle" style="margin-bottom:16px">
+        <button class="view-btn active" id="gerarBtnLinks" onclick="switchGerarView('links')">Links</button>
+      </div>
+      <div id="gerarLinksView">
+        <div class="blocos-container" id="gerarBlocosLinks">
+          <div class="links-empty">Nenhum erro registrado hoje.</div>
+        </div>
       </div>
     </div>
-    <!-- JSON VIEW -->
-    <div id="geradosJsonView" style="display:none">
-      <div class="bloco-select-tabs" id="geradosJsonBlocoTabs"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span class="gemini-status" id="geradosJsonStats" style="margin-top:0"></span>
-        <button class="btn btn-ghost" style="font-size:10px" onclick="copyGeradosJson()">Copiar JSON do bloco</button>
+
+    <!-- ══ ABA GERADOS (sucessos) ══ -->
+    <div class="inner-panel active" id="gtab-gerados">
+      <div class="view-toggle" style="margin-bottom:16px">
+        <button class="view-btn active" id="geradosBtnLinks" onclick="switchGeradosView('links')">Links</button>
+        <button class="view-btn" id="geradosBtnJson" onclick="switchGeradosView('json')">JSON</button>
       </div>
-      <textarea class="json-out" id="geradosJsonOutput" readonly style="min-height:400px"></textarea>
+      <!-- LINKS VIEW -->
+      <div id="geradosLinksView">
+        <div class="blocos-container" id="geradosBlocosLinks">
+          <div class="links-empty">Nenhum projeto gerado hoje.</div>
+        </div>
+      </div>
+      <!-- JSON VIEW -->
+      <div id="geradosJsonView" style="display:none">
+        <div class="bloco-select-tabs" id="geradosJsonBlocoTabs"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span class="gemini-status" id="geradosJsonStats" style="margin-top:0"></span>
+          <button class="btn btn-ghost" style="font-size:10px" onclick="copyGeradosJson()">Copiar JSON do bloco</button>
+        </div>
+        <textarea class="json-out" id="geradosJsonOutput" readonly style="min-height:400px"></textarea>
+      </div>
     </div>
   </div>
 </div>
@@ -890,6 +912,7 @@ const GEMINI_KEY   = 'vin_gemini_key';
 const SIDEBAR_KEY  = 'vin_sidebar_open';
 const GEMINI_COUNTER_KEY = 'vin_gemini_counter';
 const GERADOS_KEY        = 'vin_gerados_v1';
+const ERROS_KEY          = 'vin_erros_v1';
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -999,6 +1022,10 @@ let puxarSelectedDay   = todayStr();
 let puxarSelectedBloco = 0;
 let geradosView        = 'links';
 let geradosSelectedDay = todayStr();
+let geradosInnerTab    = 'gerados';  // 'gerar' | 'gerados'
+let gerarView          = 'links';
+let gerarSelectedBloco = 0;
+let geradosJsonSelectedBloco = 0;
 
 /* ════════════════════════════
    DATE HELPERS
@@ -1129,7 +1156,9 @@ function updateBadges() {
 
   const geradosData = ensureGeradosData();
   const geradosHoje = (geradosData.days[today] || []).length;
-  document.getElementById('badge-gerados').textContent = geradosHoje;
+  const errosData   = ensureErrosData();
+  const errosHoje   = (errosData.days[today] || []).length;
+  document.getElementById('badge-gerados').textContent = geradosHoje + errosHoje;
 }
 
 /* ════════════════════════════
@@ -1265,6 +1294,42 @@ function addGerados(items) {
     data.days[today].push(item);
   });
   saveGeradosData(data);
+}
+
+/* ════════════════════════════
+   STORAGE — ERROS (Gerar)
+════════════════════════════ */
+function getErrosData()    { try { return JSON.parse(localStorage.getItem(ERROS_KEY) || 'null'); } catch { return null; } }
+function saveErrosData(d)  { localStorage.setItem(ERROS_KEY, JSON.stringify(d)); }
+function ensureErrosData() {
+  let data = getErrosData();
+  const ws = currentWeekStartStr();
+  if (!data || data.weekStart !== ws) {
+    data = { weekStart: ws, days: {} };
+    localStorage.setItem(ERROS_KEY, JSON.stringify(data));
+  }
+  return data;
+}
+function addErros(siteUrls) {
+  const today = todayStr();
+  const data  = ensureErrosData();
+  if (!data.days[today]) data.days[today] = [];
+  // Evita duplicatas
+  const existingSites = new Set(data.days[today].map(e => e.site));
+  siteUrls.forEach(site => {
+    if (!existingSites.has(site)) {
+      data.days[today].push({ site, id: genId() });
+      existingSites.add(site);
+    }
+  });
+  saveErrosData(data);
+}
+function removeErro(id) {
+  const today = todayStr();
+  const data  = ensureErrosData();
+  if (!data.days[today]) return;
+  data.days[today] = data.days[today].filter(e => e.id !== id);
+  saveErrosData(data);
 }
 
 /* ════════════════════════════
@@ -2236,6 +2301,18 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
     notify('// nenhum projeto gerado com sucesso', 'err');
   }
 
+  // Salva erros no storage de Gerar
+  if (erros.length) {
+    addErros(erros);
+    document.getElementById('puxarSitesInput').value = erros.join('\n');
+    statusEl.innerHTML = `<span class="acc">✓ Concluído!</span> <span class="warn">· ${erros.length} erro${erros.length>1?'s':''} salvos em Gerados → Gerar</span>`;
+  } else {
+    document.getElementById('puxarSitesInput').value = '';
+    statusEl.innerHTML = `<span class="acc">✓ Concluído! Todos os sites processados.</span>`;
+  }
+
+  updateBadges();
+
   /* ── Envio automático para o Início ── */
   const targetDay = puxarSelectedDay || todayStr();
   const extDataFresh = ensureExtData();
@@ -2283,32 +2360,33 @@ function downloadJsonOutput() {
 }
 
 /* ════════════════════════════
-   GERADOS
+   GERADOS — PAINEL PRINCIPAL
 ════════════════════════════ */
-let geradosJsonSelectedBloco = 0;
-
-function switchGeradosView(view) {
-  geradosView = view;
-  document.getElementById('geradosBtnLinks').classList.toggle('active', view === 'links');
-  document.getElementById('geradosBtnJson').classList.toggle('active', view === 'json');
-  document.getElementById('geradosLinksView').style.display = view === 'links' ? 'block' : 'none';
-  document.getElementById('geradosJsonView').style.display  = view === 'json'  ? 'block' : 'none';
+function switchGeradosInnerTab(tab) {
+  geradosInnerTab = tab;
+  document.getElementById('itab-gerar').classList.toggle('active',   tab === 'gerar');
+  document.getElementById('itab-gerados').classList.toggle('active', tab === 'gerados');
+  document.getElementById('gtab-gerar').classList.toggle('active',   tab === 'gerar');
+  document.getElementById('gtab-gerados').classList.toggle('active', tab === 'gerados');
   renderGeradosContent();
 }
 
 function renderGeradosPanel() {
-  const data     = ensureGeradosData();
-  const weekDays = currentWeekDays();
-  const today    = todayStr();
+  const geradosData = ensureGeradosData();
+  const errosData   = ensureErrosData();
+  const weekDays    = currentWeekDays();
+  const today       = todayStr();
   geradosSelectedDay = geradosSelectedDay || today;
 
   document.getElementById('geradosDayTabs').innerHTML = weekDays.map(day => {
-    const count   = (data.days[day] || []).length;
+    const gCount  = (geradosData.days[day] || []).length;
+    const eCount  = (errosData.days[day]   || []).length;
+    const total   = gCount + eCount;
     const isToday = day === today;
     const active  = day === geradosSelectedDay;
     return `<button class="week-tab${active ? ' active' : ''}" onclick="geradosSelectDay('${day}')">
       ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}
-      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+      ${total > 0 ? `<span class="day-count">${total}</span>` : ''}
     </button>`;
   }).join('');
 
@@ -2316,23 +2394,107 @@ function renderGeradosPanel() {
 }
 
 function geradosSelectDay(day) {
-  geradosSelectedDay = day;
+  geradosSelectedDay     = day;
   geradosJsonSelectedBloco = 0;
+  gerarSelectedBloco     = 0;
   renderGeradosPanel();
 }
 
 function renderGeradosContent() {
-  const data  = ensureGeradosData();
-  const items = data.days[geradosSelectedDay] || [];
-  const BLOCK_SIZE = 10;
-  const numBlocos  = Math.ceil(items.length / BLOCK_SIZE) || 0;
+  const geradosData = ensureGeradosData();
+  const errosData   = ensureErrosData();
+  const sucessos    = geradosData.days[geradosSelectedDay] || [];
+  const erros       = errosData.days[geradosSelectedDay]   || [];
+  const BLOCK_SIZE  = 10;
 
   document.getElementById('geradosStats').innerHTML = `
-    <div class="ext-stat">gerados hoje <span class="ext-stat-val accent">${items.length}</span></div>
-    <div class="ext-stat">blocos <span class="ext-stat-val">${numBlocos}</span></div>`;
+    <div class="ext-stat">gerados <span class="ext-stat-val accent">${sucessos.length}</span></div>
+    <div class="ext-stat">erros <span class="ext-stat-val warn">${erros.length}</span></div>
+    <div class="ext-stat">blocos ok <span class="ext-stat-val">${Math.ceil(sucessos.length / BLOCK_SIZE) || 0}</span></div>`;
 
-  if (geradosView === 'links') renderGeradosLinks(items, BLOCK_SIZE);
-  else renderGeradosJson(items, BLOCK_SIZE, numBlocos);
+  if (geradosInnerTab === 'gerar')   renderGerarTab(erros, BLOCK_SIZE);
+  if (geradosInnerTab === 'gerados') {
+    if (geradosView === 'links') renderGeradosLinks(sucessos, BLOCK_SIZE);
+    else renderGeradosJson(sucessos, BLOCK_SIZE);
+  }
+}
+
+/* ── ABA GERAR (erros) ── */
+function switchGerarView(view) {
+  gerarView = view;
+  renderGerarTab(ensureErrosData().days[geradosSelectedDay] || [], 10);
+}
+
+function renderGerarTab(erros, BLOCK_SIZE) {
+  const container = document.getElementById('gerarBlocosLinks');
+  if (!erros.length) {
+    container.innerHTML = '<div class="links-empty">Nenhum erro registrado neste dia. ✓</div>';
+    return;
+  }
+
+  const blocos = [];
+  for (let i = 0; i < erros.length; i += BLOCK_SIZE) blocos.push(erros.slice(i, i + BLOCK_SIZE));
+
+  container.innerHTML = blocos.map((bloco, bi) => {
+    const sites     = bloco.map(e => e.site).join('\n');
+    const slotsHtml = bloco.map((e, si) => `
+      <div class="bloco-slot">
+        <span class="bloco-slot-num">${bi * BLOCK_SIZE + si + 1}</span>
+        <div class="bloco-slot-info">
+          <div class="bloco-slot-name" style="color:var(--error)">✕ erro</div>
+          <div class="bloco-slot-site"><a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a></div>
+        </div>
+        <button class="bloco-devalidate" onclick="removeErroItem('${escHtml(e.id)}')" title="Remover">✕</button>
+      </div>`).join('');
+
+    let emptySlots = '';
+    for (let i = 0; i < BLOCK_SIZE - bloco.length; i++) {
+      emptySlots += `<div class="bloco-slot"><span class="bloco-slot-num" style="opacity:0.2">${bi * BLOCK_SIZE + bloco.length + i + 1}</span><div class="bloco-slot-info"><span class="bloco-slot-empty">— vazio</span></div></div>`;
+    }
+
+    return `<div class="bloco">
+      <div class="bloco-number" style="background:var(--error)">Retry ${bi + 1}</div>
+      <div class="bloco-header">
+        <span class="bloco-title" style="color:var(--error)">${bloco.length}/10 · pendentes</span>
+        <div class="bloco-actions">
+          <button class="bloco-copy-btn" style="background:var(--surface3);color:var(--text2);border:1px solid var(--border2)"
+            onclick="carregarErrosNoInput(${bi})">
+            ↓ Carregar no Puxar
+          </button>
+        </div>
+      </div>
+      <div class="bloco-items">${slotsHtml}${emptySlots}</div>
+    </div>`;
+  }).join('');
+}
+
+function removeErroItem(id) {
+  removeErro(id);
+  renderGeradosContent();
+  updateBadges();
+}
+
+function carregarErrosNoInput(bi) {
+  const erros = ensureErrosData().days[geradosSelectedDay] || [];
+  const BLOCK_SIZE = 10;
+  const bloco = erros.slice(bi * BLOCK_SIZE, (bi + 1) * BLOCK_SIZE);
+  const sites = bloco.map(e => e.site).join('\n');
+  // Remove os itens do bloco do storage (serão reprocessados)
+  bloco.forEach(e => removeErro(e.id));
+  // Carrega no campo do Puxar Dados
+  document.getElementById('puxarSitesInput').value = sites;
+  switchPanel('puxar');
+  notify(`✓ ${bloco.length} site${bloco.length > 1 ? 's' : ''} carregado${bloco.length > 1 ? 's' : ''} em Puxar Dados`);
+}
+
+/* ── ABA GERADOS (sucessos) ── */
+function switchGeradosView(view) {
+  geradosView = view;
+  document.getElementById('geradosBtnLinks').classList.toggle('active', view === 'links');
+  document.getElementById('geradosBtnJson').classList.toggle('active',  view === 'json');
+  document.getElementById('geradosLinksView').style.display = view === 'links' ? 'block' : 'none';
+  document.getElementById('geradosJsonView').style.display  = view === 'json'  ? 'block' : 'none';
+  renderGeradosContent();
 }
 
 function renderGeradosLinks(items, BLOCK_SIZE) {
@@ -2343,8 +2505,8 @@ function renderGeradosLinks(items, BLOCK_SIZE) {
   for (let i = 0; i < items.length; i += BLOCK_SIZE) blocos.push(items.slice(i, i + BLOCK_SIZE));
 
   container.innerHTML = blocos.map((bloco, bi) => {
-    const startNum = bi * BLOCK_SIZE + 1;
-    const endNum   = startNum + bloco.length - 1;
+    const startNum  = bi * BLOCK_SIZE + 1;
+    const endNum    = startNum + bloco.length - 1;
     const slotsHtml = bloco.map((item, si) => {
       const num  = bi * BLOCK_SIZE + si + 1;
       const nome = item.pagina ? item.pagina.replace(/↪\s*\d+\.\s*/, '') : '—';
@@ -2373,8 +2535,10 @@ function renderGeradosLinks(items, BLOCK_SIZE) {
   }).join('');
 }
 
-function renderGeradosJson(items, BLOCK_SIZE, numBlocos) {
-  const tabsEl = document.getElementById('geradosJsonBlocoTabs');
+function renderGeradosJson(items, BLOCK_SIZE) {
+  const numBlocos = Math.ceil(items.length / BLOCK_SIZE) || 0;
+  const tabsEl    = document.getElementById('geradosJsonBlocoTabs');
+
   if (!numBlocos) {
     tabsEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Nenhum projeto gerado neste dia</span>';
     document.getElementById('geradosJsonOutput').value = '';
@@ -2399,11 +2563,8 @@ function renderGeradosJson(items, BLOCK_SIZE, numBlocos) {
 
 function geradosSelectJsonBloco(bi) {
   geradosJsonSelectedBloco = bi;
-  renderGeradosJson(
-    ensureGeradosData().days[geradosSelectedDay] || [],
-    10,
-    Math.ceil((ensureGeradosData().days[geradosSelectedDay] || []).length / 10)
-  );
+  const items = ensureGeradosData().days[geradosSelectedDay] || [];
+  renderGeradosJson(items, 10);
   document.querySelectorAll('#geradosJsonBlocoTabs .bloco-select-tab').forEach((btn, i) => {
     btn.classList.toggle('active', i === bi);
   });
@@ -2704,6 +2865,7 @@ function exportExcelHistory() {
 ensureWeekData();
 ensureExtData();
 ensureGeradosData();
+ensureErrosData();
 extImportTargetDay = todayStr();
 extSelectedDay     = todayStr();
 renderInicio();
