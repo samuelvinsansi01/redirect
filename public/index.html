@@ -25,6 +25,7 @@
   --warning: #f0a429;
   --radius: 10px;
   --sidebar-w: 220px;
+  --sidebar-collapsed-w: 56px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;overflow:hidden;}
@@ -41,22 +42,41 @@ body::before{
   background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;
   position:relative;z-index:10;height:100vh;padding:0;
+  transition:width 0.22s cubic-bezier(0.4,0,0.2,1);overflow:hidden;
 }
+.sidebar.collapsed { width:var(--sidebar-collapsed-w); }
+
 .sidebar-logo{
-  padding:22px 20px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 13px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;min-height:56px;
 }
-.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2.4s ease-in-out infinite;flex-shrink:0;}
+.sidebar-hamburger{
+  width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;background:var(--surface2);border:1px solid var(--border);
+  cursor:pointer;transition:all 0.18s;color:var(--text2);font-size:14px;line-height:1;
+  user-select:none;
+}
+.sidebar-hamburger:hover{border-color:var(--accent);color:var(--accent);}
+.sidebar-brand{display:flex;flex-direction:column;gap:2px;opacity:1;transition:opacity 0.15s;white-space:nowrap;overflow:hidden;}
+.sidebar.collapsed .sidebar-brand{opacity:0;pointer-events:none;width:0;}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2.4s ease-in-out infinite;flex-shrink:0;display:none;}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(184,240,89,0.4)}50%{opacity:0.5;box-shadow:0 0 0 6px rgba(184,240,89,0)}}
 .logo-text{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--accent);}
 .logo-sub{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;margin-top:2px;}
 
-.sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
-.nav-section-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.16em;color:var(--muted);padding:12px 10px 6px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;overflow-x:hidden;}
+.nav-section-label{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.16em;color:var(--muted);
+  padding:12px 10px 6px;text-transform:uppercase;white-space:nowrap;
+  opacity:1;transition:opacity 0.15s;
+}
+.sidebar.collapsed .nav-section-label{opacity:0;height:0;padding:0;margin:0;}
 .nav-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;
   cursor:pointer;transition:all 0.18s;border:1px solid transparent;position:relative;
+  white-space:nowrap;
 }
+.sidebar.collapsed .nav-item{padding:10px;justify-content:center;}
 .nav-item:hover{background:var(--surface2);color:var(--text);}
 .nav-item.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);}
 .nav-icon{
@@ -64,18 +84,34 @@ body::before{
   font-size:13px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);transition:all 0.18s;
 }
 .nav-item.active .nav-icon{background:rgba(184,240,89,0.12);border-color:var(--accent-border);}
-.nav-label{font-size:12px;font-weight:600;letter-spacing:0.01em;color:var(--text2);transition:color 0.18s;}
+.nav-label{font-size:12px;font-weight:600;letter-spacing:0.01em;color:var(--text2);transition:all 0.15s;overflow:hidden;}
+.sidebar.collapsed .nav-label{width:0;opacity:0;overflow:hidden;}
 .nav-item.active .nav-label,.nav-item:hover .nav-label{color:inherit;}
 .nav-badge{
   margin-left:auto;background:var(--surface3);border:1px solid var(--border2);
   color:var(--text2);font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:100px;white-space:nowrap;
+  transition:all 0.15s;
 }
+.sidebar.collapsed .nav-badge{display:none;}
 .nav-item.active .nav-badge{background:rgba(184,240,89,0.12);border-color:var(--accent-border);color:var(--accent);}
-.sidebar-footer{padding:16px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.08em;}
+
+/* Tooltip on collapsed sidebar */
+.sidebar.collapsed .nav-item{position:relative;}
+.sidebar.collapsed .nav-item::after{
+  content:attr(data-label);
+  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+  background:var(--surface2);border:1px solid var(--border2);color:var(--text);
+  font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;border-radius:6px;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:100;
+}
+.sidebar.collapsed .nav-item:hover::after{opacity:1;}
+
+.sidebar-footer{padding:16px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.08em;overflow:hidden;}
+.sidebar.collapsed .sidebar-footer{display:none;}
 .sidebar-clock{color:var(--text2);font-size:11px;margin-bottom:2px;}
 
 /* ══ MAIN ══ */
-.main{flex:1;height:100vh;overflow-y:auto;position:relative;z-index:1;}
+.main{flex:1;height:100vh;overflow-y:auto;position:relative;z-index:1;transition:all 0.22s;}
 .panel{display:none;padding:28px;min-height:100vh;}
 .panel.active{display:block;}
 
@@ -149,10 +185,11 @@ select option{background:#17171e;}
 .error-msg{display:none;margin-top:10px;color:var(--error);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.04em;}
 
 /* ══ INÍCIO ══ */
-.inicio-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start;}
+.inicio-grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start;}
 @media(max-width:1100px){.inicio-grid{grid-template-columns:1fr;}}
 
-.day-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;}
+/* Day tabs */
+.day-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
 .day-tab{
   padding:5px 12px;border:1px solid var(--border2);border-radius:7px;
   background:var(--bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;
@@ -163,6 +200,18 @@ select option{background:#17171e;}
 .day-tab .day-count{display:inline-block;background:var(--border2);border-radius:100px;padding:1px 5px;font-size:8px;margin-left:3px;}
 .day-tab.active .day-count{background:rgba(184,240,89,0.18);}
 
+/* Status tabs — horizontal, like day tabs */
+.status-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.status-tab{
+  padding:5px 12px;border:1px solid var(--border2);border-radius:7px;
+  background:var(--bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;
+  cursor:pointer;transition:all 0.18s;white-space:nowrap;display:flex;align-items:center;gap:5px;
+}
+.status-tab.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.status-tab:hover:not(.active){color:var(--text2);}
+.status-tab .st-count{display:inline-block;background:var(--border2);border-radius:100px;padding:1px 5px;font-size:8px;}
+.status-tab.active .st-count{background:rgba(184,240,89,0.18);}
+
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
 table{width:100%;border-collapse:collapse;font-size:11px;}
 thead tr{background:var(--surface2);}
@@ -171,24 +220,44 @@ td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,0.015);}
 .td-name{font-weight:700;white-space:nowrap;font-size:12px;}
+.td-name a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--muted);transition:border-color 0.15s;}
+.td-name a:hover{border-color:var(--accent);color:var(--accent);}
 .td-link{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .td-link a{color:inherit;text-decoration:none;}
 .td-link a:hover{text-decoration:underline;}
 .td-missing{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
 .status-select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;padding:4px 7px;cursor:pointer;outline:none;width:100%;}
 .table-empty{text-align:center;padding:32px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
-.status-group-header td{background:var(--surface2);color:var(--muted);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--border);}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:4px;transition:color 0.2s,background 0.2s;}
 .del-btn:hover{color:var(--error);background:rgba(255,92,92,0.1);}
 .usar-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;white-space:nowrap;transition:all 0.18s;}
 .usar-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
 .usar-btn.active{background:var(--accent);color:#0a0a0d;border-color:var(--accent);font-weight:700;}
+.next-day-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;white-space:nowrap;transition:all 0.18s;}
+.next-day-btn:hover{border-color:var(--warning);color:var(--warning);background:rgba(240,164,41,0.06);}
 .proto-edit-wrap{display:flex;align-items:center;gap:5px;}
 .proto-input{background:var(--bg);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;padding:4px 7px;width:130px;outline:none;transition:border-color 0.2s;}
 .proto-input:focus{border-color:var(--accent);}
 .proto-save-btn{background:var(--accent);color:#0a0a0d;border:none;border-radius:4px;font-family:'Syne',sans-serif;font-weight:700;font-size:8px;padding:4px 7px;cursor:pointer;}
 .proto-edit-icon{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:4px;font-size:9px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;flex-shrink:0;vertical-align:middle;margin-left:3px;}
 .proto-edit-icon:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Tooltip for date history */
+.date-tooltip-wrap{position:relative;display:inline-flex;align-items:center;}
+.date-badge{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;cursor:default;}
+.date-tooltip{
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--surface2);border:1px solid var(--border2);border-radius:8px;
+  padding:8px 12px;z-index:200;min-width:180px;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity 0.15s;
+}
+.date-tooltip-wrap:hover .date-tooltip{opacity:1;}
+.date-tooltip-row{display:flex;justify-content:space-between;gap:16px;font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:3px;}
+.date-tooltip-row:last-child{margin-bottom:0;}
+.date-tooltip-row .dt-label{color:var(--muted);}
+.date-tooltip-row .dt-val{color:var(--text2);}
+.date-tooltip-row .dt-val.accent{color:var(--accent);}
+.date-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border2);}
 
 /* MSG PANEL */
 .msg-panel{background:var(--bg);border:1px solid var(--accent-border);border-radius:12px;overflow:hidden;}
@@ -197,13 +266,14 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .msg-panel-empresa{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
 .msg-panel-empresa span{color:var(--text);font-weight:600;}
 .msg-body{padding:14px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.85;color:var(--text);white-space:pre-wrap;min-height:80px;}
-.msg-link-highlight{color:var(--accent);font-weight:600;}
 .msg-no-link{color:var(--muted);font-style:italic;}
-.msg-panel-footer{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.msg-panel-footer{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .msg-copy-btn{background:var(--accent);color:#0a0a0d;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;padding:8px 16px;cursor:pointer;transition:opacity 0.2s;}
 .msg-copy-btn:hover{opacity:0.85;}
 .msg-copy-btn:disabled{opacity:0.3;cursor:not-allowed;}
-.msg-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
+.msg-shuffle-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:7px;font-family:'DM Mono',monospace;font-size:9px;padding:7px 12px;cursor:pointer;transition:all 0.18s;}
+.msg-shuffle-btn:hover{border-color:var(--accent);color:var(--accent);}
+.msg-hint{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);width:100%;}
 
 .export-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px;}
 .export-bar select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:7px 10px;width:auto;cursor:pointer;}
@@ -251,13 +321,15 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .empresa-badge{font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
 .empresa-badge.ok{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);}
 .empresa-badge.no-site{background:rgba(240,164,41,0.08);border:1px solid rgba(240,164,41,0.25);color:var(--warning);}
-.btn-group{display:flex;gap:5px;flex-shrink:0;}
+.btn-group{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;}
 .validate-btn{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;transition:all 0.18s;}
 .validate-btn:hover,.validate-btn.validated{background:var(--accent);color:#0a0a0d;border-color:var(--accent);font-weight:700;}
 .remove-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-size:10px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;flex-shrink:0;}
 .remove-btn:hover{border-color:var(--error);color:var(--error);background:rgba(255,92,92,0.06);}
 .restore-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;transition:all 0.18s;flex-shrink:0;}
 .restore-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.ext-next-day-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;font-family:'DM Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;white-space:nowrap;transition:all 0.18s;flex-shrink:0;}
+.ext-next-day-btn:hover{border-color:var(--warning);color:var(--warning);background:rgba(240,164,41,0.06);}
 
 .filter-box{background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:12px 14px;margin-bottom:14px;}
 .filter-toggle-label{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
@@ -296,8 +368,11 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .bloco{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px;position:relative;}
 .bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .bloco-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--text2);}
+.bloco-actions{display:flex;gap:6px;}
 .bloco-copy-btn{background:var(--accent);color:#0a0a0d;border:none;border-radius:6px;font-family:'Syne',sans-serif;font-weight:700;font-size:9px;padding:5px 10px;cursor:pointer;transition:opacity 0.2s;display:flex;align-items:center;gap:5px;}
 .bloco-copy-btn:hover{opacity:0.85;}
+.bloco-send-inicio-btn{background:none;border:1px solid var(--accent-border);color:var(--accent);border-radius:6px;font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;cursor:pointer;transition:all 0.18s;}
+.bloco-send-inicio-btn:hover{background:var(--accent);color:#0a0a0d;}
 .bloco-items{display:flex;flex-direction:column;gap:6px;}
 .bloco-number{
   position:absolute;top:-10px;left:14px;background:var(--accent);color:#0a0a0d;
@@ -365,39 +440,41 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .links-search:focus{border-color:var(--accent);}
 .links-search::placeholder{color:var(--muted);}
 .links-empty{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:24px;}
-.sem-proto-section{margin-top:16px;}
+
+/* Bloco send-to-inicio modal */
+.bloco-modal .modal{max-width:520px;}
 </style>
 </head>
 <body>
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar">
+<aside class="sidebar collapsed" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-dot"></div>
-    <div>
+    <div class="sidebar-hamburger" onclick="toggleSidebar()" title="Menu">☰</div>
+    <div class="sidebar-brand">
       <div class="logo-text">VIN STUDIO</div>
       <div class="logo-sub">// sistema de prospecção</div>
     </div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Principal</div>
-    <div class="nav-item active" onclick="switchPanel('inicio')">
+    <div class="nav-item active" onclick="switchPanel('inicio')" data-label="Início">
       <div class="nav-icon">📊</div>
       <span class="nav-label">Início</span>
       <span class="nav-badge" id="badge-inicio">0</span>
     </div>
-    <div class="nav-item" onclick="switchPanel('extracao')">
+    <div class="nav-item" onclick="switchPanel('extracao')" data-label="Extração">
       <div class="nav-icon">🔍</div>
       <span class="nav-label">Extração</span>
       <span class="nav-badge" id="badge-extracao">0</span>
     </div>
     <div class="nav-section-label">Geração</div>
-    <div class="nav-item" onclick="switchPanel('puxar')">
+    <div class="nav-item" onclick="switchPanel('puxar')" data-label="Puxar Dados">
       <div class="nav-icon">✦</div>
       <span class="nav-label">Puxar Dados</span>
       <span class="nav-badge">Gemini</span>
     </div>
-    <div class="nav-item" onclick="switchPanel('links')">
+    <div class="nav-item" onclick="switchPanel('links')" data-label="Links & Redirect">
       <div class="nav-icon">🔗</div>
       <span class="nav-label">Links & Redirect</span>
       <span class="nav-badge" id="badge-links">0</span>
@@ -416,23 +493,26 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel active" id="panel-inicio">
   <div class="page-header">
     <div class="page-title">Empresas da <span>semana.</span></div>
-    <div class="page-sub">// somente projetos com protótipo · exportação Excel · mensagem pronta</div>
+    <div class="page-sub">// prospecção ativa · mensagens prontas · histórico de datas</div>
   </div>
   <div class="inicio-grid">
     <div>
       <div class="card">
         <div class="card-title">Projetos ativos</div>
+        <!-- Day tabs -->
         <div class="day-tabs" id="inicioDayTabs"></div>
+        <!-- Status tabs -->
+        <div class="status-tabs" id="inicioStatusTabs"></div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Empresa</th><th>Site</th><th>WhatsApp</th>
-                <th>Protótipo</th><th>Status</th><th>Msg</th><th></th>
+                <th>Empresa</th><th>WhatsApp</th>
+                <th>Protótipo</th><th>Status</th><th>Datas</th><th>Msg</th><th></th>
               </tr>
             </thead>
             <tbody id="inicioTbody">
-              <tr><td colspan="7" class="table-empty">Nenhuma empresa com protótipo nesta semana</td></tr>
+              <tr><td colspan="7" class="table-empty">Nenhuma empresa neste dia</td></tr>
             </tbody>
           </table>
         </div>
@@ -441,9 +521,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
             Semana completa
           </button>
-          <select id="exportDaySelect">
-            <option value="">Selecionar dia...</option>
-          </select>
+          <select id="exportDaySelect"><option value="">Selecionar dia...</option></select>
           <button class="btn btn-excel" onclick="exportExcelDay()">Dia específico</button>
           <button class="btn btn-ghost" onclick="clearAll()">Limpar semana</button>
         </div>
@@ -456,7 +534,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <div class="table-wrap" style="margin-bottom:10px">
               <table>
                 <thead>
-                  <tr><th>Data</th><th>Empresa</th><th>Site</th><th>WhatsApp</th><th>Protótipo</th><th>Status</th></tr>
+                  <tr><th>Data</th><th>Empresa</th><th>WhatsApp</th><th>Protótipo</th><th>Status</th></tr>
                 </thead>
                 <tbody id="historyTbody"></tbody>
               </table>
@@ -469,6 +547,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         </div>
       </div>
     </div>
+
     <!-- MENSAGEM -->
     <div>
       <div class="card">
@@ -481,15 +560,9 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           <div class="msg-body" id="msgBody"><span class="msg-no-link">← clique em "Usar" em uma empresa para carregar a mensagem</span></div>
           <div class="msg-panel-footer">
             <span class="msg-hint" id="msgHint">// nenhuma empresa selecionada</span>
+            <button class="msg-shuffle-btn" id="msgShuffleBtn" onclick="shuffleMsg()" disabled>↻ Sortear outra</button>
             <button class="msg-copy-btn" id="msgCopyBtn" onclick="copyMsg()" disabled>Copiar mensagem</button>
           </div>
-        </div>
-      </div>
-      <!-- Sem protótipo -->
-      <div class="card sem-proto-section" id="semProtoCard">
-        <div class="card-title">Aguardando protótipo <span id="semProtoCount" style="color:var(--warning);font-family:'DM Mono',monospace;font-size:9px;text-transform:none;letter-spacing:0;font-weight:400;margin-left:4px"></span></div>
-        <div id="semProtoList">
-          <div class="links-empty">Todas as empresas possuem protótipo</div>
         </div>
       </div>
     </div>
@@ -513,7 +586,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="inner-panel active" id="json-tab">
       <div class="field-group" style="margin-bottom:14px">
         <label>JSON da Apify</label>
-        <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...&#10;&#10;[&#10;  { "title": "...", "website": "...", "phone": "...", "categoryName": "Escritório de contabilidade" },&#10;  ...&#10;]'></textarea>
+        <textarea class="json-area" id="extJsonInput" placeholder='Cole aqui o JSON exportado da Apify...'></textarea>
       </div>
       <div class="filter-box">
         <div style="display:flex;align-items:center">
@@ -575,7 +648,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             Copiar todos os sites
           </button>
-          <button class="btn btn-ghost" onclick="extSendToDados()">→ Enviar para Início</button>
         </div>
         <div id="extValidadasList" style="display:flex;flex-direction:column;gap:7px">
           <div class="links-empty">Nenhuma empresa validada neste dia.</div>
@@ -584,7 +656,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <!-- BLOCOS VIEW -->
       <div id="validadasBlocosView" style="display:none">
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">
-          Validadas distribuídas em blocos de 10. Cada bloco pode ser copiado para o Gemini.
+          Validadas em blocos de 10. Envie cada bloco individualmente para o Início ou para o Gemini.
         </div>
         <div class="blocos-container" id="blocosContainer">
           <div class="links-empty">Nenhuma empresa validada neste dia.</div>
@@ -625,7 +697,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <div class="card-title">Sites para processar</div>
       <div class="field-group" style="margin-bottom:12px">
         <label>Um site por linha</label>
-        <textarea class="json-area" id="puxarSitesInput" placeholder="https://empresa1.com.br&#10;https://empresa2.com.br&#10;https://empresa3.com.br&#10;..." style="min-height:240px"></textarea>
+        <textarea class="json-area" id="puxarSitesInput" placeholder="https://empresa1.com.br&#10;https://empresa2.com.br&#10;..." style="min-height:240px"></textarea>
       </div>
       <div class="field-group" style="margin-bottom:12px">
         <label>Template page <span class="tag">padrão</span></label>
@@ -665,7 +737,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel" id="panel-links">
   <div class="page-header">
     <div class="page-title">Links & <span>Redirect.</span></div>
-    <div class="page-sub">// gere TinyURL · geração em fila · histórico semanal</div>
+    <div class="page-sub">// gere TinyURL para leads com interesse confirmado</div>
   </div>
   <div class="links-redirect-grid">
     <div>
@@ -697,26 +769,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           <div class="result-label">// LINK GERADO</div>
           <div class="result-url" id="resultUrl"></div>
           <button class="copy-btn" onclick="copyUrl()">Copiar link</button>
-        </div>
-      </div>
-      <!-- FILA -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Geração em fila</div>
-        <div class="field-group" style="margin-bottom:12px">
-          <label>Cole vários projetos <span class="tag">Nome / Desktop / Mobile por bloco</span></label>
-          <textarea id="filaInput" placeholder="Nome da Empresa&#10;https://figma.com/proto/xxx&#10;https://figma.com/proto/yyy&#10;&#10;Outra Empresa&#10;https://figma.com/proto/aaa&#10;https://figma.com/proto/bbb" style="min-height:150px"></textarea>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" style="width:auto;flex:1" onclick="gerarFila()">
-            <div class="spinner" id="filaSpinner"></div>
-            <span id="filaBtn">Gerar links em fila</span>
-          </button>
-          <button class="btn btn-ghost" onclick="document.getElementById('filaInput').value=''">Limpar</button>
-        </div>
-        <div class="error-msg" id="filaError"></div>
-        <div id="filaResultado" style="display:none;margin-top:14px">
-          <div class="section-label">Links gerados</div>
-          <div id="filaResultList" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
       </div>
     </div>
@@ -793,6 +845,18 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
+<!-- Bloco send-to-inicio confirm -->
+<div class="modal-overlay" id="blocoInicioModal">
+  <div class="modal">
+    <div class="modal-title">Enviar bloco <span style="color:var(--accent)" id="blocoInicioTitle">—</span> para Início</div>
+    <div class="modal-sub" id="blocoInicioSub"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="confirmSendBlocoToInicio()">Enviar</button>
+      <button class="modal-btn-cancel" onclick="closeBlocoInicioModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="notify" id="notify"></div>
 
 <script>
@@ -804,6 +868,7 @@ const EMPRESAS_KEY = 'fr_empresas_v2';
 const HISTORY_KEY  = 'fr_empresas_hist';
 const EXT_KEY      = 'fr_extracao_v2';
 const GEMINI_KEY   = 'vin_gemini_key';
+const SIDEBAR_KEY  = 'vin_sidebar_open';
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -815,29 +880,28 @@ const ACCOUNTING_KEYWORDS = [
   'departamento contab','bureau contab','office of account','accounting',
 ];
 
-const MSG_BASE = `Olá, tudo bem?
-
-Meu nome é Samuel, trabalho com criação e reformulação de sites institucionais, com foco em melhorar credibilidade e facilitar o recebimento de novos contatos.
-
-Observei o site de vocês e desenvolvi uma amostra de como uma nova estrutura poderia melhorar a apresentação atual, com uma comunicação mais clara e mais orientada à conversão de clientes.
-
-Segue o link para visualizar:
-
-{LINK}
-
-Essa é apenas uma simulação de direção visual e posicionamento, para demonstrar como o site poderia evoluir nesse cenário. O que acha?
-
-Confira um pouco mais sobre mim:
-
-Meu site  - samuelvinsansi.com.br
-Instagram - instagram.com/samuelvinsansi`;
+/* 10 message templates — {EMPRESA} replaced dynamically */
+const MSG_TEMPLATES = [
+  `Olá! Estava olhando o site da {EMPRESA} e acho que vocês podem estar perdendo clientes sem perceber. Contabilidade se vende pela confiança. E quando um cliente em potencial acessa um site confuso ou pouco profissional, a dúvida bate: "será que essa empresa é assim também?" Preparei uma amostra de como o site de vocês poderia se apresentar. Dá uma olhada na imagem. O que achou? Faz sentido pra vocês?`,
+  `Olá! Dei uma olhada no site da {EMPRESA} e achei que valeria te mostrar algo. Escritórios de contabilidade vivem de credibilidade. E o site muitas vezes é o primeiro contato que o cliente tem com vocês. Se ele não passa segurança, o cliente vai embora sem nem entrar em contato. Montei uma amostra de como vocês poderiam se apresentar melhor. Olha a imagem. O que achou?`,
+  `Olá! Estava pesquisando escritórios de contabilidade na região e acabei chegando no site da {EMPRESA}. Percebi que dá pra melhorar bastante a forma como vocês se apresentam pro cliente. No mercado contábil, confiança é tudo, e o site é onde essa confiança começa. Preparei uma amostra visual pra mostrar como ficaria. Dá uma olhada na imagem. Faz sentido pra vocês?`,
+  `Olá! Vi o site da {EMPRESA} e acredito que vocês merecem se apresentar melhor pro mercado. Um cliente que está procurando um escritório de contabilidade quer sentir segurança antes de qualquer coisa. Se o site não passa isso, ele simplesmente escolhe outro. Fiz uma amostra de como o site de vocês poderia ficar. Olha a imagem e me fala o que achou.`,
+  `Olá! Estava olhando o site da {EMPRESA} e senti que vocês têm muito mais a oferecer do que o site mostra hoje. No segmento contábil, a primeira impressão conta muito. O cliente te julga pelo site antes mesmo de falar com você. Preparei uma amostra de como vocês poderiam se apresentar. Dá uma olhada. O que achou? Faz sentido?`,
+  `Olá! Dei uma olhada no site da {EMPRESA} e acredito que vocês podem estar deixando clientes escaparem sem perceber. Quando alguém procura um escritório contábil, ele quer sentir que está em boas mãos. Um site desorganizado passa a mensagem errada, mesmo que o serviço de vocês seja excelente. Montei uma amostra de como ficaria com uma apresentação mais profissional. Olha a imagem. O que achou?`,
+  `Olá! Estava olhando o site da {EMPRESA} e tenho certeza que dá pra melhorar muito a forma como vocês chegam até o cliente. Contabilidade é um serviço de confiança. E o site é o cartão de visita digital de vocês. Se ele não transmite isso, o cliente hesita. Preparei uma amostra pra mostrar como ficaria. Dá uma olhada na imagem e me conta o que achou.`,
+  `Olá! Vi o site da {EMPRESA} e acredito que vocês podem estar transmitindo menos confiança do que realmente merecem. No mercado contábil, o cliente precisa sentir segurança antes de fechar com alguém. Essa sensação começa pelo site. Fiz uma amostra de como o site de vocês poderia se apresentar. Olha a imagem. Faz sentido pra vocês?`,
+  `Olá! Estava olhando o site da {EMPRESA} e achei que vocês poderiam estar se apresentando muito melhor pro mercado. Quem busca um escritório de contabilidade quer confiar antes de contratar. E o site é onde essa decisão começa a ser tomada. Preparei uma amostra visual de como ficaria. Dá uma olhada na imagem. O que achou?`,
+  `Olá! Dei uma olhada no site da {EMPRESA} e acredito que vocês têm potencial pra atrair muito mais clientes do que estão atraindo hoje. Um site bem apresentado no segmento contábil não é estética, é argumento de venda. O cliente que se sente seguro pelo que vê, entra em contato. Montei uma amostra de como vocês poderiam se apresentar. Olha a imagem. Faz sentido pra vocês?`,
+];
 
 /* ════════════════════════════
    STATE
 ════════════════════════════ */
 let selectedDay        = todayStr();
+let selectedStatus     = 'Todos';
 let selectedLinksDay   = todayStr();
 let selectedMsgEmpresa = null;
+let selectedMsgTemplateIdx = -1;
 let archivedOpen       = false;
 let extRemovedOpen     = false;
 let historyOpen        = false;
@@ -849,6 +913,7 @@ let editingTs          = null;
 let archivingTs        = null;
 let puxarSelectedDay   = todayStr();
 let puxarSelectedBloco = 0;
+let pendingBlocoInicio = null; // { day, bi }
 
 /* ════════════════════════════
    DATE HELPERS
@@ -873,6 +938,12 @@ function currentWeekDays() {
   }
   return days;
 }
+function nextDayStr(dateStr) {
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + 1);
+  return dt.toLocaleDateString('pt-BR');
+}
 function dayLabel(dateStr, forSheet) {
   const [d, m, y] = dateStr.split('/').map(Number);
   const dt = new Date(y, m - 1, d);
@@ -890,6 +961,16 @@ setInterval(updateClock, 1000);
 updateClock();
 
 /* ════════════════════════════
+   SIDEBAR TOGGLE
+════════════════════════════ */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const isOpen  = !sidebar.classList.contains('collapsed');
+  sidebar.classList.toggle('collapsed', isOpen);
+  localStorage.setItem(SIDEBAR_KEY, isOpen ? '0' : '1');
+}
+
+/* ════════════════════════════
    UTILS
 ════════════════════════════ */
 function genId()          { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -905,6 +986,17 @@ function isContabilidade(cat) {
 function normalizeWebsite(url) {
   try { return new URL(url).hostname.replace(/^www\./,'').toLowerCase(); }
   catch { return url.replace(/^https?:\/\//i,'').replace(/^www\./i,'').split('/')[0].toLowerCase(); }
+}
+function pickRandomTemplate(nome) {
+  const idx = Math.floor(Math.random() * MSG_TEMPLATES.length);
+  selectedMsgTemplateIdx = idx;
+  return { text: MSG_TEMPLATES[idx].replace(/\{EMPRESA\}/g, nome), idx };
+}
+function pickOtherTemplate(nome, currentIdx) {
+  let idx;
+  do { idx = Math.floor(Math.random() * MSG_TEMPLATES.length); } while (idx === currentIdx && MSG_TEMPLATES.length > 1);
+  selectedMsgTemplateIdx = idx;
+  return { text: MSG_TEMPLATES[idx].replace(/\{EMPRESA\}/g, nome), idx };
 }
 
 /* ════════════════════════════
@@ -939,7 +1031,7 @@ function switchPanel(name) {
 function updateBadges() {
   const data = ensureWeekData();
   const flat = flattenWeekData(data);
-  document.getElementById('badge-inicio').textContent = flat.filter(e => e.prototipo).length;
+  document.getElementById('badge-inicio').textContent = flat.length;
 
   const extData = ensureExtData();
   const extFlat = Object.values(extData.days || {}).flat();
@@ -953,22 +1045,11 @@ function updateBadges() {
 /* ════════════════════════════
    STORAGE — LINKS
 ════════════════════════════ */
-function getLinks()           { try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; } }
+function getLinks()      { try { return JSON.parse(localStorage.getItem(LINKS_KEY) || '[]'); } catch { return []; } }
 function saveLink(name, url) {
   const links = getLinks();
   links.unshift({ name, url, date: todayStr(), time: timeStr(), ts: Date.now() });
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
-  // Cross-match with empresas
-  const normName  = normalizeAlias(stripPrefix(name));
-  const weekData  = getWeekData();
-  const today     = todayStr();
-  if (!weekData || !weekData.days[today]) return;
-  let filled = 0;
-  weekData.days[today] = weekData.days[today].map(e => {
-    if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) { filled++; return { ...e, prototipo: url }; }
-    return e;
-  });
-  if (filled > 0) { saveWeekData(weekData); notify(`✓ Protótipo preenchido em ${filled} empresa${filled > 1 ? 's' : ''} de hoje`); }
 }
 function findLinkByName(name) {
   const norm = normalizeAlias(stripPrefix(name));
@@ -1026,38 +1107,35 @@ function getAllExtSitesInWeek(data) {
 }
 
 /* ════════════════════════════
-   MENSAGEM
+   MENSAGEM — RANDOM TEMPLATES
 ════════════════════════════ */
-function usarEmpresaMsg(nome, prototipo) {
-  selectedMsgEmpresa = { nome, prototipo };
-  const labelEl  = document.getElementById('msgEmpresaLabel');
-  const bodyEl   = document.getElementById('msgBody');
-  const hintEl   = document.getElementById('msgHint');
-  const copyBtn  = document.getElementById('msgCopyBtn');
-  const panelEl  = document.getElementById('msgPanel');
-
-  labelEl.innerHTML = `empresa: <span>${escHtml(nome)}</span>`;
-
-  if (!prototipo) {
-    bodyEl.innerHTML = `<span class="msg-no-link">⚠ Esta empresa não tem protótipo cadastrado.</span>`;
-    hintEl.textContent = '// sem protótipo';
-    copyBtn.disabled = true;
-    return;
-  }
-  const msgFinal = MSG_BASE.replace('{LINK}', prototipo);
-  const parts    = msgFinal.split(prototipo);
-  bodyEl.innerHTML = escHtml(parts[0]) + `<span class="msg-link-highlight">${escHtml(prototipo)}</span>` + escHtml(parts[1] || '');
-  hintEl.textContent = `// ${nome} · link pronto`;
-  copyBtn.disabled = false;
-
-  if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function usarEmpresaMsg(nome) {
+  selectedMsgEmpresa = { nome };
+  const { text, idx } = pickRandomTemplate(nome);
+  renderMsgPanel(nome, text, idx);
   document.querySelectorAll('.usar-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.nome === nome));
 }
 
+function shuffleMsg() {
+  if (!selectedMsgEmpresa) return;
+  const { text, idx } = pickOtherTemplate(selectedMsgEmpresa.nome, selectedMsgTemplateIdx);
+  renderMsgPanel(selectedMsgEmpresa.nome, text, idx);
+}
+
+function renderMsgPanel(nome, text, idx) {
+  document.getElementById('msgEmpresaLabel').innerHTML = `empresa: <span>${escHtml(nome)}</span>`;
+  document.getElementById('msgBody').textContent = text;
+  document.getElementById('msgHint').textContent = `// ${nome} · template ${idx + 1}/${MSG_TEMPLATES.length}`;
+  document.getElementById('msgCopyBtn').disabled   = false;
+  document.getElementById('msgShuffleBtn').disabled = false;
+  const panelEl = document.getElementById('msgPanel');
+  if (panelEl) panelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function copyMsg() {
-  if (!selectedMsgEmpresa || !selectedMsgEmpresa.prototipo) return;
-  const msgFinal = MSG_BASE.replace('{LINK}', selectedMsgEmpresa.prototipo);
-  navigator.clipboard.writeText(msgFinal).then(() => {
+  if (!selectedMsgEmpresa) return;
+  const text = document.getElementById('msgBody').textContent;
+  navigator.clipboard.writeText(text).then(() => {
     const btn = document.getElementById('msgCopyBtn');
     btn.textContent = 'Copiado ✓';
     setTimeout(() => btn.textContent = 'Copiar mensagem', 2200);
@@ -1076,13 +1154,27 @@ function renderInicio() {
   // Day tabs
   const tabsEl = document.getElementById('inicioDayTabs');
   tabsEl.innerHTML = weekDays.map(day => {
-    const withProto = (data.days[day] || []).filter(e => e.prototipo).length;
-    const total     = (data.days[day] || []).length;
-    const isToday   = day === today;
-    const active    = day === selectedDay;
+    const total   = (data.days[day] || []).length;
+    const isToday = day === today;
+    const active  = day === selectedDay;
     return `<button class="day-tab${active ? ' active' : ''}" onclick="selectDay('${day}')">
       ${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}
-      ${total > 0 ? `<span class="day-count">${withProto}/${total}</span>` : ''}
+      ${total > 0 ? `<span class="day-count">${total}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  // Status tabs
+  const dayArr = data.days[selectedDay] || [];
+  const statusCounts = { 'Todos': dayArr.length };
+  STATUS_OPTIONS.forEach(s => { statusCounts[s] = dayArr.filter(e => (e.status || 'Não enviada') === s).length; });
+  const stTabsEl = document.getElementById('inicioStatusTabs');
+  const allStatuses = ['Todos', ...STATUS_OPTIONS];
+  stTabsEl.innerHTML = allStatuses.map(s => {
+    const cnt = statusCounts[s] || 0;
+    if (s !== 'Todos' && cnt === 0) return '';
+    const active = selectedStatus === s;
+    return `<button class="status-tab${active ? ' active' : ''}" onclick="selectStatus('${s}')">
+      ${escHtml(s)} <span class="st-count">${cnt}</span>
     </button>`;
   }).join('');
 
@@ -1095,89 +1187,138 @@ function renderInicio() {
     ).join('');
 
   renderDayTable(data, selectedDay);
-  renderSemProto(data, selectedDay);
   renderHistory();
   updateBadges();
 }
 
-function selectDay(day) { selectedDay = day; renderInicio(); }
+function selectDay(day) {
+  selectedDay = day;
+  selectedStatus = 'Todos';
+  renderInicio();
+}
+function selectStatus(s) {
+  selectedStatus = s;
+  const data = ensureWeekData();
+  renderDayTable(data, selectedDay);
+  // update tab active state
+  document.querySelectorAll('.status-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim().startsWith(s));
+  });
+}
 
 function renderDayTable(data, day) {
-  const tbody   = document.getElementById('inicioTbody');
+  const tbody  = document.getElementById('inicioTbody');
   const fullArr = data.days[day] || [];
-  const withProto = fullArr.filter(e => e.prototipo);
 
-  if (!withProto.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa com protótipo em ${dayLabel(day)}</td></tr>`;
+  // Filter by selected status
+  const toShow = selectedStatus === 'Todos'
+    ? fullArr
+    : fullArr.filter(e => (e.status || 'Não enviada') === selectedStatus);
+
+  if (!toShow.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa${selectedStatus !== 'Todos' ? ' com status "' + selectedStatus + '"' : ''} em ${dayLabel(day)}</td></tr>`;
     return;
   }
 
-  const groups = {};
-  STATUS_OPTIONS.forEach(s => groups[s] = []);
-  withProto.forEach(e => {
-    const realIdx = fullArr.indexOf(e);
-    const st = e.status || 'Não enviada';
-    if (!groups[st]) groups[st] = [];
-    groups[st].push({ ...e, _idx: realIdx });
-  });
-
   let html = '';
-  STATUS_OPTIONS.forEach(status => {
-    if (!groups[status].length) return;
-    html += `<tr class="status-group-header"><td colspan="7">// ${escHtml(status)} (${groups[status].length})</td></tr>`;
-    groups[status].forEach(e => {
-      const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
-      const waRaw      = e.whatsapp || '';
-      const waBuilt    = buildWhatsapp(waRaw);
-      const proto      = e.prototipo || '';
+  toShow.forEach(e => {
+    const realIdx = fullArr.indexOf(e);
+    const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
+    const waRaw  = e.whatsapp || '';
+    const waBuilt = buildWhatsapp(waRaw);
+    const proto  = e.prototipo || '';
 
-      const waCell = waRaw
-        ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
-           <button class="proto-edit-icon" onclick="showWaEdit('${day}',${e._idx},this)" title="Editar">✎</button>`
-        : `<div class="proto-edit-wrap">
-             <input class="proto-input" placeholder="Número..." id="wa-input-${day}-${e._idx}"/>
-             <button class="proto-save-btn" onclick="saveWa('${day}',${e._idx})">OK</button>
-           </div>`;
+    // Name cell — clickable if site available
+    const nameCell = e.site
+      ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.nome)}</a>`
+      : escHtml(e.nome);
 
-      const protoCell = proto
-        ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(proto)}" target="_blank">${escHtml(proto)}</a></span>
-           <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${e._idx},this)" title="Editar">✎</button>`
-        : `<div class="proto-edit-wrap">
-             <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${e._idx}"/>
-             <button class="proto-save-btn" onclick="saveProto('${day}',${e._idx})">OK</button>
-           </div>`;
+    // WhatsApp cell
+    const waCell = waRaw
+      ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(waBuilt)}" target="_blank">${escHtml(waBuilt)}</a></span>
+         <button class="proto-edit-icon" onclick="showWaEdit('${day}',${realIdx},this)" title="Editar">✎</button>`
+      : `<div class="proto-edit-wrap">
+           <input class="proto-input" placeholder="Número..." id="wa-input-${day}-${realIdx}"/>
+           <button class="proto-save-btn" onclick="saveWa('${day}',${realIdx})">OK</button>
+         </div>`;
 
-      // Safe proto for inline onclick
-      const safeProto = proto.replace(/'/g, "\\'");
-      const safeNome  = e.nome.replace(/'/g, "\\'");
+    // Proto cell
+    const protoCell = proto
+      ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(proto)}" target="_blank">${escHtml(proto)}</a></span>
+         <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${realIdx},this)" title="Editar">✎</button>`
+      : `<div class="proto-edit-wrap">
+           <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${realIdx}"/>
+           <button class="proto-save-btn" onclick="saveProto('${day}',${realIdx})">OK</button>
+         </div>`;
 
-      html += `<tr>
-        <td class="td-name">${escHtml(e.nome)}</td>
-        <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
-        <td style="white-space:nowrap">${waCell}</td>
-        <td style="white-space:nowrap">${protoCell}</td>
-        <td><select class="status-select" onchange="updateStatus('${day}',${e._idx},this.value)">${STATUS_OPTIONS.map(s => `<option${e.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select></td>
-        <td><button class="usar-btn${isSelected ? ' active' : ''}" data-nome="${escHtml(e.nome)}" data-proto="${escHtml(proto)}" onclick="usarEmpresaMsg(this.dataset.nome, this.dataset.proto)">${isSelected ? '✓ usando' : 'Usar'}</button></td>
-        <td><button class="del-btn" onclick="deleteEmpresa('${day}',${e._idx})">✕</button></td>
-      </tr>`;
-    });
+    // Date tooltip
+    const criadoEm     = e.criadoEm || day;
+    const prospectadoEm= e.prospectadoEm || '';
+    const fechadoEm    = e.fechadoEm || '';
+    const movedDays    = e.movedFrom ? e.movedFrom : [];
+    let tooltipRows    = `<div class="date-tooltip-row"><span class="dt-label">Criado em</span><span class="dt-val">${escHtml(criadoEm)}</span></div>`;
+    if (movedDays.length) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Movido de</span><span class="dt-val">${escHtml(movedDays.join(' → '))}</span></div>`;
+    if (prospectadoEm) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Prospectado</span><span class="dt-val accent">${escHtml(prospectadoEm)}</span></div>`;
+    if (fechadoEm)     tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Fechado</span><span class="dt-val accent">${escHtml(fechadoEm)}</span></div>`;
+
+    // Check if there's a next week day available
+    const weekDays   = currentWeekDays();
+    const dayIdx     = weekDays.indexOf(day);
+    const nextDay    = dayIdx >= 0 && dayIdx < 6 ? weekDays[dayIdx + 1] : null;
+
+    html += `<tr>
+      <td class="td-name">${nameCell}</td>
+      <td style="white-space:nowrap">${waCell}</td>
+      <td style="white-space:nowrap">${protoCell}</td>
+      <td>
+        <select class="status-select" onchange="updateStatus('${day}',${realIdx},this.value)">
+          ${STATUS_OPTIONS.map(s => `<option${(e.status||'Não enviada')===s?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        <div class="date-tooltip-wrap">
+          <span class="date-badge">${escHtml(criadoEm.slice(0,5))}</span>
+          <div class="date-tooltip">${tooltipRows}</div>
+        </div>
+      </td>
+      <td><button class="usar-btn${isSelected?' active':''}" data-nome="${escHtml(e.nome)}" onclick="usarEmpresaMsg(this.dataset.nome)">${isSelected?'✓ usando':'Usar'}</button></td>
+      <td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
+        ${nextDay ? `<button class="next-day-btn" onclick="moveLeadToDay('${day}',${realIdx},'${nextDay}')" title="Passar para ${dayLabel(nextDay)}">→ ${dayLabel(nextDay)}</button>` : ''}
+        <button class="del-btn" onclick="deleteEmpresa('${day}',${realIdx})">✕</button>
+      </td>
+    </tr>`;
   });
   tbody.innerHTML = html;
 }
 
-function renderSemProto(data, day) {
-  const dayArr = (data.days[day] || []).filter(e => !e.prototipo);
-  document.getElementById('semProtoCount').textContent = dayArr.length ? `(${dayArr.length})` : '';
-  const listEl = document.getElementById('semProtoList');
-  if (!dayArr.length) { listEl.innerHTML = '<div class="links-empty">Todas as empresas possuem protótipo</div>'; return; }
-  listEl.innerHTML = dayArr.map(e => `
-    <div class="empresa-card" style="margin-bottom:6px">
-      <div class="empresa-info">
-        <div class="empresa-name">${escHtml(e.nome)}</div>
-        ${e.site ? `<div class="empresa-site"><a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a></div>` : ''}
-      </div>
-      <span class="empresa-badge no-site">sem protótipo</span>
-    </div>`).join('');
+function moveLeadToDay(fromDay, idx, toDay) {
+  const data = ensureWeekData();
+  if (!data.days[fromDay]) return;
+  const empresa = data.days[fromDay][idx];
+  if (!empresa) return;
+
+  // Track move history
+  const movedFrom = empresa.movedFrom || [];
+  movedFrom.push(fromDay);
+
+  const movedEmpresa = {
+    ...empresa,
+    criadoEm: empresa.criadoEm || fromDay,
+    movedFrom,
+  };
+
+  if (!data.days[toDay]) data.days[toDay] = [];
+  // Check for dupe in target day
+  const existNomes = new Set((data.days[toDay] || []).map(e => normalizeAlias(e.nome)));
+  if (existNomes.has(normalizeAlias(empresa.nome))) {
+    notify(`// ${empresa.nome} já existe em ${dayLabel(toDay)}`, 'warn');
+    return;
+  }
+  data.days[toDay].push(movedEmpresa);
+  data.days[fromDay].splice(idx, 1);
+  saveWeekData(data);
+  renderInicio();
+  notify(`✓ ${empresa.nome} movida para ${dayLabel(toDay)}`);
 }
 
 function showWaEdit(day, idx, btn) {
@@ -1219,14 +1360,23 @@ function saveProto(day, idx) {
   if (data.days[day] && data.days[day][idx] !== undefined) {
     data.days[day][idx].prototipo = val;
     saveWeekData(data);
-    if (selectedMsgEmpresa && selectedMsgEmpresa.nome === data.days[day][idx].nome) usarEmpresaMsg(data.days[day][idx].nome, val);
     renderInicio();
     notify(val ? '✓ Protótipo atualizado' : '✓ Protótipo removido');
   }
 }
 function updateStatus(day, idx, val) {
   const data = ensureWeekData();
-  if (data.days[day] && data.days[day][idx]) { data.days[day][idx].status = val; saveWeekData(data); renderInicio(); }
+  if (data.days[day] && data.days[day][idx]) {
+    data.days[day][idx].status = val;
+    // Track prospectado date on first send
+    if (val === 'Enviada' && !data.days[day][idx].prospectadoEm) {
+      data.days[day][idx].prospectadoEm = todayStr();
+    }
+    if ((val === 'Fechada') && !data.days[day][idx].fechadoEm) {
+      data.days[day][idx].fechadoEm = todayStr();
+    }
+    saveWeekData(data); renderInicio();
+  }
 }
 function deleteEmpresa(day, idx) {
   const data    = ensureWeekData();
@@ -1240,6 +1390,7 @@ function deleteEmpresa(day, idx) {
     document.getElementById('msgBody').innerHTML = '<span class="msg-no-link">← clique em "Usar" em uma empresa para carregar a mensagem</span>';
     document.getElementById('msgHint').textContent = '// nenhuma empresa selecionada';
     document.getElementById('msgCopyBtn').disabled = true;
+    document.getElementById('msgShuffleBtn').disabled = true;
   }
   renderInicio();
 }
@@ -1260,7 +1411,7 @@ function renderHistory() {
   if (!hist) {
     sec.style.opacity = '0.4';
     badge.textContent = 'nenhum dado';
-    tbody.innerHTML   = '<tr><td colspan="6" class="table-empty">Nenhuma semana anterior</td></tr>';
+    tbody.innerHTML   = '<tr><td colspan="5" class="table-empty">Nenhuma semana anterior</td></tr>';
     return;
   }
   sec.style.opacity = '1';
@@ -1278,21 +1429,20 @@ function renderHistory() {
     STATUS_OPTIONS.forEach(status => {
       const group = dateGroups[date][status];
       if (!group || !group.length) return;
-      html += `<tr class="status-group-header"><td colspan="6">// ${dayLabel(date)} — ${escHtml(status)} (${group.length})</td></tr>`;
+      html += `<tr class="status-group-header" style="background:var(--surface2)"><td colspan="5" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;padding:7px 12px;color:var(--muted)">// ${dayLabel(date)} — ${escHtml(status)} (${group.length})</td></tr>`;
       group.forEach(e => {
         const wa = buildWhatsapp(e.whatsapp);
         html += `<tr>
           <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(date)}</td>
-          <td class="td-name">${escHtml(e.nome)}</td>
-          <td class="td-link">${e.site ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site)}</a>` : '<span class="td-missing">—</span>'}</td>
+          <td class="td-name">${e.site ? `<a href="${escHtml(e.site)}" target="_blank" style="color:inherit;border-bottom:1px dashed var(--muted)">${escHtml(e.nome)}</a>` : escHtml(e.nome)}</td>
           <td class="td-link">${wa ? `<a href="${escHtml(wa)}" target="_blank">${escHtml(wa)}</a>` : '<span class="td-missing">—</span>'}</td>
-          <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">⚠</span>'}</td>
+          <td class="td-link">${e.prototipo ? `<a href="${escHtml(e.prototipo)}" target="_blank">${escHtml(e.prototipo)}</a>` : '<span class="td-missing">—</span>'}</td>
           <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(e.status || 'Não enviada')}</td>
         </tr>`;
       });
     });
   });
-  tbody.innerHTML = html || '<tr><td colspan="6" class="table-empty">Sem dados</td></tr>';
+  tbody.innerHTML = html || '<tr><td colspan="5" class="table-empty">Sem dados</td></tr>';
 }
 function toggleHistory() {
   historyOpen = !historyOpen;
@@ -1350,7 +1500,7 @@ function updateFilterPreview() {
   ].join('') || '<span class="filter-keyword-chip">nenhum categoryName</span>';
   kwWrap.classList.add('open');
 
-  const extData  = ensureExtData();
+  const extData    = ensureExtData();
   const weekTitles = getAllExtTitlesInWeek(extData);
   const weekSites  = getAllExtSitesInWeek(extData);
   const dupCount   = passing.filter(item => weekTitles.has(normalizeAlias(String(item.title || '').trim()))).length;
@@ -1419,7 +1569,7 @@ function extImportJson() {
     filteredOut = arr.length - filteredArr.length;
   }
   if (filterEnabled && !filteredArr.length) {
-    errEl.textContent = `// nenhuma empresa contábil nos ${arr.length} itens. Verifique categoryName ou desative o filtro.`;
+    errEl.textContent = `// nenhuma empresa contábil nos ${arr.length} itens.`;
     errEl.style.display = 'block'; return;
   }
 
@@ -1453,7 +1603,7 @@ function extImportJson() {
 
   switchInnerTab('empresas-tab');
   let msg = `✓ ${added} empresa${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`;
-  if (filteredOut  > 0) msg += ` · ${filteredOut} de outros ramos ignorada${filteredOut !== 1 ? 's' : ''}`;
+  if (filteredOut  > 0) msg += ` · ${filteredOut} ignorada${filteredOut !== 1 ? 's' : ''}`;
   if (skippedWeek  > 0) msg += ` · ${skippedWeek} já na semana`;
   if (skippedSite  > 0) msg += ` · ${skippedSite} site dup.`;
   if (skippedNoSite> 0) msg += ` · ${skippedNoSite} sem site/nome`;
@@ -1474,7 +1624,6 @@ function renderExtEmpresasTab() {
   const weekDays = currentWeekDays();
   const today    = todayStr();
 
-  // Week tabs
   document.getElementById('extEmpresasWeekTabs').innerHTML = weekDays.map(day => {
     const count   = (data.days[day] || []).filter(e => !e.removed && !e.validated).length;
     const isToday = day === today;
@@ -1487,6 +1636,10 @@ function renderExtEmpresasTab() {
   const validated    = allForDay.filter(e => !e.removed && e.validated);
   const removedItems = allForDay.filter(e => e.removed);
   const withSite     = activeItems.filter(e => e.website);
+
+  // Get next available day in week
+  const dayIdx  = weekDays.indexOf(extSelectedDay);
+  const nextDay = dayIdx >= 0 && dayIdx < 6 ? weekDays[dayIdx + 1] : null;
 
   document.getElementById('extEmpresasStats').innerHTML = `
     <div class="ext-stat">pendentes <span class="ext-stat-val">${activeItems.length}</span></div>
@@ -1515,6 +1668,7 @@ function renderExtEmpresasTab() {
         <span class="empresa-badge ${hasSite ? 'ok' : 'no-site'}">${hasSite ? '✓ site' : '⚠ sem site'}</span>
         <div class="btn-group">
           <button class="validate-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extToggleValidate(this.dataset.day,this.dataset.id)">Validar</button>
+          ${nextDay ? `<button class="ext-next-day-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" data-next="${escHtml(nextDay)}" onclick="extMoveToNextDay(this.dataset.day,this.dataset.id,this.dataset.next)" title="Mover para ${dayLabel(nextDay)}">→ ${dayLabel(nextDay)}</button>` : ''}
           <button class="remove-btn" data-day="${escHtml(extSelectedDay)}" data-id="${escHtml(e.id)}" onclick="extRemoveItem(this.dataset.day,this.dataset.id)" title="Remover">✕</button>
         </div>
       </div>`;
@@ -1545,6 +1699,28 @@ function renderExtEmpresasTab() {
   }
 }
 function toggleExtRemoved() { extRemovedOpen = !extRemovedOpen; renderExtEmpresasTab(); }
+
+function extMoveToNextDay(day, id, nextDay) {
+  const sid  = String(id);
+  const data = ensureExtData();
+  if (!data.days[day]) return;
+  const itemIdx = data.days[day].findIndex(e => String(e.id) === sid);
+  if (itemIdx < 0) return;
+  const item = data.days[day][itemIdx];
+
+  if (!data.days[nextDay]) data.days[nextDay] = [];
+  // Dupe check
+  const existTitles = new Set((data.days[nextDay] || []).map(e => normalizeAlias(e.title)));
+  if (existTitles.has(normalizeAlias(item.title))) {
+    notify(`// ${item.title} já existe em ${dayLabel(nextDay)}`, 'warn'); return;
+  }
+  data.days[nextDay].push({ ...item });
+  data.days[day].splice(itemIdx, 1);
+  saveExtData(data);
+  renderExtEmpresasTab();
+  notify(`✓ ${item.title} movida para ${dayLabel(nextDay)}`);
+  updateBadges();
+}
 
 /* VALIDADAS TAB */
 function renderExtValidadasTab() {
@@ -1624,14 +1800,64 @@ function renderValidadasBlocos(validated) {
       <div class="bloco-number">Bloco ${bi + 1}</div>
       <div class="bloco-header">
         <span class="bloco-title">${bloco.length}/10 empresa${bloco.length !== 1 ? 's' : ''}</span>
-        <button class="bloco-copy-btn" id="bloco-copy-btn-${bi}" data-sites="${escHtml(sites)}" onclick="copyBlocoSites(${bi})">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-          Copiar sites
-        </button>
+        <div class="bloco-actions">
+          <button class="bloco-send-inicio-btn" onclick="openSendBlocoToInicio(${bi})">→ Início</button>
+          <button class="bloco-copy-btn" id="bloco-copy-btn-${bi}" data-sites="${escHtml(sites)}" onclick="copyBlocoSites(${bi})">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copiar sites
+          </button>
+        </div>
       </div>
       <div class="bloco-items">${slotsHtml}${emptySlots}</div>
     </div>`;
   }).join('');
+}
+
+/* Send bloco to Início — modal flow */
+function openSendBlocoToInicio(bi) {
+  pendingBlocoInicio = { day: extSelectedDay, bi };
+  const data      = ensureExtData();
+  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
+  const bloco     = validated.slice(bi * 10, (bi + 1) * 10);
+
+  document.getElementById('blocoInicioTitle').textContent = `${bi + 1}`;
+  document.getElementById('blocoInicioSub').textContent   = `${bloco.length} empresa${bloco.length !== 1 ? 's' : ''} do Bloco ${bi + 1} serão adicionadas ao Início (dia: ${dayLabel(extSelectedDay)}).`;
+  document.getElementById('blocoInicioModal').classList.add('open');
+}
+function closeBlocoInicioModal() {
+  document.getElementById('blocoInicioModal').classList.remove('open');
+  pendingBlocoInicio = null;
+}
+function confirmSendBlocoToInicio() {
+  if (!pendingBlocoInicio) return;
+  const { day, bi } = pendingBlocoInicio;
+
+  const extData   = ensureExtData();
+  const validated = (extData.days[day] || []).filter(e => !e.removed && e.validated);
+  const bloco     = validated.slice(bi * 10, (bi + 1) * 10);
+
+  const weekData     = ensureWeekData();
+  if (!weekData.days[day]) weekData.days[day] = [];
+  const existingNomes = getAllNomesInWeek(weekData);
+  let added = 0, skipped = 0;
+
+  bloco.forEach(e => {
+    const normNome = normalizeAlias(e.title);
+    if (existingNomes.has(normNome)) { skipped++; return; }
+    weekData.days[day].push({
+      nome: e.title, site: e.website || '', whatsapp: e.phone || '',
+      prototipo: '', status: 'Não enviada', criadoEm: day,
+    });
+    existingNomes.add(normNome); added++;
+  });
+
+  saveWeekData(weekData);
+  closeBlocoInicioModal();
+  if (added > 0) {
+    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} do Bloco ${bi + 1} enviadas para Início${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
+    selectedDay = day;
+    switchPanel('inicio');
+  } else notify('// todas as empresas deste bloco já existem no Início', 'warn');
 }
 
 function copyBlocoSites(bi) {
@@ -1712,7 +1938,7 @@ function extRestoreItem(day, id) {
   updateBadges();
 }
 function extClearDay() {
-  if (!confirm(`Limpar TODAS as empresas de ${dayLabel(extSelectedDay)} (incluindo removidas)?`)) return;
+  if (!confirm(`Limpar TODAS as empresas de ${dayLabel(extSelectedDay)}?`)) return;
   const data = ensureExtData();
   data.days[extSelectedDay] = [];
   saveExtData(data);
@@ -1727,32 +1953,6 @@ function extCopySites() {
   if (!validated.length) { notify('Nenhuma empresa validada com site neste dia', 'warn'); return; }
   const sites = validated.map(e => e.website).join('\n');
   navigator.clipboard.writeText(sites).then(() => notify(`✓ ${validated.length} site${validated.length !== 1 ? 's' : ''} copiado${validated.length !== 1 ? 's' : ''}`)).catch(() => notify('// erro ao copiar', 'err'));
-}
-function extSendToDados() {
-  const data      = ensureExtData();
-  const day       = extSelectedDay;
-  const validated = (data.days[day] || []).filter(e => !e.removed && e.validated);
-  if (!validated.length) { notify('Nenhuma empresa validada neste dia para enviar', 'warn'); return; }
-
-  const weekData    = ensureWeekData();
-  if (!weekData.days[day]) weekData.days[day] = [];
-  const existingNomes = getAllNomesInWeek(weekData);
-  let added = 0, skipped = 0;
-
-  validated.forEach(e => {
-    const normNome = normalizeAlias(e.title);
-    if (existingNomes.has(normNome)) { skipped++; return; }
-    const proto = findLinkByName(e.title)?.url || '';
-    weekData.days[day].push({ nome: e.title, site: e.website || '', whatsapp: e.phone || '', prototipo: proto, status: 'Não enviada' });
-    existingNomes.add(normNome); added++;
-  });
-
-  saveWeekData(weekData);
-  selectedDay = day;
-  if (added > 0) {
-    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} enviada${added !== 1 ? 's' : ''} para Início${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
-    switchPanel('inicio');
-  } else notify('// todas as empresas já existem no Início', 'warn');
 }
 
 /* ════════════════════════════
@@ -1841,15 +2041,6 @@ async function puxarDadosGemini() {
 Com base no domínio do site ${site}, preencha o JSON abaixo com dados reais e plausíveis da empresa.
 Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
 
-Regras:
-- whatsapp: apenas dígitos com DDI 55 (ex: 5511999990000). Se não souber, deixe "".
-- cor_primaria: cor hex principal da identidade visual típica de um escritório contábil.
-- logo_url: tente inferir a URL da logo com base no padrão comum do domínio (ex: dominio.com.br/logo.png). Se não souber, deixe "".
-- pagina: use exatamente o formato "↪    ${String(num).padStart(4,'0')}. NOME DA EMPRESA" — extraia o nome do domínio.
-- cards: exatamente 4 diferenciais reais ou plausíveis da empresa.
-- servicos: exatamente 5 serviços contábeis reais ou plausíveis.
-- Todos os textos em português do Brasil, naturais e profissionais.
-
 {
   "pagina": "↪    ${String(num).padStart(4,'0')}. NOME DA EMPRESA",
   "identidade": {"cor_primaria": "#hex", "logo_url": "", "site_url": "${site}"},
@@ -1857,17 +2048,10 @@ Regras:
   "hero": {"subtexto": ""},
   "sobre": {"texto": ""},
   "cards": [
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""}
+    {"titulo": "", "texto": ""},{"titulo": "", "texto": ""},{"titulo": "", "texto": ""},{"titulo": "", "texto": ""}
   ],
   "servicos": [
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""},
-    {"titulo": "", "texto": ""}
+    {"titulo": "", "texto": ""},{"titulo": "", "texto": ""},{"titulo": "", "texto": ""},{"titulo": "", "texto": ""},{"titulo": "", "texto": ""}
   ]
 }`;
 
@@ -1879,29 +2063,20 @@ Regras:
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.2,
-              responseMimeType: "application/json"
-            }
+            generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
           })
         }
       );
-
       const resData = await response.json();
-
       if (!response.ok) {
-        console.error('API error:', resData);
         projetos.push({ pagina: `ERRO: ${site}`, identidade: { site_url: site } });
       } else {
         const parts   = resData.candidates?.[0]?.content?.parts || [];
         const rawText = parts.filter(p => p.text).map(p => p.text).join('');
         const clean   = rawText.replace(/```json|```/g, '').trim();
-        const content = JSON.parse(clean);
-        projetos.push(content);
+        projetos.push(JSON.parse(clean));
       }
-
     } catch (err) {
-      console.error('Erro no site ' + site, err);
       projetos.push({ pagina: `ERRO: ${site}`, identidade: { site_url: site } });
     }
 
@@ -1917,23 +2092,10 @@ Regras:
   notify('✓ JSON gerado para o Figma');
 }
 
-function emptyProjeto(num, site, prefix) {
-  const label = prefix ? `${prefix} — ${site}` : site;
-  return {
-    pagina: `↪    ${String(num).padStart(4,'0')}. ${label}`,
-    identidade: { cor_primaria: '#1f2937', logo_url: '', site_url: site },
-    header: { email: '', telefone: '', whatsapp: '' },
-    hero: { subtexto: '' },
-    sobre: { texto: '' },
-    cards: [{ titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }],
-    servicos: [{ titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }, { titulo: '', texto: '' }]
-  };
-}
-
 function copyJsonOutput() {
   const val = document.getElementById('puxarJsonOutput').value;
   if (!val) { notify('Nenhum JSON para copiar', 'warn'); return; }
-  navigator.clipboard.writeText(val).then(() => notify('✓ JSON copiado para a área de transferência'));
+  navigator.clipboard.writeText(val).then(() => notify('✓ JSON copiado'));
 }
 function downloadJsonOutput() {
   const val = document.getElementById('puxarJsonOutput').value;
@@ -1941,7 +2103,7 @@ function downloadJsonOutput() {
   const blob = new Blob([val], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url; a.download = `projetos-${todayStr().replace(/\//g,'-')}.json`;
+  a.href = url; a.download = `projetos-${todayStr().replace(/\//g,'-')}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   notify('✓ JSON baixado');
@@ -1971,8 +2133,8 @@ async function generate() {
   const mobUrl      = document.getElementById('mobUrl').value.trim();
 
   if (!companyName) { showError('// informe o nome da empresa'); document.getElementById('companyName').classList.add('error-field'); return; }
-  if (!deskUrl || !deskUrl.includes('figma.com')) { showError('// link desktop inválido — precisa ser URL do Figma'); document.getElementById('deskUrl').classList.add('error-field'); return; }
-  if (!mobUrl  || !mobUrl.includes('figma.com'))  { showError('// link mobile inválido — precisa ser URL do Figma');  document.getElementById('mobUrl').classList.add('error-field');  return; }
+  if (!deskUrl || !deskUrl.includes('figma.com')) { showError('// link desktop inválido'); document.getElementById('deskUrl').classList.add('error-field'); return; }
+  if (!mobUrl  || !mobUrl.includes('figma.com'))  { showError('// link mobile inválido');  document.getElementById('mobUrl').classList.add('error-field');  return; }
   ['companyName','deskUrl','mobUrl'].forEach(id => document.getElementById(id).classList.remove('error-field'));
 
   setLoading(true);
@@ -1981,15 +2143,15 @@ async function generate() {
     const data = await res.json();
     if (!res.ok) { showError(`// ${data.error}`); return; }
     const shortUrl = data.shortUrl;
-    document.getElementById('resultUrl').textContent      = shortUrl;
-    document.getElementById('resultBox').style.display    = 'block';
+    document.getElementById('resultUrl').textContent   = shortUrl;
+    document.getElementById('resultBox').style.display = 'block';
     saveLink(companyName, shortUrl);
     document.getElementById('companyName').value = '';
     document.getElementById('deskUrl').value     = '';
     document.getElementById('mobUrl').value      = '';
     document.getElementById('aliasPreview').textContent = '';
     updateBadges();
-  } catch { showError('// falha na conexão com o servidor'); }
+  } catch { showError('// falha na conexão'); }
   finally  { setLoading(false); }
 }
 
@@ -2000,62 +2162,6 @@ function copyUrl() {
     btn.textContent = 'Copiado ✓';
     setTimeout(() => btn.textContent = 'Copiar link', 2000);
   });
-}
-
-/* FILA */
-async function gerarFila() {
-  const raw   = document.getElementById('filaInput').value.trim();
-  const errEl = document.getElementById('filaError');
-  errEl.style.display = 'none';
-
-  if (!raw) { errEl.textContent = '// cole os projetos antes de gerar'; errEl.style.display = 'block'; return; }
-
-  const projetos = [];
-  const blocos   = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
-  blocos.forEach(bloco => {
-    const linhas = bloco.split('\n').map(l => l.trim()).filter(Boolean);
-    if (linhas.length >= 3) {
-      projetos.push({
-        nome:    linhas[0],
-        desktop: linhas[1].replace(/\s*\(desktop\)/i,'').trim(),
-        mobile:  linhas[2].replace(/\s*\(mobile\)/i,'').trim()
-      });
-    }
-  });
-
-  if (!projetos.length) { errEl.textContent = '// formato inválido. Use: Nome / Desktop / Mobile separados por linha em branco'; errEl.style.display = 'block'; return; }
-
-  const spinnerEl = document.getElementById('filaSpinner');
-  const btnEl     = document.getElementById('filaBtn');
-  spinnerEl.style.display = 'block'; btnEl.textContent = `Gerando 0/${projetos.length}...`;
-  document.getElementById('filaResultado').style.display = 'none';
-
-  const resultados = [];
-  for (let i = 0; i < projetos.length; i++) {
-    const p = projetos[i];
-    btnEl.textContent = `Gerando ${i + 1}/${projetos.length}...`;
-    try {
-      const res  = await fetch('/api/shorten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deskUrl: p.desktop, mobUrl: p.mobile, companyName: p.nome }) });
-      const data = await res.json();
-      if (res.ok) { saveLink(p.nome, data.shortUrl); resultados.push({ nome: p.nome, url: data.shortUrl, ok: true }); }
-      else         resultados.push({ nome: p.nome, url: data.error || 'Erro', ok: false });
-    } catch { resultados.push({ nome: p.nome, url: 'Falha na conexão', ok: false }); }
-    if (i < projetos.length - 1) await new Promise(r => setTimeout(r, 600));
-  }
-
-  spinnerEl.style.display = 'none'; btnEl.textContent = 'Gerar links em fila';
-  const listEl = document.getElementById('filaResultList');
-  listEl.innerHTML = resultados.map(r => `
-    <div class="link-item${r.ok ? '' : ' archived'}">
-      <div class="link-item-info">
-        <div class="link-item-name">${escHtml(r.nome)}</div>
-        <div class="link-item-url">${escHtml(r.url)}</div>
-      </div>
-      ${r.ok ? `<button class="link-copy-btn" onclick="copyText('${escHtml(r.url)}',this)">Copiar</button>` : `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--error)">✕ erro</span>`}
-    </div>`).join('');
-  document.getElementById('filaResultado').style.display = 'block';
-  notify(`✓ ${resultados.filter(r => r.ok).length}/${resultados.length} links gerados`);
-  updateBadges();
 }
 
 /* LINKS PANEL */
@@ -2127,16 +2233,6 @@ function restoreLink(ts) {
   if (idx < 0) return;
   links[idx].hidden = false;
   localStorage.setItem(LINKS_KEY, JSON.stringify(links));
-  const link     = links[idx];
-  const normName = normalizeAlias(stripPrefix(link.name));
-  const weekData = getWeekData();
-  if (weekData && weekData.days[link.date]) {
-    weekData.days[link.date] = weekData.days[link.date].map(e => {
-      if (!e.prototipo && normalizeAlias(stripPrefix(e.nome)) === normName) return { ...e, prototipo: link.url };
-      return e;
-    });
-    saveWeekData(weekData);
-  }
   renderLinksPanel();
   notify('✓ Link restaurado');
   updateBadges();
@@ -2193,12 +2289,6 @@ async function confirmArchiveLink() {
   if (!link) { closeArchiveModal(); return; }
   const idx = links.findIndex(l => l.ts === archivingTs);
   if (idx >= 0) { links[idx].hidden = true; localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
-  const today    = link.date || todayStr();
-  const weekData = getWeekData();
-  if (weekData && weekData.days[today]) {
-    weekData.days[today] = weekData.days[today].map(e => e.prototipo === link.url ? { ...e, prototipo: '' } : e);
-    saveWeekData(weekData);
-  }
   closeArchiveModal(); renderLinksPanel(); notify('✓ Link arquivado'); updateBadges();
 }
 
@@ -2222,14 +2312,14 @@ function downloadWb(wb, filename) {
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch(err) { console.error(err); notify('// erro ao gerar Excel', 'err'); }
+  } catch(err) { notify('// erro ao gerar Excel', 'err'); }
 }
 function makeHyperlink(url) {
   if (!url) return { v: '', t: 's' };
   return { f: `HYPERLINK("${url}","${url}")` };
 }
 function buildDaySheet(wb, sheetName, companies) {
-  const headers = ['Empresa','Site','WhatsApp','Protótipo','Status'];
+  const headers = ['Empresa','Site','WhatsApp','Protótipo','Status','Criado em','Prospectado em'];
   const ws = {}; let row = 0;
   headers.forEach((h, ci) => { ws[XLSX.utils.encode_cell({ r: row, c: ci })] = { v: h, t: 's' }; }); row++;
 
@@ -2237,7 +2327,7 @@ function buildDaySheet(wb, sheetName, companies) {
     const group = companies.filter(e => (e.status || 'Não enviada') === status);
     if (!group.length) return;
     ws[XLSX.utils.encode_cell({ r: row, c: 0 })] = { v: `── ${status} (${group.length}) ──`, t: 's' };
-    for (let ci = 1; ci < 5; ci++) ws[XLSX.utils.encode_cell({ r: row, c: ci })] = { v: '', t: 's' }; row++;
+    for (let ci = 1; ci < 7; ci++) ws[XLSX.utils.encode_cell({ r: row, c: ci })] = { v: '', t: 's' }; row++;
     group.forEach(e => {
       const waUrl = buildWhatsapp(e.whatsapp);
       const cells = [
@@ -2245,14 +2335,16 @@ function buildDaySheet(wb, sheetName, companies) {
         e.site    ? makeHyperlink(e.site)    : { v: '', t: 's' },
         waUrl     ? makeHyperlink(waUrl)     : { v: '', t: 's' },
         e.prototipo? makeHyperlink(e.prototipo):{ v: '', t: 's' },
-        { v: e.status || 'Não enviada', t: 's' }
+        { v: e.status || 'Não enviada', t: 's' },
+        { v: e.criadoEm || '', t: 's' },
+        { v: e.prospectadoEm || '', t: 's' },
       ];
       cells.forEach((cell, ci) => { ws[XLSX.utils.encode_cell({ r: row, c: ci })] = cell; }); row++;
     });
   });
 
-  ws['!ref']  = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: row - 1, c: 4 } });
-  ws['!cols'] = [{ wch: 30 }, { wch: 44 }, { wch: 46 }, { wch: 46 }, { wch: 16 }];
+  ws['!ref']  = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: row - 1, c: 6 } });
+  ws['!cols'] = [{ wch: 30 }, { wch: 36 }, { wch: 40 }, { wch: 40 }, { wch: 16 }, { wch: 12 }, { wch: 14 }];
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
 }
 
@@ -2293,6 +2385,16 @@ function exportExcelHistory() {
 /* ════════════════════════════
    INIT
 ════════════════════════════ */
+// Restore sidebar state (default closed)
+(function initSidebar() {
+  const savedOpen = localStorage.getItem(SIDEBAR_KEY);
+  const sidebar = document.getElementById('sidebar');
+  // default collapsed; open only if explicitly saved as '1'
+  if (savedOpen === '1') {
+    sidebar.classList.remove('collapsed');
+  }
+})();
+
 ensureWeekData();
 ensureExtData();
 extImportTargetDay = todayStr();
@@ -2300,15 +2402,12 @@ extSelectedDay     = todayStr();
 renderInicio();
 updateBadges();
 
-// Keyboard shortcut
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('panel-links').classList.contains('active')) generate();
 });
 
-// JSON filter live preview
 document.getElementById('extJsonInput')?.addEventListener('input', updateFilterPreview);
 
-// Restore saved Gemini key
 const _savedKey = localStorage.getItem(GEMINI_KEY) || '';
 if (_savedKey) document.getElementById('geminiApiKey').value = _savedKey;
 </script>
