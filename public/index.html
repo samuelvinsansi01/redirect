@@ -2381,12 +2381,53 @@ async function puxarDadosGemini() {
   const today = todayStr();
   let numAtual = (geradosData.days[today] || []).length + 1;
 
+  // Proxies gratuitos para contornar CORS — tenta em ordem até um funcionar
+  const CORS_PROXIES = [
+    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+
+  async function fetchSiteContent(url) {
+    for (const proxyFn of CORS_PROXIES) {
+      try {
+        const res = await fetch(proxyFn(url), { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) continue;
+        const data = await res.json().catch(() => null);
+        // allorigins retorna { contents: "..." }
+        const html = data?.contents ?? (typeof data === 'string' ? data : await res.text());
+        if (!html || html.length < 200) continue;
+        // Extrai só texto útil: remove scripts, estilos, tags HTML
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[\s\S]*?<\/style>/gi, '')
+          .replace(/<[^>]+>/g, ' ');
+        const text = tmp.innerText || tmp.textContent || '';
+        // Limita a 6000 chars para não estourar o contexto do Gemini
+        return text.replace(/\s+/g, ' ').trim().slice(0, 6000);
+      } catch { continue; }
+    }
+    return null; // todos os proxies falharam
+  }
+
   for (let i = 0; i < siteLines.length; i++) {
     const site = siteLines[i];
-    statusEl.innerHTML = `<span class="acc">Analisando ${i+1}/${siteLines.length}:</span> ${site}`;
+    statusEl.innerHTML = `<span class="acc">Buscando ${i+1}/${siteLines.length}:</span> ${site}`;
+
+    // ── Etapa 1: fetch do conteúdo real do site ──
+    const siteContent = await fetchSiteContent(site);
+    const conteudoBloco = siteContent
+      ? `\n\nCONTEÚDO REAL DO SITE (extraído agora):\n"""\n${siteContent}\n"""`
+      : `\n\n(Não foi possível acessar o site. Use apenas o domínio como referência.)`;
+
+    statusEl.innerHTML = `<span class="acc">Analisando ${i+1}/${siteLines.length}:</span> ${site}${siteContent ? '' : ' <span class="warn">· sem conteúdo</span>'}`;
 
     const prompt = `Você é um assistente especializado em extrair informações de empresas contábeis brasileiras.
-Acesse o site ${site} e extraia os dados reais da empresa para preencher o JSON abaixo.
+Com base no conteúdo real do site abaixo, preencha o JSON com os dados da empresa.
+Site: ${site}${conteudoBloco}
+
+Extraia os dados reais: cores predominantes, email, telefone, whatsapp, textos sobre a empresa, serviços oferecidos.
 Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
 
 {
@@ -2456,7 +2497,7 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
     }
 
     progressBar.style.width = `${((i + 1) / siteLines.length) * 100}%`;
-    if (i < siteLines.length - 1) await new Promise(r => setTimeout(r, 9000));
+    if (i < siteLines.length - 1) await new Promise(r => setTimeout(r, 4000));
   }
 
   // JSON do campo: apenas os que deram certo
