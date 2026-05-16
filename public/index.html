@@ -3171,13 +3171,17 @@ async function iniciarDisparo() {
       const base64Data = item.imagemBase64.split(',')[1];
       const mimeType   = item.imagemBase64.split(';')[0].replace('data:','');
 
+      // Payload formato Evolution API v1
       const payload = {
         number: numero,
-        mediatype: 'image',
-        mimetype: mimeType,
-        caption: item.mensagem,
-        media: base64Data,
-        fileName: item.imagemNome || 'imagem.jpg'
+        options: { delay: 1000 },
+        mediaMessage: {
+          mediatype: 'image',
+          mimetype: mimeType,
+          caption: item.mensagem,
+          media: base64Data,
+          fileName: item.imagemNome || 'imagem.jpg'
+        }
       };
 
       const res = await fetch(`${cfg.url}/message/sendMedia/${cfg.instance}`, {
@@ -3196,7 +3200,8 @@ async function iniciarDisparo() {
         const err = await res.json().catch(() => ({}));
         item.status = 'erro';
         atualizarStatusFilaItem(item.id, 'erro');
-        log(`<span style="color:var(--error)">\u2717 Erro ${res.status} \u2014 ${err.message || 'falha'}</span>`);
+        const errMsg = err.message || err.error || JSON.stringify(err) || 'falha';
+        log(`<span style="color:var(--error)">\u2717 Erro ${res.status} \u2014 ${errMsg}</span>`);
       }
     } catch(e) {
       item.status = 'erro';
