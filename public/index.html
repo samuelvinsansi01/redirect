@@ -371,8 +371,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .bloco-actions{display:flex;gap:6px;}
 .bloco-copy-btn{background:var(--accent);color:#0a0a0d;border:none;border-radius:6px;font-family:'Syne',sans-serif;font-weight:700;font-size:9px;padding:5px 10px;cursor:pointer;transition:opacity 0.2s;display:flex;align-items:center;gap:5px;}
 .bloco-copy-btn:hover{opacity:0.85;}
-.bloco-send-inicio-btn{background:none;border:1px solid var(--accent-border);color:var(--accent);border-radius:6px;font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;cursor:pointer;transition:all 0.18s;}
-.bloco-send-inicio-btn:hover{background:var(--accent);color:#0a0a0d;}
 .bloco-items{display:flex;flex-direction:column;gap:6px;}
 .bloco-number{
   position:absolute;top:-10px;left:14px;background:var(--accent);color:#0a0a0d;
@@ -845,17 +843,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
-<!-- Bloco send-to-inicio confirm -->
-<div class="modal-overlay" id="blocoInicioModal">
-  <div class="modal">
-    <div class="modal-title">Enviar bloco <span style="color:var(--accent)" id="blocoInicioTitle">—</span> para Início</div>
-    <div class="modal-sub" id="blocoInicioSub"></div>
-    <div class="modal-btns">
-      <button class="modal-btn-ok" onclick="confirmSendBlocoToInicio()">Enviar</button>
-      <button class="modal-btn-cancel" onclick="closeBlocoInicioModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
 
 <div class="notify" id="notify"></div>
 
@@ -976,7 +963,6 @@ let editingTs          = null;
 let archivingTs        = null;
 let puxarSelectedDay   = todayStr();
 let puxarSelectedBloco = 0;
-let pendingBlocoInicio = null; // { day, bi }
 
 /* ════════════════════════════
    DATE HELPERS
@@ -1864,7 +1850,6 @@ function renderValidadasBlocos(validated) {
       <div class="bloco-header">
         <span class="bloco-title">${bloco.length}/10 empresa${bloco.length !== 1 ? 's' : ''}</span>
         <div class="bloco-actions">
-          <button class="bloco-send-inicio-btn" onclick="openSendBlocoToInicio(${bi})">→ Início</button>
           <button class="bloco-copy-btn" id="bloco-copy-btn-${bi}" data-sites="${escHtml(sites)}" onclick="copyBlocoSites(${bi})">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             Copiar sites
@@ -1876,52 +1861,7 @@ function renderValidadasBlocos(validated) {
   }).join('');
 }
 
-/* Send bloco to Início — modal flow */
-function openSendBlocoToInicio(bi) {
-  pendingBlocoInicio = { day: extSelectedDay, bi };
-  const data      = ensureExtData();
-  const validated = (data.days[extSelectedDay] || []).filter(e => !e.removed && e.validated);
-  const bloco     = validated.slice(bi * 10, (bi + 1) * 10);
 
-  document.getElementById('blocoInicioTitle').textContent = `${bi + 1}`;
-  document.getElementById('blocoInicioSub').textContent   = `${bloco.length} empresa${bloco.length !== 1 ? 's' : ''} do Bloco ${bi + 1} serão adicionadas ao Início (dia: ${dayLabel(extSelectedDay)}).`;
-  document.getElementById('blocoInicioModal').classList.add('open');
-}
-function closeBlocoInicioModal() {
-  document.getElementById('blocoInicioModal').classList.remove('open');
-  pendingBlocoInicio = null;
-}
-function confirmSendBlocoToInicio() {
-  if (!pendingBlocoInicio) return;
-  const { day, bi } = pendingBlocoInicio;
-
-  const extData   = ensureExtData();
-  const validated = (extData.days[day] || []).filter(e => !e.removed && e.validated);
-  const bloco     = validated.slice(bi * 10, (bi + 1) * 10);
-
-  const weekData     = ensureWeekData();
-  if (!weekData.days[day]) weekData.days[day] = [];
-  const existingNomes = getAllNomesInWeek(weekData);
-  let added = 0, skipped = 0;
-
-  bloco.forEach(e => {
-    const normNome = normalizeAlias(e.title);
-    if (existingNomes.has(normNome)) { skipped++; return; }
-    weekData.days[day].push({
-      nome: e.title, site: e.website || '', whatsapp: e.phone || '',
-      prototipo: '', status: 'Não enviada', criadoEm: day,
-    });
-    existingNomes.add(normNome); added++;
-  });
-
-  saveWeekData(weekData);
-  closeBlocoInicioModal();
-  if (added > 0) {
-    notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} do Bloco ${bi + 1} enviadas para Início${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} pulada${skipped !== 1 ? 's' : ''}` : ''}`);
-    selectedDay = day;
-    switchPanel('inicio');
-  } else notify('// todas as empresas deste bloco já existem no Início', 'warn');
-}
 
 function copyBlocoSites(bi) {
   const btn   = document.getElementById(`bloco-copy-btn-${bi}`);
@@ -2153,6 +2093,38 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
   document.getElementById('geminiJsonStats').textContent = `${projetos.filter(p => !p.pagina?.startsWith('ERRO')).length}/${projetos.length} com sucesso`;
   statusEl.innerHTML = `<span class="acc">✓ Concluído!</span>`;
   notify('✓ JSON gerado para o Figma');
+
+  /* ── Envio automático para o Início ── */
+  const targetDay = puxarSelectedDay || todayStr();
+  const extData   = ensureExtData();
+  const validated = (extData.days[targetDay] || []).filter(e => !e.removed && e.validated);
+  const BLOCK_SIZE = 10;
+  const bloco = puxarSelectedBloco !== null
+    ? validated.slice(puxarSelectedBloco * BLOCK_SIZE, (puxarSelectedBloco + 1) * BLOCK_SIZE)
+    : validated;
+
+  if (bloco.length) {
+    const weekData = ensureWeekData();
+    if (!weekData.days[targetDay]) weekData.days[targetDay] = [];
+    const existingNomes = getAllNomesInWeek(weekData);
+    let added = 0, skipped = 0;
+
+    bloco.forEach(e => {
+      const normNome = normalizeAlias(e.title);
+      if (existingNomes.has(normNome)) { skipped++; return; }
+      weekData.days[targetDay].push({
+        nome: e.title, site: e.website || '', whatsapp: e.phone || '',
+        prototipo: '', status: 'Não enviada', criadoEm: targetDay,
+      });
+      existingNomes.add(normNome); added++;
+    });
+
+    saveWeekData(weekData);
+    updateBadges();
+    if (added > 0) {
+      notify(`✓ ${added} empresa${added !== 1 ? 's' : ''} enviada${added !== 1 ? 's' : ''} automaticamente para o Início${skipped ? ` · ${skipped} duplicata${skipped !== 1 ? 's' : ''} ignorada${skipped !== 1 ? 's' : ''}` : ''}`);
+    }
+  }
 }
 
 function copyJsonOutput() {
