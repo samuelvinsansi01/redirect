@@ -353,32 +353,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         </div>
       </div>
 
-      <!-- ATALHO VALIDADOR -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Atalho Validador</div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.7">
-          Cole abaixo os sites das empresas que você quer <span style="color:var(--accent)">manter</span> na aba "Não enviada".<br>
-          Todos os outros da aba serão excluídos e seus domínios salvos para nunca mais voltar.
-        </div>
-        <textarea id="validadorInput" placeholder="https://escritorio-silva.com.br&#10;https://contabilidade-souza.com.br&#10;..." style="min-height:120px;margin-bottom:10px"></textarea>
-        <div class="btn-row">
-          <button class="btn btn-primary" style="flex:1" onclick="aplicarValidador()">✓ Aplicar validador</button>
-          <button class="btn btn-ghost" onclick="document.getElementById('validadorInput').value=''">Limpar</button>
-        </div>
-        <div id="validadorResumo" style="margin-top:10px"></div>
-      </div>
-
-      <!-- SITES EXCLUÍDOS -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Sites já vistos <span id="excludedCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.7">
-          Domínios bloqueados permanentemente. Nunca voltarão na importação da Apify.
-        </div>
-        <div id="excludedList" style="max-height:200px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);"></div>
-        <div class="btn-row" style="margin-top:10px">
-          <button class="btn btn-danger" onclick="limparExcluidos()">Limpar lista</button>
-        </div>
-      </div>
     </div>
     <!-- MSG PANEL -->
     <div>
@@ -395,6 +369,30 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <button class="msg-shuffle-btn" onclick="shuffleMsg()">↻ Sortear</button>
             <div class="msg-hint">// {EMPRESA} é substituído pelo nome real</div>
           </div>
+        </div>
+      </div>
+
+      <!-- ATALHO VALIDADOR -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Atalho Validador</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.6">
+          Cole os sites que quer <span style="color:var(--accent)">manter</span>. Os demais da aba "Não enviada" serão excluídos e bloqueados.
+        </div>
+        <textarea id="validadorInput" placeholder="https://escritorio-silva.com.br&#10;https://contabilidade-souza.com.br&#10;..." style="min-height:80px;margin-bottom:8px"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="flex:1;font-size:11px" onclick="aplicarValidador()">✓ Aplicar</button>
+          <button class="btn btn-ghost" style="font-size:11px" onclick="document.getElementById('validadorInput').value=''">Limpar</button>
+        </div>
+        <div id="validadorResumo" style="margin-top:8px"></div>
+      </div>
+
+      <!-- SITES EXCLUÍDOS -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Sites já vistos <span id="excludedCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px">Bloqueados permanentemente na importação da Apify.</div>
+        <div id="excludedList" style="max-height:180px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);"></div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-danger" onclick="limparExcluidos()">Limpar lista</button>
         </div>
       </div>
     </div>
@@ -1060,12 +1058,7 @@ function aplicarValidador() {
   saveWeekData(data);
   saveExcludedDomains(excluidos);
   document.getElementById('validadorInput').value = '';
-
-  const resumoEl = document.getElementById('validadorResumo');
-  resumoEl.innerHTML = `<div class="filter-summary">
-    <span class="acc">${manter.size}</span> mantidos ·
-    <span class="err">${removidos}</span> excluídos e bloqueados permanentemente
-  </div>`;
+  document.getElementById('validadorResumo').innerHTML = '';
 
   renderInicio();
   renderExcluidos();
