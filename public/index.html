@@ -903,7 +903,8 @@ function parseApifyJson(raw) {
 
 function hasValidSite(item) {
   const site = String(item.website || item.url || item.site || '').trim();
-  return site.startsWith('http') && site.length > 8;
+  if (!site.startsWith('http') || site.length <= 8) return false;
+  return !isSiteBlocklisted(site);
 }
 function hasValidPhone(item) {
   const phone = String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim();
@@ -912,6 +913,78 @@ function hasValidPhone(item) {
 function extractSite(item) { return String(item.website || item.url || item.site || '').trim(); }
 function extractPhone(item) { return String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim(); }
 function extractName(item)  { return String(item.title || item.name || item.nome || '').trim(); }
+
+/* ════════════════════════════
+   FILTRO — CATEGORIA CONTABILIDADE
+════════════════════════════ */
+
+// Palavras-chave aceitas no categoryName (contabilidade e afins)
+const CATEGORY_KEYWORDS_ALLOWED = [
+  'contabilidade', 'contabil', 'contador', 'contadores', 'escritorio contabil',
+  'assessoria contabil', 'consultoria contabil', 'auditoria', 'fiscal',
+  'tributario', 'tributaria', 'contabilista', 'contabilistas',
+  'accounting', 'bookkeeping', 'tax'
+];
+
+// Sites genéricos/redes sociais/plataformas que devem ser bloqueados
+const SITE_BLOCKLIST_DOMAINS = [
+  'google.com', 'google.com.br',
+  'instagram.com', 'facebook.com', 'fb.com',
+  'twitter.com', 'x.com',
+  'linkedin.com',
+  'youtube.com',
+  'tiktok.com',
+  'whatsapp.com',
+  'wa.me',
+  'maps.google.com',
+  'goo.gl',
+  'bit.ly', 'linktr.ee', 'linktree.com',
+  'wix.com', 'wordpress.com', 'blogspot.com',
+  'hotmart.com', 'kiwify.com.br', 'eduzz.com',
+  'mercadolivre.com.br', 'mercadopago.com.br',
+  'shopify.com', 'lojaintegrada.com.br',
+  'ifood.com.br', 'rappi.com.br',
+  'booking.com', 'airbnb.com',
+  'olx.com.br', 'enjoei.com.br',
+  'gov.br', 'receita.fazenda.gov.br',
+  'sebrae.com.br',
+  'yelp.com', 'foursquare.com', 'tripadvisor.com',
+  'guiamais.com.br', 'telelistas.net',
+];
+
+function isSiteBlocklisted(site) {
+  try {
+    const hostname = new URL(site).hostname.replace(/^www\./, '').toLowerCase();
+    return SITE_BLOCKLIST_DOMAINS.some(blocked => hostname === blocked || hostname.endsWith('.' + blocked));
+  } catch { return false; }
+}
+
+function extractCategory(item) {
+  return String(
+    item.categoryName || item.category || item.categoria ||
+    item.type || item.tipo || item.segment || item.segmento || ''
+  ).trim();
+}
+
+function isContabilidade(item) {
+  const cat = normalizeStr(extractCategory(item));
+  if (!cat) return false; // sem categoria: não passa
+  return CATEGORY_KEYWORDS_ALLOWED.some(kw => cat.includes(normalizeStr(kw)));
+}
+
+function rejectReason(item) {
+  if (!isContabilidade(item))      return 'categoria';
+  if (!hasValidSiteRaw(item))      return 'sem_site';
+  if (isSiteBlocklisted(extractSite(item))) return 'site_bloqueado';
+  if (!hasValidPhone(item))        return 'sem_telefone';
+  return null;
+}
+
+// Versão sem checagem de blocklist (usada internamente)
+function hasValidSiteRaw(item) {
+  const site = String(item.website || item.url || item.site || '').trim();
+  return site.startsWith('http') && site.length > 8;
+}
 
 function importPreview() {
   const raw     = document.getElementById('importJsonInput').value.trim();
@@ -934,26 +1007,31 @@ function importPreview() {
   }
 
   const total     = arr.length;
-  const comSite   = arr.filter(hasValidSite);
-  const validos   = comSite.filter(hasValidPhone); // site + telefone
-  const semTel    = comSite.filter(i => !hasValidPhone(i));
-  const semSite   = arr.filter(i => !hasValidSite(i));
+  const semCategoria  = arr.filter(i => !isContabilidade(i));
+  const contabil      = arr.filter(isContabilidade);
+  const semSite       = contabil.filter(i => !hasValidSiteRaw(i));
+  const siteBloq      = contabil.filter(i => hasValidSiteRaw(i) && isSiteBlocklisted(extractSite(i)));
+  const comSite       = contabil.filter(i => hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)));
+  const semTel        = comSite.filter(i => !hasValidPhone(i));
+  const validos       = comSite.filter(hasValidPhone);
 
   const data      = ensureWeekData();
   const existNomes = getAllNomes(data);
   const novos = validos.filter(i => !existNomes.has(normalizeStr(extractName(i))));
 
   sumEl.innerHTML = `
-    <span class="acc">${total}</span> total importados ·
-    <span class="acc">${validos.length}</span> com site + telefone ·
-    <span class="warn">${semTel.length}</span> sem telefone ·
+    <span class="acc">${total}</span> total ·
+    <span class="err">${semCategoria.length}</span> fora de contabilidade ·
     <span class="err">${semSite.length}</span> sem site ·
-    <span class="acc">${novos.length}</span> novos para importar
+    <span class="err">${siteBloq.length}</span> site bloqueado ·
+    <span class="warn">${semTel.length}</span> sem telefone ·
+    <span class="acc">${validos.length}</span> válidos ·
+    <span class="acc">${novos.length}</span> novos
   `;
   countEl.textContent = `· ${validos.length} válidos`;
 
   if (!validos.length) {
-    listEl.innerHTML = '<span style="color:var(--muted)">// nenhuma empresa válida encontrada</span>';
+    listEl.innerHTML = '<span style="color:var(--muted)">// nenhuma empresa de contabilidade válida encontrada</span>';
     return;
   }
 
@@ -961,6 +1039,7 @@ function importPreview() {
     const nome  = extractName(item);
     const site  = extractSite(item);
     const phone = extractPhone(item);
+    const cat   = extractCategory(item);
     const isDup = existNomes.has(normalizeStr(nome));
     return `<div class="empresa-card" style="${isDup?'opacity:0.45':''}">
       <div class="empresa-info">
@@ -968,6 +1047,7 @@ function importPreview() {
         <div class="empresa-meta">
           <div class="empresa-site"><a href="${escHtml(site)}" target="_blank">${escHtml(site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a></div>
           <div class="empresa-phone">📱 ${escHtml(phone)}</div>
+          ${cat ? `<span class="q-badge ok" style="font-size:7px">${escHtml(cat)}</span>` : ''}
         </div>
       </div>
       ${isDup ? '<span class="q-badge warn">duplicada</span>' : '<span class="q-badge ok">✓ válida</span>'}
@@ -981,8 +1061,8 @@ function importarLeads() {
   const arr = parseApifyJson(raw);
   if (!arr || !arr.length) { notify('// JSON inválido ou vazio', 'err'); return; }
 
-  const validos = arr.filter(i => hasValidSite(i) && hasValidPhone(i));
-  if (!validos.length) { notify('// nenhuma empresa com site + telefone', 'warn'); return; }
+  const validos = arr.filter(i => isContabilidade(i) && hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && hasValidPhone(i));
+  if (!validos.length) { notify('// nenhuma empresa de contabilidade com site + telefone', 'warn'); return; }
 
   const data = ensureWeekData();
   if (!data.days[importTargetDay]) data.days[importTargetDay] = [];
