@@ -1312,6 +1312,14 @@ function ensureWeekData() {
     data = { weekStart: ws, days: {} };
     localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
   }
+  // Garante que todas as empresas tenham id
+  let needsSave = false;
+  Object.keys(data.days).forEach(day => {
+    (data.days[day] || []).forEach(e => {
+      if (!e.id) { e.id = genId(); needsSave = true; }
+    });
+  });
+  if (needsSave) localStorage.setItem(EMPRESAS_KEY, JSON.stringify(data));
   return data;
 }
 function archiveWeekData(data) { if (!data) return; localStorage.setItem(HISTORY_KEY, JSON.stringify({ ...data, archivedAt: todayStr() })); }
@@ -2484,7 +2492,7 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
       const normNome = normalizeAlias(e.title);
       if (existingNomes.has(normNome)) { skipped++; return; }
       weekData.days[targetDay].push({
-        nome: e.title, site: e.website || '', whatsapp: '',
+        id: genId(), nome: e.title, site: e.website || '', whatsapp: '',
         prototipo: '', status: 'Não enviada', criadoEm: targetDay,
       });
       existingNomes.add(normNome); added++;
