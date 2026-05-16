@@ -717,8 +717,17 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel" id="panel-puxar">
   <div class="page-header">
     <div class="page-title">Puxar <span>Dados.</span></div>
-    <div class="page-sub">// sites → Gemini → JSON estruturado para o plugin do Figma</div>
+    <div class="page-sub">// sites → Gemini → JSON · ou cole um JSON gerado por outra IA</div>
   </div>
+
+  <!-- Mode tabs -->
+  <div class="inner-tabs" style="margin-bottom:20px">
+    <button class="inner-tab active" id="puxar-tab-gemini" onclick="switchPuxarMode('gemini')">✦ Gemini</button>
+    <button class="inner-tab" id="puxar-tab-json" onclick="switchPuxarMode('json')">{ } Colar JSON</button>
+  </div>
+
+  <!-- ══ ABA GEMINI ══ -->
+  <div id="puxar-panel-gemini">
   <div class="card" style="margin-bottom:16px">
     <div class="card-title">Configuração Gemini</div>
     <div class="gemini-api-input">
@@ -774,6 +783,42 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <textarea class="json-out" id="puxarJsonOutput" readonly placeholder="// o JSON gerado pelo Gemini aparecerá aqui..." style="min-height:360px"></textarea>
     </div>
   </div>
+  </div><!-- /puxar-panel-gemini -->
+
+  <!-- ══ ABA COLAR JSON ══ -->
+  <div id="puxar-panel-json" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Dia de destino</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:10px">As empresas do JSON serão enviadas para este dia no Início:</div>
+      <div class="week-tabs" id="jsonPasteWeekTabs"></div>
+    </div>
+    <div class="puxar-grid">
+      <div class="card">
+        <div class="card-title">Colar JSON</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">
+          // Cole aqui o JSON gerado por outra IA (mesmo formato do Gemini). Os links dos blocos batem com os sites das empresas.
+        </div>
+        <div class="field-group" style="margin-bottom:14px">
+          <label>JSON <span class="tag">projetos[]</span></label>
+          <textarea class="json-area" id="jsonPasteInput" placeholder='{"template_page":"↪    Template","projetos":[{...}]}' style="min-height:320px" oninput="jsonPastePreview()"></textarea>
+        </div>
+        <div class="gemini-status" id="jsonPasteStatus"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-primary" style="width:auto;flex:1" onclick="importarJsonColado()">↓ Importar para o Início</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('jsonPasteInput').value='';document.getElementById('jsonPasteStatus').textContent='';document.getElementById('jsonPastePreviewBox').style.display='none'">Limpar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Pré-visualização</div>
+        <div id="jsonPastePreviewBox" style="display:none">
+          <div class="gemini-status" id="jsonPasteStats" style="margin-bottom:12px"></div>
+          <div id="jsonPastePreviewList" style="display:flex;flex-direction:column;gap:6px;max-height:440px;overflow-y:auto"></div>
+        </div>
+        <div id="jsonPastePreviewEmpty" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// cole o JSON ao lado para ver uma prévia das empresas</div>
+      </div>
+    </div>
+  </div><!-- /puxar-panel-json -->
+
 </div>
 
 <!-- ── GERADOS ── -->
@@ -2312,6 +2357,7 @@ function renderPuxarPanel() {
     return `<button class="week-tab${active ? ' active' : ''}" onclick="puxarSelectDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}${val.length > 0 ? `<span class="day-count">${val.length}</span>` : ''}</button>`;
   }).join('');
   renderPuxarBlocoTabs();
+  if (puxarMode === 'json') renderJsonPasteWeekTabs();
 }
 
 function puxarSelectDay(day) { puxarSelectedDay = day; puxarSelectedBloco = 0; renderPuxarBlocoTabs(); }
@@ -2344,6 +2390,137 @@ function carregarSitesNoInput() {
   document.getElementById('puxarSitesInput').value = content;
   notify('✓ Sites carregados no campo de entrada');
 }
+/* ════════════════════════════
+   PUXAR DADOS — MODO (Gemini | Colar JSON)
+════════════════════════════ */
+let puxarMode = 'gemini';
+
+function switchPuxarMode(mode) {
+  puxarMode = mode;
+  document.getElementById('puxar-tab-gemini').classList.toggle('active', mode === 'gemini');
+  document.getElementById('puxar-tab-json').classList.toggle('active', mode === 'json');
+  document.getElementById('puxar-panel-gemini').style.display = mode === 'gemini' ? '' : 'none';
+  document.getElementById('puxar-panel-json').style.display   = mode === 'json'   ? '' : 'none';
+  if (mode === 'json') renderJsonPasteWeekTabs();
+}
+
+/* ── Semana tabs para o modo JSON ── */
+let jsonPasteTargetDay = null;
+function renderJsonPasteWeekTabs() {
+  const weekDays = currentWeekDays();
+  const today    = todayStr();
+  if (!jsonPasteTargetDay) jsonPasteTargetDay = today;
+  const el = document.getElementById('jsonPasteWeekTabs');
+  if (!el) return;
+  el.innerHTML = weekDays.map(day => {
+    const active  = day === jsonPasteTargetDay;
+    const isToday = day === today;
+    return `<button class="week-tab${active ? ' active' : ''}" onclick="jsonPasteSetDay('${day}')">${dayLabel(day)}${isToday ? ' <span style="color:var(--accent);font-size:8px">●</span>' : ''}</button>`;
+  }).join('');
+}
+function jsonPasteSetDay(day) { jsonPasteTargetDay = day; renderJsonPasteWeekTabs(); }
+
+/* ── Pré-visualização do JSON colado ── */
+function jsonPastePreview() {
+  const raw      = document.getElementById('jsonPasteInput').value.trim();
+  const statsEl  = document.getElementById('jsonPasteStats');
+  const listEl   = document.getElementById('jsonPastePreviewList');
+  const boxEl    = document.getElementById('jsonPastePreviewBox');
+  const emptyEl  = document.getElementById('jsonPastePreviewEmpty');
+  const statusEl = document.getElementById('jsonPasteStatus');
+
+  statusEl.textContent = '';
+  if (!raw) { boxEl.style.display = 'none'; emptyEl.style.display = ''; return; }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch {
+    statusEl.innerHTML = '<span style="color:var(--error)">// JSON inválido — verifique a sintaxe</span>';
+    boxEl.style.display = 'none'; emptyEl.style.display = ''; return;
+  }
+
+  const projetos = parsed.projetos || (Array.isArray(parsed) ? parsed : []);
+  if (!projetos.length) {
+    statusEl.innerHTML = '<span style="color:var(--warning)">// nenhum projeto encontrado no JSON</span>';
+    boxEl.style.display = 'none'; emptyEl.style.display = ''; return;
+  }
+
+  boxEl.style.display  = '';
+  emptyEl.style.display = 'none';
+  statsEl.innerHTML = `<span class="acc">${projetos.length}</span> projeto${projetos.length !== 1 ? 's' : ''} encontrado${projetos.length !== 1 ? 's' : ''} · pronto para importar`;
+
+  listEl.innerHTML = projetos.map((p, i) => {
+    const nomeBruto = p.pagina || '';
+    const nome = nomeBruto.replace(/^↪\s*\d+\.\s*/, '').replace(/^↪\s*/, '').trim() || `Projeto ${i+1}`;
+    const site = p.identidade?.site_url || p._siteUrl || '';
+    const wa   = p.header?.whatsapp || '';
+    return `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);min-width:24px">${i+1}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(nome)}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${site ? escHtml(site) : '<span style="color:var(--muted)">— sem site</span>'}</div>
+      </div>
+      ${wa ? `<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--accent)">📱 ${escHtml(wa)}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ── Importar JSON colado para o Início ── */
+function importarJsonColado() {
+  const raw      = document.getElementById('jsonPasteInput').value.trim();
+  const statusEl = document.getElementById('jsonPasteStatus');
+
+  if (!raw) { statusEl.innerHTML = '<span style="color:var(--error)">// cole o JSON antes de importar</span>'; return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch {
+    statusEl.innerHTML = '<span style="color:var(--error)">// JSON inválido — verifique a sintaxe</span>'; return;
+  }
+
+  const projetos = parsed.projetos || (Array.isArray(parsed) ? parsed : []);
+  if (!projetos.length) { statusEl.innerHTML = '<span style="color:var(--warning)">// nenhum projeto no JSON</span>'; return; }
+
+  const targetDay = jsonPasteTargetDay || todayStr();
+  const weekData  = ensureWeekData();
+  if (!weekData.days[targetDay]) weekData.days[targetDay] = [];
+  const existingNomes = getAllNomesInWeek(weekData);
+
+  let added = 0, skipped = 0;
+  projetos.forEach(p => {
+    const nomeBruto = p.pagina || '';
+    const nome = nomeBruto.replace(/^↪\s*\d+\.\s*/, '').replace(/^↪\s*/, '').trim();
+    if (!nome) { skipped++; return; }
+
+    const normNome = normalizeAlias(nome);
+    if (existingNomes.has(normNome)) { skipped++; return; }
+
+    const site = p.identidade?.site_url || p._siteUrl || '';
+    const wa   = p.header?.whatsapp || '';
+
+    weekData.days[targetDay].push({
+      id: genId(), nome, site, whatsapp: wa,
+      prototipo: '', status: 'Não enviada', criadoEm: targetDay,
+    });
+    existingNomes.add(normNome);
+    added++;
+  });
+
+  // Salva também nos Gerados para manter histórico
+  addGerados(projetos);
+
+  saveWeekData(weekData);
+  updateBadges();
+  renderInicio();
+
+  let msg = '';
+  if (added > 0)   msg += `✓ ${added} empresa${added > 1 ? 's' : ''} importada${added > 1 ? 's' : ''} para o Início`;
+  if (skipped > 0) msg += `${msg ? ' · ' : ''}${skipped} duplicada${skipped > 1 ? 's' : ''} ignorada${skipped > 1 ? 's' : ''}`;
+  if (!msg) msg = '// nenhuma empresa nova importada';
+
+  statusEl.innerHTML = added > 0
+    ? `<span class="acc">${msg}</span>`
+    : `<span style="color:var(--warning)">${msg}</span>`;
+  notify(added > 0 ? `✓ ${added} empresa${added>1?'s':''} importadas` : '// nenhuma empresa nova', added > 0 ? '' : 'warn');
+}
+
 function puxarClear() {
   document.getElementById('puxarSitesInput').value    = '';
   document.getElementById('puxarJsonOutput').value    = '';
@@ -2559,12 +2736,22 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
     const weekData = ensureWeekData();
     if (!weekData.days[targetDay]) weekData.days[targetDay] = [];
     const existingNomes = getAllNomesInWeek(weekData);
+    // Monta mapa site → projeto gerado para pegar o nome pelo campo 'pagina'
+    const siteToGerado = {};
+    sucessos.forEach(p => { if (p.identidade?.site_url || p._siteUrl) siteToGerado[(p.identidade?.site_url || p._siteUrl).trim()] = p; });
     let added = 0, skipped = 0;
     bloco.forEach(e => {
-      const normNome = normalizeAlias(e.title);
+      // Tenta pegar o nome pelo campo 'pagina' do gerado (sem numeração), senão usa title da extração
+      const gerado = siteToGerado[(e.website || '').trim()];
+      let nomeEmpresa = e.title;
+      if (gerado?.pagina) {
+        // Remove prefixo tipo "↪    0001. " ou "↪    " deixando só o nome
+        nomeEmpresa = gerado.pagina.replace(/^↪\s*\d+\.\s*/, '').replace(/^↪\s*/, '').trim() || e.title;
+      }
+      const normNome = normalizeAlias(nomeEmpresa);
       if (existingNomes.has(normNome)) { skipped++; return; }
       weekData.days[targetDay].push({
-        id: genId(), nome: e.title, site: e.website || '', whatsapp: '',
+        id: genId(), nome: nomeEmpresa, site: e.website || '', whatsapp: gerado?.header?.whatsapp || '',
         prototipo: '', status: 'Não enviada', criadoEm: targetDay,
       });
       existingNomes.add(normNome); added++;
