@@ -414,7 +414,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel" id="panel-disparo">
   <div class="page-header">
     <div class="page-title">Disparo <span>WhatsApp.</span></div>
-    <div class="page-sub">// Evolution API · imagem + mensagem · controle de lotes</div>
+    <div class="page-sub">// Evolution API · apenas mensagem · controle de lotes</div>
   </div>
   <div class="disparo-grid">
     <!-- Config + fila -->
@@ -1266,11 +1266,6 @@ function renderFila() {
           <div class="fila-msg-area" id="fila-msg-${item.id}">${escHtml(item.mensagem)}</div>
           <button class="fila-msg-shuffle" onclick="shuffleFilaMsg('${item.id}')">↻ sortear</button>
         </div>
-        <label class="fila-img-area${item.imagemBase64?' has-img':''}" id="fila-img-${item.id}">
-          ${item.imagemBase64 ? `<img src="${item.imagemBase64}" alt="imagem"/>` : ''}
-          <div class="fila-img-label">${item.imagemBase64 ? `<span style="background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:4px;position:relative">${escHtml(item.imagemNome||'imagem.jpg')}</span>` : '🖼 Clique para adicionar imagem'}</div>
-          <input type="file" accept="image/jpeg,image/jpg,image/png" class="fila-img-input" onchange="onImgChange('${item.id}',this)"/>
-        </label>
       </div>
     </div>`;
   }).join('');
@@ -1376,10 +1371,8 @@ async function dispararLote() {
     try {
       const waNum  = item.whatsapp.replace(/\D/g,'');
       const numero = waNum.startsWith('55') ? waNum : '55'+waNum;
-      const base64Data = item.imagemBase64.split(',')[1];
-      const mimeType   = item.imagemBase64.split(';')[0].replace('data:','');
-      const payload    = { number: numero, options: { delay: 1000 }, mediaMessage: { mediatype:'image', mimetype: mimeType, caption: item.mensagem, media: base64Data, fileName: item.imagemNome||'imagem.jpg' } };
-      const res = await fetch(`${cfg.url}/message/sendMedia/${cfg.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':cfg.key}, body: JSON.stringify(payload) });
+      const payload = { number: numero, options: { delay: 1000 }, textMessage: { text: item.mensagem } };
+      const res = await fetch(`${cfg.url}/message/sendText/${cfg.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':cfg.key}, body: JSON.stringify(payload) });
       if (res.ok) {
         item.status='enviado'; atualizarStatusFila(item.id,'enviado');
         log(`<span style="color:var(--accent)">✓ Enviado para ${escHtml(item.nome)}</span>`);
@@ -1429,8 +1422,6 @@ async function iniciarDisparo() {
   if (disparoEmAndamento || aguardandoLote) return;
   const cfg = loadEvoConfig();
   if (!cfg.url || !cfg.key || !cfg.instance) { notify('// configure a Evolution API primeiro','err'); return; }
-  const semImagem = filaDisparo.filter(f => !f.imagemBase64);
-  if (semImagem.length) { notify(`// ${semImagem.length} empresa${semImagem.length>1?'s':''} sem imagem`,'err'); return; }
   if (!filaDisparo.length) { notify('// fila vazia','warn'); return; }
   document.getElementById('disparoLog').innerHTML = '';
   const loteConf = getLoteConfig();
