@@ -1876,22 +1876,28 @@ Regras obrigatórias:
       );
 
       const resData = await response.json();
+      console.log('STATUS:', response.status);
+      console.log('RESPOSTA COMPLETA:', JSON.stringify(resData, null, 2));
 
       if (!response.ok) {
-        console.error('Gemini API error:', resData);
+        console.error('API error:', resData);
         projetos.push({ pagina: `ERRO: ${site}`, identidade: { site_url: site } });
       } else {
-        const rawText = resData.candidates[0].content.parts
-          .filter(p => p.text)
-          .map(p => p.text)
-          .join('');
+        const parts = resData.candidates?.[0]?.content?.parts || [];
+        console.log('PARTS:', JSON.stringify(parts, null, 2));
+
+        const rawText = parts.filter(p => p.text).map(p => p.text).join('');
+        console.log('RAW TEXT:', rawText);
+
         const clean = rawText.replace(/```json|```/g, '').trim();
+        console.log('CLEAN:', clean);
+
         const content = JSON.parse(clean);
         projetos.push(content);
       }
 
     } catch (err) {
-      console.error('Erro no site ' + site, err);
+      console.error('ERRO DETALHADO no site ' + site, err);
       projetos.push({ pagina: `ERRO: ${site}`, identidade: { site_url: site } });
     }
 
@@ -1902,8 +1908,7 @@ Regras obrigatórias:
   const finalJson = { template_page: templatePage, projetos };
   outputEl.value = JSON.stringify(finalJson, null, 2);
   document.getElementById('geminiSpinner').style.display = 'none';
-  statusEl.innerHTML = `<span class="acc">✓ Concluído! ${projetos.length} empresa${projetos.length !== 1 ? 's' : ''} processada${projetos.length !== 1 ? 's' : ''}.</span>`;
-  document.getElementById('geminiJsonStats').textContent = `${projetos.filter(p => !p.pagina?.startsWith('ERRO')).length}/${projetos.length} com sucesso`;
+  statusEl.innerHTML = `<span class="acc">✓ Concluído!</span>`;
   notify('✓ JSON gerado para o Figma');
 }
 
