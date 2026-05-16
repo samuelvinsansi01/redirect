@@ -506,11 +506,11 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <thead>
               <tr>
                 <th>Empresa</th><th>WhatsApp</th>
-                <th>Protótipo</th><th>Status</th><th>Datas</th><th>Msg</th><th></th>
+                <th>Status</th><th>Msg</th><th></th>
               </tr>
             </thead>
             <tbody id="inicioTbody">
-              <tr><td colspan="7" class="table-empty">Nenhuma empresa neste dia</td></tr>
+              <tr><td colspan="5" class="table-empty">Nenhuma empresa neste dia</td></tr>
             </tbody>
           </table>
         </div>
@@ -948,7 +948,7 @@ Faz sentido pra vocês?`,
    STATE
 ════════════════════════════ */
 let selectedDay        = todayStr();
-let selectedStatus     = 'Todos';
+let selectedStatus     = 'Não enviada';
 let selectedLinksDay   = todayStr();
 let selectedMsgEmpresa = null;
 let selectedMsgTemplateIdx = -1;
@@ -1214,13 +1214,11 @@ function renderInicio() {
 
   // Status tabs
   const dayArr = data.days[selectedDay] || [];
-  const statusCounts = { 'Todos': dayArr.length };
+  const statusCounts = {};
   STATUS_OPTIONS.forEach(s => { statusCounts[s] = dayArr.filter(e => (e.status || 'Não enviada') === s).length; });
   const stTabsEl = document.getElementById('inicioStatusTabs');
-  const allStatuses = ['Todos', ...STATUS_OPTIONS];
-  stTabsEl.innerHTML = allStatuses.map(s => {
+  stTabsEl.innerHTML = STATUS_OPTIONS.map(s => {
     const cnt = statusCounts[s] || 0;
-    if (s !== 'Todos' && cnt === 0) return '';
     const active = selectedStatus === s;
     return `<button class="status-tab${active ? ' active' : ''}" onclick="selectStatus('${s}')">
       ${escHtml(s)} <span class="st-count">${cnt}</span>
@@ -1242,7 +1240,7 @@ function renderInicio() {
 
 function selectDay(day) {
   selectedDay = day;
-  selectedStatus = 'Todos';
+  selectedStatus = 'Não enviada';
   renderInicio();
 }
 function selectStatus(s) {
@@ -1260,12 +1258,10 @@ function renderDayTable(data, day) {
   const fullArr = data.days[day] || [];
 
   // Filter by selected status
-  const toShow = selectedStatus === 'Todos'
-    ? fullArr
-    : fullArr.filter(e => (e.status || 'Não enviada') === selectedStatus);
+  const toShow = fullArr.filter(e => (e.status || 'Não enviada') === selectedStatus);
 
   if (!toShow.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa${selectedStatus !== 'Todos' ? ' com status "' + selectedStatus + '"' : ''} em ${dayLabel(day)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Nenhuma empresa com status "${selectedStatus}" em ${dayLabel(day)}</td></tr>`;
     return;
   }
 
@@ -1275,12 +1271,26 @@ function renderDayTable(data, day) {
     const isSelected = selectedMsgEmpresa && selectedMsgEmpresa.nome === e.nome;
     const waRaw  = e.whatsapp || '';
     const waBuilt = buildWhatsapp(waRaw);
-    const proto  = e.prototipo || '';
 
-    // Name cell — clickable if site available
-    const nameCell = e.site
+    // Date tooltip data
+    const criadoEm     = e.criadoEm || day;
+    const prospectadoEm= e.prospectadoEm || '';
+    const fechadoEm    = e.fechadoEm || '';
+    const movedDays    = e.movedFrom ? e.movedFrom : [];
+    let tooltipRows    = `<div class="date-tooltip-row"><span class="dt-label">Criado em</span><span class="dt-val">${escHtml(criadoEm)}</span></div>`;
+    if (movedDays.length) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Movido de</span><span class="dt-val">${escHtml(movedDays.join(' → '))}</span></div>`;
+    if (prospectadoEm) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Prospectado</span><span class="dt-val accent">${escHtml(prospectadoEm)}</span></div>`;
+    if (fechadoEm)     tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Fechado</span><span class="dt-val accent">${escHtml(fechadoEm)}</span></div>`;
+
+    // Name cell — with date tooltip, clickable if site available
+    const nameLink = e.site
       ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.nome)}</a>`
       : escHtml(e.nome);
+    const nameCell = `<div class="date-tooltip-wrap" style="display:inline-flex;align-items:center;gap:5px">
+      ${nameLink}
+      <span class="date-badge" style="cursor:default" title="histórico">${escHtml(criadoEm.slice(0,5))}</span>
+      <div class="date-tooltip">${tooltipRows}</div>
+    </div>`;
 
     // WhatsApp cell
     const waCell = waRaw
@@ -1291,25 +1301,6 @@ function renderDayTable(data, day) {
            <button class="proto-save-btn" onclick="saveWa('${day}',${realIdx})">OK</button>
          </div>`;
 
-    // Proto cell
-    const protoCell = proto
-      ? `<span class="td-link" style="max-width:130px;display:inline-block"><a href="${escHtml(proto)}" target="_blank">${escHtml(proto)}</a></span>
-         <button class="proto-edit-icon" onclick="showProtoEdit('${day}',${realIdx},this)" title="Editar">✎</button>`
-      : `<div class="proto-edit-wrap">
-           <input class="proto-input" placeholder="Colar link..." id="proto-input-${day}-${realIdx}"/>
-           <button class="proto-save-btn" onclick="saveProto('${day}',${realIdx})">OK</button>
-         </div>`;
-
-    // Date tooltip
-    const criadoEm     = e.criadoEm || day;
-    const prospectadoEm= e.prospectadoEm || '';
-    const fechadoEm    = e.fechadoEm || '';
-    const movedDays    = e.movedFrom ? e.movedFrom : [];
-    let tooltipRows    = `<div class="date-tooltip-row"><span class="dt-label">Criado em</span><span class="dt-val">${escHtml(criadoEm)}</span></div>`;
-    if (movedDays.length) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Movido de</span><span class="dt-val">${escHtml(movedDays.join(' → '))}</span></div>`;
-    if (prospectadoEm) tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Prospectado</span><span class="dt-val accent">${escHtml(prospectadoEm)}</span></div>`;
-    if (fechadoEm)     tooltipRows += `<div class="date-tooltip-row"><span class="dt-label">Fechado</span><span class="dt-val accent">${escHtml(fechadoEm)}</span></div>`;
-
     // Check if there's a next week day available
     const weekDays   = currentWeekDays();
     const dayIdx     = weekDays.indexOf(day);
@@ -1318,17 +1309,10 @@ function renderDayTable(data, day) {
     html += `<tr>
       <td class="td-name">${nameCell}</td>
       <td style="white-space:nowrap">${waCell}</td>
-      <td style="white-space:nowrap">${protoCell}</td>
       <td>
         <select class="status-select" onchange="updateStatus('${day}',${realIdx},this.value)">
           ${STATUS_OPTIONS.map(s => `<option${(e.status||'Não enviada')===s?' selected':''}>${s}</option>`).join('')}
         </select>
-      </td>
-      <td>
-        <div class="date-tooltip-wrap">
-          <span class="date-badge">${escHtml(criadoEm.slice(0,5))}</span>
-          <div class="date-tooltip">${tooltipRows}</div>
-        </div>
       </td>
       <td><button class="usar-btn${isSelected?' active':''}" data-nome="${escHtml(e.nome)}" onclick="usarEmpresaMsg(this.dataset.nome)">${isSelected?'✓ usando':'Usar'}</button></td>
       <td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
