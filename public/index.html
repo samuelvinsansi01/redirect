@@ -702,8 +702,12 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         <input type="text" id="puxarTemplatePage" value="↪    Template"/>
       </div>
       <div class="field-group" style="margin-bottom:14px">
-        <label>Número inicial do projeto</label>
-        <input type="number" id="puxarNumeroInicial" value="1" min="1" style="width:120px"/>
+        <label>Número inicial do projeto <span class="tag" id="numAutoTag" style="background:rgba(184,240,89,0.12);border:1px solid rgba(184,240,89,0.3);color:var(--accent)">auto</span></label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="puxarNumeroInicial" value="1" min="1" style="width:120px"/>
+          <button class="btn btn-ghost" style="font-size:9px;padding:5px 10px;white-space:nowrap" onclick="syncNumeroInicial()" title="Sincronizar com último número do dia">↺ Sincronizar</button>
+          <span id="numAutoHint" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)"></span>
+        </div>
       </div>
       <div class="btn-row">
         <button class="btn btn-primary" style="width:auto;flex:1" onclick="puxarDadosGemini()">
@@ -856,6 +860,7 @@ const HISTORY_KEY  = 'fr_empresas_hist';
 const EXT_KEY      = 'fr_extracao_v2';
 const GEMINI_KEY   = 'vin_gemini_key';
 const SIDEBAR_KEY  = 'vin_sidebar_open';
+const GEMINI_COUNTER_KEY = 'vin_gemini_counter';
 
 const STATUS_OPTIONS = ['Não enviada','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -1153,6 +1158,42 @@ function getAllExtSitesInWeek(data) {
   const sites = new Set();
   Object.values(data.days).forEach(arr => (arr || []).forEach(e => { if (e.website) sites.add(normalizeWebsite(e.website)); }));
   return sites;
+}
+
+/* ════════════════════════════
+   CONTADOR DIÁRIO DE PROJETOS
+   Reseta à meia-noite automaticamente
+════════════════════════════ */
+function getCounterData() {
+  try { return JSON.parse(localStorage.getItem(GEMINI_COUNTER_KEY) || 'null'); } catch { return null; }
+}
+function saveCounterData(d) { localStorage.setItem(GEMINI_COUNTER_KEY, JSON.stringify(d)); }
+
+/** Retorna o próximo número a usar hoje (sem incrementar ainda) */
+function getNextNumForToday() {
+  const today = todayStr();
+  const d = getCounterData();
+  if (!d || d.date !== today) return 1; // novo dia → começa do 1
+  return d.lastNum + 1;
+}
+
+/** Salva o último número usado hoje após a geração */
+function saveLastNumForToday(lastNum) {
+  saveCounterData({ date: todayStr(), lastNum });
+}
+
+/** Preenche o campo e mostra hint */
+function syncNumeroInicial() {
+  const next = getNextNumForToday();
+  document.getElementById('puxarNumeroInicial').value = next;
+  const d = getCounterData();
+  const today = todayStr();
+  const hintEl = document.getElementById('numAutoHint');
+  if (d && d.date === today && d.lastNum > 0) {
+    hintEl.textContent = `// último hoje: ${d.lastNum}`;
+  } else {
+    hintEl.textContent = '// primeiro do dia';
+  }
 }
 
 /* ════════════════════════════
@@ -1952,6 +1993,9 @@ function renderPuxarPanel() {
   const savedKey = localStorage.getItem(GEMINI_KEY) || '';
   if (savedKey) document.getElementById('geminiApiKey').value = savedKey;
 
+  // Auto-preenche o número inicial baseado no contador do dia
+  syncNumeroInicial();
+
   const weekDays = currentWeekDays();
   const today    = todayStr();
   document.getElementById('puxarWeekTabs').innerHTML = weekDays.map(day => {
@@ -2025,11 +2069,12 @@ async function puxarDadosGemini() {
     statusEl.innerHTML = `<span class="acc">Analisando ${i+1}/${sites.length}:</span> ${site}`;
 
     const prompt = `Você é um assistente especializado em extrair informações de empresas contábeis brasileiras.
-Com base no domínio do site ${site}, preencha o JSON abaixo com dados reais e plausíveis da empresa.
+Acesse o site ${site} e extraia os dados reais da empresa para preencher o JSON abaixo.
 Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
+O campo "nome_empresa" deve conter apenas o nome da empresa, sem prefixos ou números.
 
 {
-  "pagina": "↪    ${String(num).padStart(4,'0')}. NOME DA EMPRESA",
+  "nome_empresa": "NOME DA EMPRESA",
   "identidade": {"cor_primaria": "#hex", "logo_url": "", "site_url": "${site}"},
   "header": {"email": "", "telefone": "", "whatsapp": ""},
   "hero": {"subtexto": ""},
@@ -2061,7 +2106,15 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
         const parts   = resData.candidates?.[0]?.content?.parts || [];
         const rawText = parts.filter(p => p.text).map(p => p.text).join('');
         const clean   = rawText.replace(/```json|```/g, '').trim();
-        projetos.push(JSON.parse(clean));
+        const parsed  = JSON.parse(clean);
+
+        // Monta o campo "pagina" localmente, garantindo o padrão correto
+        const nomeEmpresa = (parsed.nome_empresa || parsed.pagina || site).replace(/^[↪\s0-9.]+/, '').trim();
+        const numStr = String(num).padStart(4, '0');
+        parsed.pagina = `↪    ${numStr}. ${nomeEmpresa}`;
+        delete parsed.nome_empresa; // remove campo auxiliar
+
+        projetos.push(parsed);
       }
     } catch (err) {
       projetos.push({ pagina: `ERRO: ${site}`, identidade: { site_url: site } });
@@ -2069,6 +2122,12 @@ Retorne APENAS o JSON, sem texto extra, sem markdown, sem blocos de código.
 
     progressBar.style.width = `${((i + 1) / sites.length) * 100}%`;
     if (i < sites.length - 1) await new Promise(r => setTimeout(r, 6500));
+  }
+
+  // Salva o último número gerado hoje no contador diário
+  if (projetos.filter(p => !p.pagina?.startsWith('ERRO')).length > 0) {
+    saveLastNumForToday(numInicial + sites.length - 1);
+    syncNumeroInicial(); // atualiza o hint
   }
 
   const finalJson = { template_page: templatePage, projetos };
@@ -2420,6 +2479,7 @@ extImportTargetDay = todayStr();
 extSelectedDay     = todayStr();
 renderInicio();
 updateBadges();
+syncNumeroInicial();
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('panel-links').classList.contains('active')) generate();
