@@ -955,6 +955,21 @@ tr:hover td{background:rgba(255,255,255,0.015);}
             <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">seg</span>
           </div>
         </div>
+        <div class="field-group" style="min-width:200px">
+          <label>Controle de lotes <span class="tag">ANTI-BAN</span></label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="loteAtivo" style="width:auto;padding:0;accent-color:var(--accent)" onchange="toggleLoteConfig()"/>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">Ativar</span>
+            </div>
+            <div id="loteConfigFields" style="display:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="number" id="loteTamanho" value="30" min="1" max="100" style="width:60px" title="Empresas por lote" oninput="saveLoteConfig()"/>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">por lote ·</span>
+              <input type="number" id="loteEsperaMin" value="60" min="1" style="width:55px" title="Espera entre lotes (min)" oninput="saveLoteConfig()"/>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">min entre lotes</span>
+            </div>
+          </div>
+        </div>
         <div style="flex:1"></div>
         <button class="btn btn-danger" onclick="limparFila()">Limpar fila</button>
         <button class="btn btn-primary" style="width:auto;min-width:160px" id="btnDisparar" onclick="iniciarDisparo()">
@@ -962,7 +977,23 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           <span id="disparoBtn">🟢 Disparar fila</span>
         </button>
       </div>
-      <div id="disparoLog" style="display:none;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);max-height:200px;overflow-y:auto"></div>
+
+      <!-- PAINEL DE LOTE EM ESPERA -->
+      <div id="loteEsperaPanel" style="display:none;margin-top:14px;background:var(--bg);border:1px solid var(--accent-border);border-radius:10px;padding:14px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="flex:1">
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);margin-bottom:4px" id="loteEsperaTitle">⏱ Aguardando para disparar lote 2...</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)" id="loteEsperaDesc">O próximo lote será liberado em <span id="loteCountdown" style="color:var(--text2)">--:--</span></div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:10px;border-color:var(--warning);color:var(--warning)" onclick="cancelarLotes()">✕ Cancelar fila de lotes</button>
+          <button class="btn btn-primary" style="width:auto;font-size:11px" id="btnProximoLote" onclick="confirmarProximoLote()" disabled>Disparar lote →</button>
+        </div>
+        <div style="margin-top:10px;background:var(--surface2);border-radius:6px;height:4px;overflow:hidden">
+          <div id="loteProgressBar" style="height:100%;background:var(--accent);width:0%;transition:width 0.5s linear"></div>
+        </div>
+      </div>
+
+      <div id="disparoLog" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);max-height:200px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
@@ -3116,13 +3147,216 @@ function removerDaFila(empId) {
 
 function limparFila() {
   if (disparoEmAndamento) { notify('// disparo em andamento', 'warn'); return; }
+  if (aguardandoLote) cancelarLotes();
   filaDisparo = [];
   renderDisparoEmpresas();
   renderFila();
 }
 
+/* ════════════════════════════
+   LOTES (BATCH) SYSTEM
+════════════════════════════ */
+let loteAtual        = 0;
+let lotesTotal       = 0;
+let filaLotes        = []; // array de arrays de items
+let loteEsperaTimer  = null;
+let loteEsperaFim    = null;
+let loteCountdownInt = null;
+let aguardandoLote   = false;
+
+function toggleLoteConfig() {
+  const ativo = document.getElementById('loteAtivo').checked;
+  const fields = document.getElementById('loteConfigFields');
+  fields.style.display = ativo ? 'flex' : 'none';
+}
+
+function saveLoteConfig() {
+  const cfg = loadEvoConfig();
+  cfg.loteTamanho   = document.getElementById('loteTamanho')?.value  || '30';
+  cfg.loteEsperaMin = document.getElementById('loteEsperaMin')?.value || '60';
+  localStorage.setItem(EVO_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+function getLoteConfig() {
+  const cfg = loadEvoConfig();
+  return {
+    ativo:      document.getElementById('loteAtivo')?.checked || false,
+    tamanho:    parseInt(document.getElementById('loteTamanho')?.value)    || 30,
+    esperaMin:  parseInt(document.getElementById('loteEsperaMin')?.value)  || 60,
+  };
+}
+
+function cancelarLotes() {
+  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer  = null; }
+  if (loteCountdownInt) { clearInterval(loteCountdownInt); loteCountdownInt = null; }
+  filaLotes       = [];
+  loteAtual       = 0;
+  lotesTotal      = 0;
+  aguardandoLote  = false;
+  loteEsperaFim   = null;
+  document.getElementById('loteEsperaPanel').style.display = 'none';
+  notify('// fila de lotes cancelada', 'warn');
+}
+
+function iniciarCountdownLote(msRestante) {
+  const btnProx = document.getElementById('btnProximoLote');
+  const countEl = document.getElementById('loteCountdown');
+  const barEl   = document.getElementById('loteProgressBar');
+  const totalMs = loteEsperaFim - (Date.now() + msRestante - msRestante); // = msRestante initial
+  const inicioMs = Date.now();
+  const duracaoMs = msRestante;
+
+  if (loteCountdownInt) clearInterval(loteCountdownInt);
+
+  function tick() {
+    const agora    = Date.now();
+    const restante = loteEsperaFim - agora;
+    if (restante <= 0) {
+      clearInterval(loteCountdownInt);
+      loteCountdownInt = null;
+      countEl.textContent = '00:00';
+      barEl.style.width   = '100%';
+      btnProx.disabled    = false;
+      btnProx.style.background = 'var(--accent)';
+      notify('✓ Lote liberado! Confirme para disparar.');
+      return;
+    }
+    const min = Math.floor(restante / 60000);
+    const seg = Math.floor((restante % 60000) / 1000);
+    countEl.textContent = `${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
+    const pct = Math.min(100, ((duracaoMs - restante) / duracaoMs) * 100);
+    barEl.style.width = pct + '%';
+  }
+  tick();
+  loteCountdownInt = setInterval(tick, 500);
+
+  // Auto-disparo ao fim do timer (o usuário ainda confirma via botão, mas o timer sinaliza)
+  loteEsperaTimer = setTimeout(() => {
+    loteEsperaTimer = null;
+  }, msRestante);
+}
+
+async function confirmarProximoLote() {
+  if (!filaLotes.length) return;
+  const btnProx = document.getElementById('btnProximoLote');
+  btnProx.disabled = true;
+  document.getElementById('loteEsperaPanel').style.display = 'none';
+  if (loteCountdownInt) { clearInterval(loteCountdownInt); loteCountdownInt = null; }
+  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer  = null; }
+  await dispararLote();
+}
+
+async function dispararLote() {
+  loteAtual++;
+  const lote     = filaLotes.shift();
+  const loteConf = getLoteConfig();
+  const cfg      = loadEvoConfig();
+  const delayMin = parseInt(document.getElementById('delayMin').value) || 60;
+  const delayMax = parseInt(document.getElementById('delayMax').value) || 120;
+
+  const logEl = document.getElementById('disparoLog');
+  logEl.style.display = 'block';
+  disparoEmAndamento = true;
+  document.getElementById('btnDisparar').disabled = true;
+  document.getElementById('disparoSpinner').style.display = 'block';
+  document.getElementById('disparoBtn').textContent = `Lote ${loteAtual}/${lotesTotal}...`;
+
+  function log(msg) {
+    const line = document.createElement('div');
+    line.style.marginBottom = '3px';
+    line.innerHTML = `<span style="color:var(--muted)">[${timeStr()}]</span> ${msg}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  log(`<span style="color:var(--accent)">━━ LOTE ${loteAtual}/${lotesTotal} · ${lote.length} mensagem${lote.length>1?'s':''} ━━</span>`);
+
+  for (let i = 0; i < lote.length; i++) {
+    const item = lote[i];
+    if (item.status === 'enviado') continue;
+
+    item.status = 'enviando';
+    atualizarStatusFilaItem(item.id, 'enviando');
+    log(`Enviando para <span style="color:var(--text)">${escHtml(item.nome)}</span>...`);
+
+    try {
+      const waNum  = item.whatsapp.replace(/\D/g,'');
+      const numero = waNum.startsWith('55') ? waNum : '55' + waNum;
+      const base64Data = item.imagemBase64.split(',')[1];
+      const mimeType   = item.imagemBase64.split(';')[0].replace('data:','');
+      const payload    = {
+        number: numero, options: { delay: 1000 },
+        mediaMessage: { mediatype: 'image', mimetype: mimeType, caption: item.mensagem, media: base64Data, fileName: item.imagemNome || 'imagem.jpg' }
+      };
+      const res = await fetch(`${cfg.url}/message/sendMedia/${cfg.instance}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': cfg.key },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        item.status = 'enviado';
+        atualizarStatusFilaItem(item.id, 'enviado');
+        log(`<span style="color:var(--accent)">✓ Enviado para ${escHtml(item.nome)}</span>`);
+        atualizarStatusEmpresa(item.id, 'Enviada');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        item.status = 'erro';
+        atualizarStatusFilaItem(item.id, 'erro');
+        log(`<span style="color:var(--error)">✗ Erro ${res.status} — ${err.message || err.error || 'falha'}</span>`);
+      }
+    } catch(e) {
+      item.status = 'erro';
+      atualizarStatusFilaItem(item.id, 'erro');
+      log(`<span style="color:var(--error)">✗ Falha de conexão — ${e.message}</span>`);
+    }
+
+    if (i < lote.length - 1) {
+      const delay = (delayMin + Math.random() * (delayMax - delayMin)) * 1000;
+      log(`Aguardando ${Math.round(delay/1000)}s antes do próximo...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  const enviados = lote.filter(f => f.status === 'enviado').length;
+  const erros    = lote.filter(f => f.status === 'erro').length;
+  log(`<span style="color:var(--accent)">✓ Lote ${loteAtual} concluído! ${enviados} enviado${enviados>1?'s':''} · ${erros} erro${erros>1?'s':''}</span>`);
+
+  disparoEmAndamento = false;
+  document.getElementById('disparoSpinner').style.display = 'none';
+  renderInicio();
+  renderDisparoDayTabs();
+
+  // Se há mais lotes, iniciar espera
+  if (filaLotes.length > 0) {
+    const esperaMs  = loteConf.esperaMin * 60 * 1000;
+    loteEsperaFim   = Date.now() + esperaMs;
+    aguardandoLote  = true;
+    document.getElementById('btnDisparar').disabled = true;
+    document.getElementById('disparoBtn').textContent = `🟡 Aguardando lote ${loteAtual+1}/${lotesTotal}`;
+
+    const panel = document.getElementById('loteEsperaPanel');
+    panel.style.display = 'block';
+    document.getElementById('loteEsperaTitle').textContent = `⏱ Aguardando para disparar lote ${loteAtual+1}/${lotesTotal}...`;
+    document.getElementById('loteEsperaDesc').innerHTML   = `Próximo lote liberado em <span id="loteCountdown" style="color:var(--text2)">--:--</span> — confirme quando estiver pronto`;
+    document.getElementById('btnProximoLote').disabled    = true;
+    document.getElementById('btnProximoLote').style.background = 'var(--surface3)';
+    document.getElementById('loteProgressBar').style.width     = '0%';
+
+    notify(`✓ Lote ${loteAtual} concluído · próximo em ${loteConf.esperaMin}min`);
+    iniciarCountdownLote(esperaMs);
+  } else {
+    // Todos os lotes concluídos
+    aguardandoLote = false;
+    document.getElementById('btnDisparar').disabled = false;
+    document.getElementById('disparoBtn').textContent = '🟢 Disparar fila';
+    const totalEnv = filaDisparo.filter(f => f.status === 'enviado').length;
+    const totalErr = filaDisparo.filter(f => f.status === 'erro').length;
+    log(`<span style="color:var(--accent)">━━ TODOS OS ${lotesTotal} LOTES CONCLUÍDOS · ${totalEnv} enviados · ${totalErr} erros ━━</span>`);
+    notify(`✓ ${lotesTotal} lotes concluídos · ${totalEnv} enviados · ${totalErr} erros`);
+  }
+}
+
 async function iniciarDisparo() {
-  if (disparoEmAndamento) return;
+  if (disparoEmAndamento || aguardandoLote) return;
   const cfg = loadEvoConfig();
   if (!cfg.url || !cfg.key || !cfg.instance) {
     notify('// configure a Evolution API primeiro', 'err'); return;
@@ -3133,102 +3367,35 @@ async function iniciarDisparo() {
   }
   if (!filaDisparo.length) { notify('// fila vazia', 'warn'); return; }
 
-  disparoEmAndamento = true;
-  document.getElementById('btnDisparar').disabled = true;
-  document.getElementById('disparoSpinner').style.display = 'block';
-  document.getElementById('disparoBtn').textContent = 'Disparando...';
   const logEl = document.getElementById('disparoLog');
   logEl.style.display = 'block';
   logEl.innerHTML = '';
 
-  const delayMin = parseInt(document.getElementById('delayMin').value) || 30;
-  const delayMax = parseInt(document.getElementById('delayMax').value) || 90;
+  const loteConf = getLoteConfig();
 
-  function log(msg) {
+  if (loteConf.ativo && filaDisparo.length > loteConf.tamanho) {
+    // Modo lotes: dividir fila em chunks
+    filaLotes  = [];
+    loteAtual  = 0;
+    for (let i = 0; i < filaDisparo.length; i += loteConf.tamanho) {
+      filaLotes.push(filaDisparo.slice(i, i + loteConf.tamanho));
+    }
+    lotesTotal = filaLotes.length;
+
     const line = document.createElement('div');
     line.style.marginBottom = '3px';
-    line.innerHTML = `<span style="color:var(--muted)">[${timeStr()}]</span> ${msg}`;
+    line.innerHTML = `<span style="color:var(--muted)">[${timeStr()}]</span> <span style="color:var(--accent)">Modo lotes ativo · ${filaDisparo.length} empresas divididas em ${lotesTotal} lote${lotesTotal>1?'s':''} de até ${loteConf.tamanho} · ${loteConf.esperaMin}min entre lotes</span>`;
     logEl.appendChild(line);
-    logEl.scrollTop = logEl.scrollHeight;
+
+    await dispararLote();
+  } else {
+    // Modo simples (sem lotes ou fila menor que 1 lote)
+    filaLotes  = [];
+    loteAtual  = 1;
+    lotesTotal = 1;
+    filaLotes.push([...filaDisparo]);
+    await dispararLote();
   }
-
-  log(`Iniciando disparo de ${filaDisparo.length} mensagem${filaDisparo.length>1?'s':''}...`);
-
-  for (let i = 0; i < filaDisparo.length; i++) {
-    const item = filaDisparo[i];
-    if (item.status === 'enviado') continue;
-
-    // Atualiza status visual
-    item.status = 'enviando';
-    atualizarStatusFilaItem(item.id, 'enviando');
-    log(`Enviando para <span style="color:var(--text)">${escHtml(item.nome)}</span>...`);
-
-    try {
-      const waNum = item.whatsapp.replace(/\D/g,'');
-      const numero = waNum.startsWith('55') ? waNum : '55' + waNum;
-
-      // Extrai base64 puro sem o prefixo data:image/...;base64,
-      const base64Data = item.imagemBase64.split(',')[1];
-      const mimeType   = item.imagemBase64.split(';')[0].replace('data:','');
-
-      // Payload formato Evolution API v1
-      const payload = {
-        number: numero,
-        options: { delay: 1000 },
-        mediaMessage: {
-          mediatype: 'image',
-          mimetype: mimeType,
-          caption: item.mensagem,
-          media: base64Data,
-          fileName: item.imagemNome || 'imagem.jpg'
-        }
-      };
-
-      const res = await fetch(`${cfg.url}/message/sendMedia/${cfg.instance}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': cfg.key },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        item.status = 'enviado';
-        atualizarStatusFilaItem(item.id, 'enviado');
-        log(`<span style="color:var(--accent)">\u2713 Enviado para ${escHtml(item.nome)}</span>`);
-        // Atualiza status da empresa no weekData
-        atualizarStatusEmpresa(item.id, 'Enviada');
-      } else {
-        const err = await res.json().catch(() => ({}));
-        item.status = 'erro';
-        atualizarStatusFilaItem(item.id, 'erro');
-        const errMsg = err.message || err.error || JSON.stringify(err) || 'falha';
-        log(`<span style="color:var(--error)">\u2717 Erro ${res.status} \u2014 ${errMsg}</span>`);
-      }
-    } catch(e) {
-      item.status = 'erro';
-      atualizarStatusFilaItem(item.id, 'erro');
-      log(`<span style="color:var(--error)">\u2717 Falha de conex\u00e3o \u2014 ${e.message}</span>`);
-    }
-
-    // Delay aleat\u00f3rio antes do pr\u00f3ximo (exceto no \u00faltimo)
-    if (i < filaDisparo.length - 1) {
-      const delay = (delayMin + Math.random() * (delayMax - delayMin)) * 1000;
-      const seg   = Math.round(delay / 1000);
-      log(`Aguardando ${seg}s antes do pr\u00f3ximo...`);
-      await new Promise(r => setTimeout(r, delay));
-    }
-  }
-
-  const enviados = filaDisparo.filter(f => f.status === 'enviado').length;
-  const erros    = filaDisparo.filter(f => f.status === 'erro').length;
-  log(`<span style="color:var(--accent)">\u2713 Disparo conclu\u00eddo! ${enviados} enviado${enviados>1?'s':''} \u00b7 ${erros} erro${erros>1?'s':''}</span>`);
-  notify(`\u2713 ${enviados} enviado${enviados>1?'s':''} \u00b7 ${erros} com erro`);
-
-  disparoEmAndamento = false;
-  document.getElementById('btnDisparar').disabled = false;
-  document.getElementById('disparoSpinner').style.display = 'none';
-  document.getElementById('disparoBtn').textContent = '🟢 Disparar fila';
-  renderInicio();
-  renderDisparoDayTabs();
 }
 
 function atualizarStatusFilaItem(empId, status) {
@@ -3375,7 +3542,7 @@ ensureExtData();
 ensureGeradosData();
 ensureErrosData();
 // Pré-carregar config da Evolution API se já salva
-(function(){ const cfg = loadEvoConfig(); if (document.getElementById('evoUrl') && cfg.url) { document.getElementById('evoUrl').value = cfg.url||''; document.getElementById('evoKey').value = cfg.key||''; document.getElementById('evoInstance').value = cfg.instance||''; document.getElementById('delayMin').value = cfg.delayMin||'30'; document.getElementById('delayMax').value = cfg.delayMax||'90'; } })();
+(function(){ const cfg = loadEvoConfig(); if (document.getElementById('evoUrl') && cfg.url) { document.getElementById('evoUrl').value = cfg.url||''; document.getElementById('evoKey').value = cfg.key||''; document.getElementById('evoInstance').value = cfg.instance||''; document.getElementById('delayMin').value = cfg.delayMin||'60'; document.getElementById('delayMax').value = cfg.delayMax||'120'; if (cfg.loteTamanho)   document.getElementById('loteTamanho').value   = cfg.loteTamanho; if (cfg.loteEsperaMin) document.getElementById('loteEsperaMin').value = cfg.loteEsperaMin; } })();
 extImportTargetDay = todayStr();
 extSelectedDay     = todayStr();
 renderInicio();
