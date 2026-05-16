@@ -352,6 +352,33 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           </div>
         </div>
       </div>
+
+      <!-- ATALHO VALIDADOR -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Atalho Validador</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.7">
+          Cole abaixo os sites das empresas que você quer <span style="color:var(--accent)">manter</span> na aba "Não enviada".<br>
+          Todos os outros da aba serão excluídos e seus domínios salvos para nunca mais voltar.
+        </div>
+        <textarea id="validadorInput" placeholder="https://escritorio-silva.com.br&#10;https://contabilidade-souza.com.br&#10;..." style="min-height:120px;margin-bottom:10px"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="flex:1" onclick="aplicarValidador()">✓ Aplicar validador</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('validadorInput').value=''">Limpar</button>
+        </div>
+        <div id="validadorResumo" style="margin-top:10px"></div>
+      </div>
+
+      <!-- SITES EXCLUÍDOS -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Sites já vistos <span id="excludedCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.7">
+          Domínios bloqueados permanentemente. Nunca voltarão na importação da Apify.
+        </div>
+        <div id="excludedList" style="max-height:200px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);"></div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-danger" onclick="limparExcluidos()">Limpar lista</button>
+        </div>
+      </div>
     </div>
     <!-- MSG PANEL -->
     <div>
@@ -422,6 +449,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">Selecionar empresas</div>
         <div class="day-tabs" id="disparoDayTabs"></div>
+        <div class="status-tabs" id="disparoStatusTabs"></div>
         <div class="stats-row" id="disparoStats"></div>
         <div id="disparoEmpresasList"></div>
       </div>
@@ -524,6 +552,7 @@ const EMPRESAS_KEY  = 'vs_empresas_v1';
 const HISTORY_KEY   = 'vs_history_v1';
 const EVO_KEY       = 'vs_evo_config';
 const SIDEBAR_KEY   = 'vs_sidebar';
+const EXCLUDED_KEY  = 'vs_excluded_domains';
 
 const STATUS_OPTIONS = ['Não enviada','Em fila','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -637,6 +666,7 @@ let selectedDay      = todayStr();
 let selectedStatus   = 'Não enviada';
 let importTargetDay  = todayStr();
 let disparoDay       = todayStr();
+let disparoStatus    = 'Não enviada';
 let msgEmpresaId     = null;
 let msgTemplateIdx   = -1;
 let historyOpen      = false;
@@ -952,6 +982,98 @@ function archiveHistory() {
 }
 
 /* ════════════════════════════
+   EXCLUDED DOMAINS
+════════════════════════════ */
+function getExcludedDomains() { try { return JSON.parse(localStorage.getItem(EXCLUDED_KEY)||'[]'); } catch { return []; } }
+function saveExcludedDomains(arr) { localStorage.setItem(EXCLUDED_KEY, JSON.stringify(arr)); }
+function extractDomain(site) {
+  try { return new URL(site.trim()).hostname.replace(/^www\./,'').toLowerCase(); } catch { return null; }
+}
+function isExcludedDomain(site) {
+  const domain = extractDomain(site);
+  if (!domain) return false;
+  return getExcludedDomains().includes(domain);
+}
+
+function renderExcluidos() {
+  const domains = getExcludedDomains();
+  const countEl = document.getElementById('excludedCount');
+  const listEl  = document.getElementById('excludedList');
+  if (!countEl || !listEl) return;
+  countEl.textContent = `(${domains.length} domínio${domains.length!==1?'s':''})`;
+  if (!domains.length) {
+    listEl.innerHTML = '<span style="color:var(--muted)">// nenhum domínio excluído ainda</span>';
+    return;
+  }
+  listEl.innerHTML = domains.map(d =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span>${escHtml(d)}</span>
+      <button onclick="removerExcluido('${escHtml(d)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>`
+  ).join('');
+}
+function removerExcluido(domain) {
+  const arr = getExcludedDomains().filter(d => d !== domain);
+  saveExcludedDomains(arr);
+  renderExcluidos();
+  notify(`✓ ${domain} removido da lista`);
+}
+function limparExcluidos() {
+  if (!confirm('Limpar todos os domínios excluídos?')) return;
+  saveExcludedDomains([]);
+  renderExcluidos();
+  notify('Lista de excluídos limpa');
+}
+
+function aplicarValidador() {
+  const raw = document.getElementById('validadorInput').value.trim();
+  if (!raw) { notify('// cole ao menos um site', 'warn'); return; }
+
+  // Extrai domínios dos links colados (os que FICAM)
+  const linhas = raw.split(/[\n,\s]+/).map(l => l.trim()).filter(Boolean);
+  const manter = new Set();
+  linhas.forEach(l => {
+    const domain = extractDomain(l.startsWith('http') ? l : 'https://' + l);
+    if (domain) manter.add(domain);
+  });
+
+  if (!manter.size) { notify('// nenhum link válido encontrado', 'err'); return; }
+
+  const data = ensureWeekData();
+  const dayEmps = data.days[selectedDay] || [];
+  const naoEnviadas = dayEmps.filter(e => (e.status||'Não enviada') === 'Não enviada');
+
+  const excluidos = getExcludedDomains();
+  let removidos = 0;
+
+  naoEnviadas.forEach(emp => {
+    const domain = extractDomain(emp.site || '');
+    if (!domain || !manter.has(domain)) {
+      // Remove da lista do dia
+      data.days[selectedDay] = (data.days[selectedDay]||[]).filter(e => e.id !== emp.id);
+      // Adiciona domínio à lista de excluídos
+      if (domain && !excluidos.includes(domain)) excluidos.push(domain);
+      removidos++;
+    }
+  });
+
+  saveWeekData(data);
+  saveExcludedDomains(excluidos);
+  document.getElementById('validadorInput').value = '';
+
+  const resumoEl = document.getElementById('validadorResumo');
+  resumoEl.innerHTML = `<div class="filter-summary">
+    <span class="acc">${manter.size}</span> mantidos ·
+    <span class="err">${removidos}</span> excluídos e bloqueados permanentemente
+  </div>`;
+
+  renderInicio();
+  renderExcluidos();
+  updateBadges();
+  notify(`✓ ${manter.size} mantidos · ${removidos} excluídos`);
+}
+
+/* ════════════════════════════
    IMPORTAR — FILTRO
    Critério: tem site E tem telefone/whatsapp
 ════════════════════════════ */
@@ -1086,8 +1208,8 @@ function importPreview() {
   const semCategoria  = arr.filter(i => !isContabilidade(i));
   const contabil      = arr.filter(isContabilidade);
   const semSite       = contabil.filter(i => !hasValidSiteRaw(i));
-  const siteBloq      = contabil.filter(i => hasValidSiteRaw(i) && isSiteBlocklisted(extractSite(i)));
-  const comSite       = contabil.filter(i => hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)));
+  const siteBloq      = contabil.filter(i => hasValidSiteRaw(i) && (isSiteBlocklisted(extractSite(i)) || isExcludedDomain(extractSite(i))));
+  const comSite       = contabil.filter(i => hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && !isExcludedDomain(extractSite(i)));
   const semTel        = comSite.filter(i => !hasValidPhone(i));
   const validos       = comSite.filter(hasValidPhone);
 
@@ -1137,7 +1259,7 @@ function importarLeads() {
   const arr = parseApifyJson(raw);
   if (!arr || !arr.length) { notify('// JSON inválido ou vazio', 'err'); return; }
 
-  const validos = arr.filter(i => isContabilidade(i) && hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && hasValidPhone(i));
+  const validos = arr.filter(i => isContabilidade(i) && hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && !isExcludedDomain(extractSite(i)) && hasValidPhone(i));
   if (!validos.length) { notify('// nenhuma empresa de contabilidade com site + telefone', 'warn'); return; }
 
   const data = ensureWeekData();
@@ -1185,27 +1307,48 @@ function renderDisparoPanel() {
   }).join('');
   renderDisparoEmpresas();
 }
-function setDisparoDay(day) { disparoDay = day; renderDisparoPanel(); }
+function setDisparoDay(day) { disparoDay = day; disparoStatus = 'Não enviada'; renderDisparoPanel(); }
+function setDisparoStatus(st) { disparoStatus = st; renderDisparoEmpresas(); }
 
 function renderDisparoEmpresas() {
-  const data  = ensureWeekData();
-  const emps  = (data.days[disparoDay]||[]).filter(e => e.whatsapp);
+  const data   = ensureWeekData();
+  const todasComWa = (data.days[disparoDay]||[]).filter(e => e.whatsapp);
+  const semWa  = (data.days[disparoDay]||[]).filter(e => !e.whatsapp).length;
   const listEl = document.getElementById('disparoEmpresasList');
   const statsEl= document.getElementById('disparoStats');
 
-  const naoEnv = emps.filter(e => (e.status||'Não enviada')==='Não enviada').length;
-  const env    = emps.filter(e => e.status==='Enviada').length;
-  const semWa  = (data.days[disparoDay]||[]).filter(e => !e.whatsapp).length;
+  const naoEnv  = todasComWa.filter(e => (e.status||'Não enviada')==='Não enviada').length;
+  const emFila  = todasComWa.filter(e => e.status==='Em fila').length;
+  const env     = todasComWa.filter(e => e.status==='Enviada').length;
+
+  // Status tabs
+  const DISPARO_STATUS_TABS = [
+    { key: 'Não enviada', label: 'Não enviada', count: naoEnv },
+    { key: 'Em fila',     label: 'Em fila',     count: emFila },
+    { key: 'Enviada',     label: 'Enviada',      count: env },
+  ];
+  document.getElementById('disparoStatusTabs').innerHTML = DISPARO_STATUS_TABS.map(tab =>
+    `<div class="status-tab${disparoStatus===tab.key?' active':''}" onclick="setDisparoStatus('${tab.key}')">
+      ${tab.label} <span class="st-count">${tab.count}</span>
+    </div>`
+  ).join('');
+
   statsEl.innerHTML = `
     <div class="stat-chip"><div class="stat-chip-val acc">${naoEnv}</div><div class="stat-chip-label">para enviar</div></div>
+    <div class="stat-chip"><div class="stat-chip-val" style="color:var(--warning)">${emFila}</div><div class="stat-chip-label">em fila</div></div>
     <div class="stat-chip"><div class="stat-chip-val">${env}</div><div class="stat-chip-label">enviadas</div></div>
     <div class="stat-chip"><div class="stat-chip-val warn">${semWa}</div><div class="stat-chip-label">sem WhatsApp</div></div>
   `;
 
-  if (!emps.length) { listEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px">Nenhuma empresa com WhatsApp neste dia</div>'; return; }
+  const emps = todasComWa.filter(e => (e.status||'Não enviada') === disparoStatus);
+
+  if (!emps.length) {
+    listEl.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px">Nenhuma empresa ${disparoStatus === 'Não enviada' ? 'para enviar' : disparoStatus === 'Em fila' ? 'em fila' : 'enviada'} neste dia</div>`;
+    return;
+  }
 
   listEl.innerHTML = '<div class="ext-list">' + emps.map(e => {
-    const naFila = filaDisparo.some(f => f.id === e.id);
+    const naFila  = filaDisparo.some(f => f.id === e.id);
     const enviada = e.status === 'Enviada';
     return `<div class="empresa-card">
       <div class="empresa-info">
@@ -1217,7 +1360,7 @@ function renderDisparoEmpresas() {
       </div>
       ${enviada ? '<span class="q-badge ok">✓ enviada</span>' : ''}
       <div class="empresa-actions">
-        <button class="add-btn${naFila?' added':''}" onclick="toggleFila('${e.id}')">${naFila?'✓ na fila':'+ Fila'}</button>
+        ${!enviada ? `<button class="add-btn${naFila?' added':''}" onclick="toggleFila('${e.id}')">${naFila?'✓ na fila':'+ Fila'}</button>` : ''}
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -1541,6 +1684,7 @@ function exportExcelHistory() {
 
 ensureWeekData();
 renderInicio();
+renderExcluidos();
 updateBadges();
 </script>
 </body>
