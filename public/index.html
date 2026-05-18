@@ -24,17 +24,14 @@
   --error: #ff5c5c;
   --warning: #f0a429;
   --ok: #4ecb71;
+  --insta: #e1306c;
   --radius: 10px;
   --sidebar-w: 220px;
   --sidebar-collapsed-w: 56px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;overflow:hidden;}
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:48px 48px;opacity:0.25;pointer-events:none;z-index:0;
-}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:0.25;pointer-events:none;z-index:0;}
 
 /* ══ SIDEBAR ══ */
 .sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;z-index:10;height:100vh;transition:width 0.22s cubic-bezier(0.4,0,0.2,1);overflow:hidden;}
@@ -99,10 +96,10 @@ select option{background:#17171e;}
 .btn-danger{background:none;border:1px solid var(--border2);color:var(--muted);}
 .btn-danger:hover{border-color:var(--error);color:var(--error);background:rgba(255,92,92,0.06);}
 .btn-excel{background:#1a5c38;color:#fff;}
+.btn-insta{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
 .spinner{display:none;width:13px;height:13px;border:2px solid rgba(0,0,0,0.2);border-top-color:#0a0a0d;border-radius:50%;animation:spin 0.7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(184,240,89,0.4)}50%{opacity:0.5;box-shadow:0 0 0 6px rgba(184,240,89,0)}}
 
 .notify{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--accent-border);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;padding:11px 16px;border-radius:10px;z-index:9999;transform:translateY(70px);opacity:0;transition:all 0.28s ease;pointer-events:none;max-width:340px;}
 .notify.show{transform:translateY(0);opacity:1;}
@@ -134,6 +131,8 @@ td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,0.015);}
 .td-name{font-weight:700;font-size:12px;}
+.td-name a{color:var(--text);text-decoration:none;}
+.td-name a:hover{color:var(--accent);text-decoration:underline;}
 .td-link{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .td-link a{color:inherit;text-decoration:none;}
 .td-link a:hover{text-decoration:underline;}
@@ -143,11 +142,12 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .del-btn:hover{color:var(--error);background:rgba(255,92,92,0.1);}
 .status-select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;padding:4px 7px;cursor:pointer;outline:none;width:100%;}
 
-/* badge qualidade */
+/* badge */
 .q-badge{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;border-radius:100px;border:1px solid;}
 .q-badge.ok{color:var(--ok);border-color:rgba(78,203,113,0.3);background:rgba(78,203,113,0.06);}
 .q-badge.warn{color:var(--warning);border-color:rgba(240,164,41,0.3);background:rgba(240,164,41,0.06);}
 .q-badge.err{color:var(--error);border-color:rgba(255,92,92,0.3);background:rgba(255,92,92,0.06);}
+.q-badge.insta{color:var(--insta);border-color:rgba(225,48,108,0.3);background:rgba(225,48,108,0.06);}
 
 /* ══ STATS ROW ══ */
 .stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
@@ -161,13 +161,12 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 /* ══ IMPORT / EXTRAÇÃO ══ */
 .import-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:900px){.import-grid{grid-template-columns:1fr;}}
-
 .filter-summary{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);line-height:1.8;margin-top:12px;}
 .filter-summary .acc{color:var(--accent);}
 .filter-summary .warn{color:var(--warning);}
 .filter-summary .err{color:var(--error);}
 
-/* empresa card na extração */
+/* empresa card */
 .empresa-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color 0.18s;}
 .empresa-card:hover{border-color:var(--border);}
 .empresa-card+.empresa-card{margin-top:6px;}
@@ -250,7 +249,20 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .lote-espera-panel{display:none;margin-top:14px;background:var(--bg);border:1px solid var(--accent-border);border-radius:10px;padding:14px;}
 .disparo-log{display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);max-height:200px;overflow-y:auto;}
 
-/* modal */
+/* ══ CHIP CARD ══ */
+.chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;}
+.chip-card{background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:16px;position:relative;}
+.chip-card.connected{border-color:rgba(78,203,113,0.35);}
+.chip-card.disconnected{border-color:rgba(255,92,92,0.2);}
+.chip-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.chip-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
+.chip-dot.on{background:var(--ok);box-shadow:0 0 6px rgba(78,203,113,0.5);}
+.chip-dot.off{background:var(--error);}
+.chip-name{font-weight:700;font-size:13px;flex:1;}
+.chip-instance{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);}
+.chip-del{position:absolute;top:12px;right:12px;}
+
+/* ══ QR MODAL ══ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:26px;max-width:460px;width:90%;}
@@ -259,9 +271,53 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .modal-btns{display:flex;gap:8px;}
 .modal-btn-ok{background:var(--accent);color:#0a0a0d;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;padding:9px 18px;cursor:pointer;}
 .modal-btn-cancel{background:none;color:var(--text2);border:1px solid var(--border2);border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:11px;padding:9px 18px;cursor:pointer;}
+.qr-wrap{display:flex;justify-content:center;margin:20px 0;background:#fff;border-radius:10px;padding:16px;}
+.qr-wrap img{max-width:220px;}
+
+/* ══ VALIDAÇÃO ══ */
+.val-tabs{display:flex;gap:5px;margin-bottom:16px;}
+.val-tab{padding:6px 14px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.18s;}
+.val-tab.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.val-sub-panel{display:none;}
+.val-sub-panel.active{display:block;}
+
+/* validação número */
+.val-num-status{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;padding:3px 9px;border-radius:100px;border:1px solid;}
+.val-num-status.checking{color:var(--warning);border-color:rgba(240,164,41,0.3);}
+.val-num-status.valid{color:var(--ok);border-color:rgba(78,203,113,0.3);}
+.val-num-status.invalid{color:var(--error);border-color:rgba(255,92,92,0.3);}
+
+/* ══ INSTAGRAM FILA ══ */
+.insta-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:8px;}
+.insta-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.insta-nome{font-weight:700;font-size:13px;flex:1;}
+.insta-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.insta-link-input{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;flex:1;min-width:180px;outline:none;transition:border-color 0.2s;}
+.insta-link-input:focus{border-color:var(--insta);}
+.insta-msg-blocks{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.insta-msg-block{background:var(--surface2);border-radius:8px;padding:10px 12px;}
+.insta-msg-block-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;}
+.insta-msg-text{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);line-height:1.7;white-space:pre-wrap;}
+.copy-small{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-family:'DM Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;transition:all 0.18s;}
+.copy-small:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ══ REDIRECIONAMENTOS ══ */
+.redirect-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:900px){.redirect-grid{grid-template-columns:1fr;}}
+
+/* ══ HORARIO DISPARO ══ */
+.horario-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.horario-status{font-family:'DM Mono',monospace;font-size:9px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);}
+.horario-status.ativo{border-color:rgba(184,240,89,0.3);color:var(--accent);background:var(--accent-dim);}
 
 .export-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px;}
 .export-bar select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:7px 10px;width:auto;cursor:pointer;}
+
+/* chip selector tabs */
+.chip-tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap;}
+.chip-tab{padding:5px 14px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.18s;}
+.chip-tab.active{border-color:var(--ok);color:var(--ok);background:rgba(78,203,113,0.06);}
+.chip-tab:hover:not(.active){color:var(--text2);}
 </style>
 </head>
 <body>
@@ -288,11 +344,30 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <span class="nav-label">Importar</span>
       <span class="nav-badge" id="badge-importar">0</span>
     </div>
+    <div class="nav-item" onclick="switchPanel('validacao')" data-label="Validação">
+      <div class="nav-icon">✅</div>
+      <span class="nav-label">Validação</span>
+      <span class="nav-badge" id="badge-validacao">0</span>
+    </div>
     <div class="nav-section-label">Envio</div>
-    <div class="nav-item" onclick="switchPanel('disparo')" data-label="Disparo">
-      <div class="nav-icon">🟢</div>
-      <span class="nav-label">Disparo WhatsApp</span>
-      <span class="nav-badge" id="badge-disparo">0</span>
+    <div class="nav-item" onclick="switchPanel('fila-zap')" data-label="Fila WhatsApp">
+      <div class="nav-icon">💬</div>
+      <span class="nav-label">Fila WhatsApp</span>
+      <span class="nav-badge" id="badge-fila-zap">0</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('fila-insta')" data-label="Fila Instagram">
+      <div class="nav-icon">📸</div>
+      <span class="nav-label">Fila Instagram</span>
+      <span class="nav-badge" id="badge-fila-insta">0</span>
+    </div>
+    <div class="nav-section-label">Ferramentas</div>
+    <div class="nav-item" onclick="switchPanel('redirecionamentos')" data-label="Redirecionamentos">
+      <div class="nav-icon">🔗</div>
+      <span class="nav-label">Redirecionamentos</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('configuracoes')" data-label="Configurações">
+      <div class="nav-icon">⚙️</div>
+      <span class="nav-label">Configurações</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -307,7 +382,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 <div class="panel active" id="panel-inicio">
   <div class="page-header">
     <div class="page-title">Empresas da <span>semana.</span></div>
-    <div class="page-sub">// prospecção ativa · filtradas por site + telefone</div>
+    <div class="page-sub">// leads validados · prontos para prospecção</div>
   </div>
   <div class="inicio-grid">
     <div>
@@ -321,7 +396,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
               <tr><th>Empresa</th><th>Instagram</th><th>Site</th><th>WhatsApp</th><th>Status</th><th>Msg</th><th></th></tr>
             </thead>
             <tbody id="inicioTbody">
-              <tr><td colspan="6" class="table-empty">Nenhuma empresa neste dia</td></tr>
+              <tr><td colspan="7" class="table-empty">Nenhuma empresa neste dia</td></tr>
             </tbody>
           </table>
         </div>
@@ -334,7 +409,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           <button class="btn btn-excel" onclick="exportExcelDay()">Dia específico</button>
           <button class="btn btn-danger" onclick="clearAll()">Limpar semana</button>
         </div>
-        <!-- Histórico -->
         <div class="history-section" id="historySection">
           <div class="history-header">
             <div class="history-title">Semana anterior <span class="history-badge" id="historyBadge"></span></div>
@@ -352,7 +426,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           </div>
         </div>
       </div>
-
     </div>
     <!-- MSG PANEL -->
     <div>
@@ -371,22 +444,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           </div>
         </div>
       </div>
-
-      <!-- ATALHO VALIDADOR -->
-      <div class="card" style="margin-top:16px">
-        <div class="card-title">Atalho Validador</div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.6">
-          Cole os sites que quer <span style="color:var(--accent)">manter</span>. Os demais da aba "Não enviada" serão excluídos e bloqueados.
-        </div>
-        <textarea id="validadorInput" placeholder="https://escritorio-silva.com.br&#10;https://contabilidade-souza.com.br&#10;..." style="min-height:80px;margin-bottom:8px"></textarea>
-        <div class="btn-row">
-          <button class="btn btn-primary" style="flex:1;font-size:11px" onclick="aplicarValidador()">✓ Aplicar</button>
-          <button class="btn btn-ghost" style="font-size:11px" onclick="document.getElementById('validadorInput').value=''">Limpar</button>
-        </div>
-        <div id="validadorResumo" style="margin-top:8px"></div>
-      </div>
-
-      <!-- SITES EXCLUÍDOS -->
       <div class="card" style="margin-top:16px">
         <div class="card-title">Sites já vistos <span id="excludedCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
         <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px">Bloqueados permanentemente na importação da Apify.</div>
@@ -406,10 +463,21 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="page-sub">// cole o JSON da Apify · filtra automaticamente por site + telefone</div>
   </div>
   <div class="import-grid">
-    <!-- Coluna esquerda: input -->
     <div>
       <div class="card">
         <div class="card-title">JSON da Apify</div>
+        <div style="margin-bottom:10px">
+          <label>Ramo ativo <span class="tag">FILTRO</span></label>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <select id="ramoSelect" style="flex:1" onchange="onRamoChange()">
+              <option value="">Selecionar ramo...</option>
+            </select>
+          </div>
+          <div id="subRamosWrap" style="display:none;margin-bottom:10px">
+            <label>Sub-categorias incluídas</label>
+            <div id="subRamosList" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+          </div>
+        </div>
         <div style="margin-bottom:10px">
           <label>Dia de destino</label>
           <div class="day-tabs" id="importDayTabs"></div>
@@ -420,12 +488,11 @@ tr:hover td{background:rgba(255,255,255,0.015);}
         </div>
         <div class="filter-summary" id="importSummary">// cole o JSON acima para ver a prévia do filtro</div>
         <div class="btn-row" style="margin-top:12px">
-          <button class="btn btn-primary" style="flex:1" onclick="importarLeads()">↓ Importar para o Início</button>
+          <button class="btn btn-primary" style="flex:1" onclick="importarLeads()">↓ Importar para Validação</button>
           <button class="btn btn-ghost" onclick="document.getElementById('importJsonInput').value='';importPreview()">Limpar</button>
         </div>
       </div>
     </div>
-    <!-- Coluna direita: prévia -->
     <div>
       <div class="card">
         <div class="card-title">Prévia <span id="previewCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
@@ -435,48 +502,82 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
-<!-- ── DISPARO ── -->
-<div class="panel" id="panel-disparo">
+<!-- ── VALIDAÇÃO ── -->
+<div class="panel" id="panel-validacao">
   <div class="page-header">
-    <div class="page-title">Disparo <span>WhatsApp.</span></div>
-    <div class="page-sub">// Evolution API · apenas mensagem · controle de lotes</div>
+    <div class="page-title">Validação <span>de Leads.</span></div>
+    <div class="page-sub">// valide números · separe com site / sem site · evite duplicatas</div>
+  </div>
+  <div class="val-tabs">
+    <div class="val-tab active" onclick="setValTab('com-site')" id="valTabComSite">Com site <span id="valCountComSite" style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)"></span></div>
+    <div class="val-tab" onclick="setValTab('sem-site')" id="valTabSemSite">Sem site <span id="valCountSemSite" style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)"></span></div>
+  </div>
+
+  <!-- COM SITE -->
+  <div class="val-sub-panel active" id="valPanelComSite">
+    <div class="card">
+      <div class="card-title">Empresas com site — validar número WhatsApp</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Chip para validação:</div>
+        <div id="valChipTabs" class="chip-tabs"></div>
+        <button class="btn btn-primary" style="font-size:10px;padding:7px 14px" onclick="validarTodosNumeros()">
+          <div class="spinner" id="valSpinner" style="border-top-color:#0a0a0d"></div>
+          Validar todos os números
+        </button>
+      </div>
+      <div id="valComSiteList" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// nenhuma empresa aguardando validação</div>
+    </div>
+  </div>
+
+  <!-- SEM SITE -->
+  <div class="val-sub-panel" id="valPanelSemSite">
+    <div class="card">
+      <div class="card-title">Empresas sem site — fila Instagram</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:14px">Adicione o link do Instagram e aprove manualmente para entrar na fila.</div>
+      <div id="valSemSiteList" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// nenhuma empresa sem site</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FILA WHATSAPP ── -->
+<div class="panel" id="panel-fila-zap">
+  <div class="page-header">
+    <div class="page-title">Fila <span>WhatsApp.</span></div>
+    <div class="page-sub">// 2 chips · 60 por chip por dia · seg a sáb</div>
   </div>
   <div class="disparo-grid">
-    <!-- Config + fila -->
     <div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Selecionar empresas</div>
+        <div class="card-title">Chip ativo</div>
+        <div id="filaZapChipTabs" class="chip-tabs" style="margin-bottom:14px"></div>
+        <div class="card-title" style="margin-top:0">Selecionar empresas</div>
         <div class="day-tabs" id="disparoDayTabs"></div>
         <div class="status-tabs" id="disparoStatusTabs"></div>
         <div class="stats-row" id="disparoStats"></div>
         <div id="disparoEmpresasList"></div>
       </div>
     </div>
-    <!-- Fila + config evo -->
     <div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Evolution API</div>
-        <div class="evo-cfg-row">
-          <div class="field-group">
-            <label>URL</label>
-            <input type="text" id="evoUrl" placeholder="https://sua-evo.com" oninput="saveEvoConfig()"/>
-          </div>
-          <div class="field-group">
-            <label>Instance</label>
-            <input type="text" id="evoInstance" placeholder="minha-instancia" oninput="saveEvoConfig()"/>
-          </div>
+        <div class="card-title">Configuração de disparo</div>
+        <div style="margin-bottom:14px">
+          <label>Chip selecionado</label>
+          <div id="disparoChipInfo" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2)">Nenhum chip configurado</div>
         </div>
-        <div class="field-group" style="margin-bottom:12px">
-          <label>API Key</label>
-          <input type="password" id="evoKey" placeholder="sua-api-key" oninput="saveEvoConfig()"/>
+        <div style="margin-bottom:12px">
+          <label>Horário de início automático</label>
+          <div class="horario-row">
+            <input type="time" id="horarioInicio" value="12:00" style="width:auto" oninput="saveEvoConfig()"/>
+            <div class="horario-status" id="horarioStatus">aguardando</div>
+          </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
           <div>
-            <label>Delay entre envios</label>
+            <label>Delay entre mensagens <span class="tag">SEG</span></label>
             <div style="display:flex;gap:8px;align-items:center">
-              <input type="number" id="delayMin" value="60" min="5" style="width:70px" oninput="saveEvoConfig()"/>
+              <input type="number" id="delayMin" value="15" min="5" style="width:70px" oninput="saveEvoConfig()"/>
               <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">a</span>
-              <input type="number" id="delayMax" value="120" min="5" style="width:70px" oninput="saveEvoConfig()"/>
+              <input type="number" id="delayMax" value="30" min="5" style="width:70px" oninput="saveEvoConfig()"/>
               <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">seg</span>
             </div>
           </div>
@@ -486,7 +587,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
               <input type="checkbox" id="loteAtivo" style="width:auto;padding:0;accent-color:var(--accent)" onchange="toggleLoteConfig()"/>
               <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">Ativar</span>
               <div id="loteConfigFields" style="display:none;gap:6px;align-items:center">
-                <input type="number" id="loteTamanho" value="30" min="1" max="100" style="width:55px" oninput="saveEvoConfig()"/>
+                <input type="number" id="loteTamanho" value="15" min="1" max="60" style="width:55px" oninput="saveEvoConfig()"/>
                 <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">por lote ·</span>
                 <input type="number" id="loteEsperaMin" value="60" min="1" style="width:50px" oninput="saveEvoConfig()"/>
                 <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">min</span>
@@ -515,7 +616,6 @@ tr:hover td{background:rgba(255,255,255,0.015);}
           </div>
         </div>
       </div>
-      <!-- Fila -->
       <div class="card">
         <div class="card-title">Fila <span id="filaCount" style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(0 empresas)</span></div>
         <div class="fila-empty" id="filaVazia">Nenhuma empresa na fila.</div>
@@ -526,9 +626,128 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
+<!-- ── FILA INSTAGRAM ── -->
+<div class="panel" id="panel-fila-insta">
+  <div class="page-header">
+    <div class="page-title">Fila <span>Instagram.</span></div>
+    <div class="page-sub">// prospecção manual · copie as mensagens e envie pelo app</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Empresas aprovadas para Instagram</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <div class="status-tabs" id="instaStatusTabs" style="margin-bottom:0"></div>
+      <button class="btn btn-danger" style="font-size:10px;padding:7px 12px;margin-left:auto" onclick="limparFilaInsta()">Limpar enviadas</button>
+    </div>
+    <div id="instaFilaList">
+      <div class="fila-empty">Nenhuma empresa na fila do Instagram.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── REDIRECIONAMENTOS ── -->
+<div class="panel" id="panel-redirecionamentos">
+  <div class="page-header">
+    <div class="page-title">Redir<span>ecionamentos.</span></div>
+    <div class="page-sub">// encurtador de links · desktop & mobile · Figma</div>
+  </div>
+  <div class="redirect-grid">
+    <div>
+      <div class="card">
+        <div class="card-title">Novo link</div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label>Nome da empresa</label>
+          <input type="text" id="rdNomeEmpresa" placeholder="Ex: Studio Silva"/>
+        </div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label>URL Desktop <span class="tag">FIGMA</span></label>
+          <input type="text" id="rdDeskUrl" placeholder="https://figma.com/proto/..."/>
+        </div>
+        <div class="field-group" style="margin-bottom:16px">
+          <label>URL Mobile <span class="tag">FIGMA</span></label>
+          <input type="text" id="rdMobUrl" placeholder="https://figma.com/proto/..."/>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="criarRedirecionamento()">
+          <div class="spinner" id="rdSpinner" style="border-top-color:#0a0a0d"></div>
+          Criar link curto
+        </button>
+        <div id="rdResultado" style="margin-top:12px;display:none">
+          <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:14px">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px">LINK GERADO</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <a id="rdLinkGerado" href="#" target="_blank" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></a>
+              <button class="copy-small" onclick="copiarLinkRd()">copiar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Atualizar link existente</div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label>Alias</label>
+          <input type="text" id="rdAliasUpdate" placeholder="studio-silva-vin"/>
+        </div>
+        <div class="field-group" style="margin-bottom:12px">
+          <label>Nova URL Desktop</label>
+          <input type="text" id="rdDeskUrlUpdate" placeholder="https://figma.com/proto/..."/>
+        </div>
+        <div class="field-group" style="margin-bottom:16px">
+          <label>Nova URL Mobile</label>
+          <input type="text" id="rdMobUrlUpdate" placeholder="https://figma.com/proto/..."/>
+        </div>
+        <button class="btn btn-ghost" style="width:100%" onclick="atualizarRedirecionamento()">Atualizar link</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Como funciona</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);line-height:1.9">
+          <div style="margin-bottom:10px">① Insira o nome da empresa e os links do Figma para desktop e mobile.</div>
+          <div style="margin-bottom:10px">② O sistema gera um link curto via TinyURL no formato <span style="color:var(--accent)">tinyurl.com/nome-vin</span></div>
+          <div style="margin-bottom:10px">③ Ao acessar, detecta automaticamente se é desktop ou mobile e redireciona para o protótipo correto.</div>
+          <div>④ Para atualizar o destino sem mudar o link, use o painel ao lado com o alias.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIGURAÇÕES ── -->
+<div class="panel" id="panel-configuracoes">
+  <div class="page-header">
+    <div class="page-title">Configur<span>ações.</span></div>
+    <div class="page-sub">// chips WhatsApp · Evolution API · ramos de prospecção</div>
+  </div>
+
+  <!-- CHIPS -->
+  <div class="card">
+    <div class="card-title">Chips WhatsApp</div>
+    <div id="chipGrid" class="chip-grid"></div>
+    <button class="btn btn-ghost" onclick="abrirModalNovoChip()">+ Adicionar chip</button>
+  </div>
+
+  <!-- RAMOS -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Ramos de prospecção</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">Gerencie os ramos e suas sub-categorias para filtrar o JSON da Apify.</div>
+    <div id="ramosConfigList" style="margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" id="novoRamoInput" placeholder="Nome do ramo (ex: Advocacia)" style="flex:1"/>
+      <button class="btn btn-primary" style="white-space:nowrap" onclick="adicionarRamo()">+ Adicionar ramo</button>
+    </div>
+  </div>
+
+  <!-- MSG TEMPLATES -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Templates de mensagem</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">Templates usados no disparo WhatsApp. Use {EMPRESA} para o nome da empresa.</div>
+    <div id="templatesList"></div>
+    <button class="btn btn-ghost" style="margin-top:12px" onclick="adicionarTemplate()">+ Novo template</button>
+  </div>
+</div>
+
 </main>
 
-<!-- MODAL CLEAR -->
+<!-- MODAIS -->
 <div class="modal-overlay" id="clearModal">
   <div class="modal">
     <div class="modal-title">Limpar <span style="color:var(--error)">semana?</span></div>
@@ -540,122 +759,98 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
+<div class="modal-overlay" id="chipModal">
+  <div class="modal">
+    <div class="modal-title">Adicionar <span style="color:var(--accent)">chip</span></div>
+    <div class="modal-sub">// configure as credenciais da instância Evolution API para este chip.</div>
+    <div class="field-group" style="margin-bottom:12px">
+      <label>Nome do chip</label>
+      <input type="text" id="chipNome" placeholder="Ex: Chip 1 — Samsung"/>
+    </div>
+    <div class="field-group" style="margin-bottom:12px">
+      <label>URL da Evolution API</label>
+      <input type="text" id="chipUrl" placeholder="https://sua-evo.com"/>
+    </div>
+    <div class="field-group" style="margin-bottom:12px">
+      <label>Instance name</label>
+      <input type="text" id="chipInstance" placeholder="minha-instancia"/>
+    </div>
+    <div class="field-group" style="margin-bottom:16px">
+      <label>API Key</label>
+      <input type="password" id="chipKey" placeholder="sua-api-key"/>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="salvarChip()">Salvar chip</button>
+      <button class="modal-btn-cancel" onclick="fecharChipModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="qrModal">
+  <div class="modal">
+    <div class="modal-title">QR Code — <span id="qrChipNome" style="color:var(--accent)"></span></div>
+    <div class="modal-sub">// escaneie com o WhatsApp para conectar este chip.</div>
+    <div class="qr-wrap" id="qrWrap">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Gerando QR Code...</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-ok" onclick="atualizarQR()">↻ Atualizar QR</button>
+      <button class="modal-btn-cancel" onclick="document.getElementById('qrModal').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="notify" id="notify"></div>
 
 <script>
 /* ════════════════════════════
-   CONSTANTS
+   CONSTANTS & KEYS
 ════════════════════════════ */
-const EMPRESAS_KEY  = 'vs_empresas_v1';
-const HISTORY_KEY   = 'vs_history_v1';
-const EVO_KEY       = 'vs_evo_config';
-const SIDEBAR_KEY   = 'vs_sidebar';
-const EXCLUDED_KEY  = 'vs_excluded_domains';
+const EMPRESAS_KEY   = 'vs_empresas_v2';
+const HISTORY_KEY    = 'vs_history_v2';
+const EVO_KEY        = 'vs_evo_config_v2';
+const SIDEBAR_KEY    = 'vs_sidebar';
+const EXCLUDED_KEY   = 'vs_excluded_domains';
+const CHIPS_KEY      = 'vs_chips_v2';
+const RAMOS_KEY      = 'vs_ramos_v2';
+const TEMPLATES_KEY  = 'vs_templates_v2';
+const VAL_KEY        = 'vs_validacao_v2';   // fila de validação
+const INSTA_KEY      = 'vs_insta_fila_v2';  // fila instagram
 
 const STATUS_OPTIONS = ['Não enviada','Em fila','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-const MSG_TEMPLATES = [
-  `Olá, me chamo Samuel. Tudo bem?
-
-Vi o site da {EMPRESA} e acredito que ele pode estar afastando clientes sem vocês perceberem. Muitos sites de contabilidade não foram pensados pra converter e acabam não transmitindo a credibilidade que o escritório realmente tem.
-
-Trabalho desenvolvendo sites personalizados para empresas que querem ser vistas de forma profissional e atrair mais clientes no digital.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Passei pelo site da {EMPRESA} e sinto que ele não está representando bem o que o escritório entrega. No segmento contábil, o cliente decide pela confiança, e essa confiança começa pelo digital.
-
-Trabalho criando sites personalizados para escritórios que querem se destacar e converter mais visitantes em clientes.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido pra vocês?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Vi o site da {EMPRESA} e acredito que ele pode estar passando uma imagem mais genérica do que o escritório merece. Muitos clientes em potencial descartam um contador pelo que veem online antes mesmo de entrar em contato.
-
-Desenvolvo sites personalizados para empresas que querem ser levadas a sério no digital.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Dei uma olhada no site da {EMPRESA} e acredito que ele pode estar custando clientes pra vocês sem que percebam. Um site que não foi pensado pra converter não transmite a segurança que o cliente busca na hora de escolher.
-
-Trabalho desenvolvendo sites personalizados para escritórios que querem crescer no digital com uma presença que passa credibilidade de verdade.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Vi o site da {EMPRESA} e sinto que ele não está fazendo jus ao trabalho de vocês. No mercado contábil, a primeira impressão é tudo e ela começa pelo site. Um site que não se diferencia faz o cliente ir pro concorrente em silêncio.
-
-Crio sites personalizados para empresas que querem ser vistas de forma profissional e atrair mais clientes.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido pra vocês?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Passei pelo site da {EMPRESA} e acredito que ele pode estar transmitindo menos credibilidade do que o escritório realmente tem. No mercado contábil, sites que não se destacam não ficam na memória de quem está procurando.
-
-Trabalho desenvolvendo sites personalizados para escritórios que querem se diferenciar e conquistar mais clientes no digital.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Vi o site da {EMPRESA} e acredito que há espaço pra vocês se apresentarem muito melhor no digital. Quem busca um escritório contábil quer sentir segurança antes de qualquer coisa, e isso começa pela presença online.
-
-Desenvolvo sites personalizados para empresas que querem transmitir mais confiança e fechar mais clientes.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido pra vocês?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Dei uma olhada no site da {EMPRESA} e sinto que ele não está ajudando vocês a converter visitantes em clientes. No segmento contábil, um site bem apresentado não é estética, é argumento de venda.
-
-Trabalho criando sites personalizados para escritórios que querem crescer e ser levados a sério no digital.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Passei pelo site da {EMPRESA} e acredito que ele pode estar afastando clientes que vocês nem sabem que perderam. Um site que não foi pensado pra converter passa a mensagem errada antes mesmo do cliente falar com vocês.
-
-Desenvolvo sites personalizados para empresas que querem uma presença digital que realmente representa o que entregam.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido pra vocês?`,
-
-  `Olá, me chamo Samuel. Tudo bem?
-
-Vi o site da {EMPRESA} e acredito que vocês têm muito mais a oferecer do que ele mostra hoje. No mercado contábil, credibilidade é tudo e o site é onde essa credibilidade começa a ser formada.
-
-Trabalho desenvolvendo sites personalizados para escritórios que querem atrair mais clientes e se destacar no digital.
-
-Dá uma olhada no meu trabalho: samuelvinsansi.com.br
-
-Faz sentido conversarmos?`,
+/* ════════════════════════════
+   DEFAULT RAMOS
+════════════════════════════ */
+const RAMOS_DEFAULT = [
+  {
+    id: 'contabilidade',
+    nome: 'Contabilidade',
+    keywords: ['contabilidade','contabil','contador','contadores','escritorio contabil',
+      'assessoria contabil','consultoria contabil','auditoria','fiscal',
+      'tributario','tributaria','contabilista','contabilistas','accounting','bookkeeping','tax']
+  },
+  {
+    id: 'marcenaria',
+    nome: 'Marcenaria / Móveis',
+    keywords: ['marcenaria','marceneiro','moveis planejados','móveis planejados',
+      'movelaria','móveis sob medida','moveis sob medida','carpintaria',
+      'armarios planejados','armários planejados','cozinhas planejadas',
+      'dormitórios planejados','dormitorios planejados','móveis','moveis']
+  }
 ];
+
+/* ════════════════════════════
+   DEFAULT MSG TEMPLATES
+════════════════════════════ */
+const TEMPLATES_DEFAULT = [
+  `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que ele pode estar afastando clientes sem vocês perceberem. Muitos sites não foram pensados pra converter e acabam não transmitindo a credibilidade que a empresa realmente tem.\n\nTrabalho desenvolvendo sites personalizados para empresas que querem ser vistas de forma profissional e atrair mais clientes no digital.\n\nFaz sentido conversarmos?`,
+  `Olá, me chamo Samuel. Tudo bem?\n\nPassei pelo site da {EMPRESA} e sinto que ele não está representando bem o que vocês entregam. O cliente decide pela confiança, e essa confiança começa pelo digital.\n\nTrabalho criando sites personalizados para empresas que querem se destacar e converter mais visitantes em clientes.\n\nFaz sentido pra vocês?`,
+  `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que ele pode estar passando uma imagem mais genérica do que a empresa merece. Muitos clientes em potencial descartam pelo que veem online antes mesmo de entrar em contato.\n\nDesenvolvo sites personalizados para empresas que querem ser levadas a sério no digital.\n\nFaz sentido conversarmos?`,
+];
+
+const LINK_BICHOP = 'https://samuelvinsansi.com.br';
 
 /* ════════════════════════════
    STATE
@@ -673,6 +868,13 @@ let disparoEmAndamento = false;
 let aguardandoLote   = false;
 let filaLotes = [], loteAtual = 0, lotesTotal = 0;
 let loteEsperaTimer = null, loteEsperaFim = null, loteCountdownInt = null;
+let activeChipId     = null;
+let valTab           = 'com-site';
+let instaStatus      = 'pendente';
+let horarioCheckInt  = null;
+let qrChipIdAtivo    = null;
+let qrPollInt        = null;
+let disparoChipId    = null;
 
 /* ════════════════════════════
    DATE HELPERS
@@ -683,8 +885,8 @@ function getWeekStart(d) { const dt = d ? new Date(d) : new Date(); dt.setHours(
 function currentWeekStartStr() { return getWeekStart().toLocaleDateString('pt-BR'); }
 function currentWeekDays() {
   const days = [], start = getWeekStart();
-  for (let i = 0; i < 7; i++) { const d = new Date(start); d.setDate(start.getDate() + i); days.push(d.toLocaleDateString('pt-BR')); }
-  return days;
+  for (let i = 1; i <= 6; i++) { const d = new Date(start); d.setDate(start.getDate() + i); days.push(d.toLocaleDateString('pt-BR')); }
+  return days; // seg a sáb
 }
 function dayLabel(dateStr) {
   const [d, m, y] = dateStr.split('/').map(Number);
@@ -697,11 +899,19 @@ function dayLabelShort(dateStr) {
   const dt = new Date(y, m - 1, d);
   return WEEKDAY_NAMES[dt.getDay()] + ' ' + d + '/' + (m < 10 ? '0'+m : m);
 }
+function nextWeekday(dateStr) {
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + 1);
+  if (dt.getDay() === 0) dt.setDate(dt.getDate() + 1); // pula domingo
+  return dt.toLocaleDateString('pt-BR');
+}
 
 function updateClock() {
   const now = new Date();
   document.getElementById('sidebarClock').textContent = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   document.getElementById('sidebarDate').textContent  = now.toLocaleDateString('pt-BR', { weekday:'short', day:'numeric', month:'short' });
+  checkHorarioDisparo(now);
 }
 setInterval(updateClock, 1000); updateClock();
 
@@ -713,8 +923,31 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function normalizePhone(raw) { if (!raw) return ''; return raw.replace(/\D/g,''); }
 function buildWaLink(raw) { if (!raw) return ''; const n = normalizePhone(raw); if (!n) return ''; return 'https://wa.me/' + (n.startsWith('55') ? n : '55' + n); }
 function normalizeStr(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-function pickTemplate(nome) { const idx = Math.floor(Math.random() * MSG_TEMPLATES.length); return { text: MSG_TEMPLATES[idx].replace(/\{EMPRESA\}/g, nome), idx }; }
-function pickOtherTemplate(nome, cur) { let idx; do { idx = Math.floor(Math.random() * MSG_TEMPLATES.length); } while (idx === cur && MSG_TEMPLATES.length > 1); return { text: MSG_TEMPLATES[idx].replace(/\{EMPRESA\}/g, nome), idx }; }
+
+function capitalizeName(raw) {
+  if (!raw) return '';
+  const lower = ['de','da','do','das','dos','e','em','na','no','nas','nos','a','o','as','os'];
+  return raw.toLowerCase().replace(/\b\w+/g, (word, offset) => {
+    if (offset > 0 && lower.includes(word)) return word;
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+}
+
+function getTemplates() {
+  try { return JSON.parse(localStorage.getItem(TEMPLATES_KEY) || 'null') || TEMPLATES_DEFAULT; } catch { return TEMPLATES_DEFAULT; }
+}
+function saveTemplates(t) { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(t)); }
+
+function pickTemplate(nome) {
+  const tpl = getTemplates();
+  const idx = Math.floor(Math.random() * tpl.length);
+  return { text: tpl[idx].replace(/\{EMPRESA\}/g, nome), idx };
+}
+function pickOtherTemplate(nome, cur) {
+  const tpl = getTemplates();
+  let idx; do { idx = Math.floor(Math.random() * tpl.length); } while (idx === cur && tpl.length > 1);
+  return { text: tpl[idx].replace(/\{EMPRESA\}/g, nome), idx };
+}
 
 /* ════════════════════════════
    NOTIFY
@@ -735,22 +968,34 @@ function toggleSidebar() {
   s.classList.toggle('collapsed', open);
   localStorage.setItem(SIDEBAR_KEY, open ? '0' : '1');
 }
-const PANELS = ['inicio','importar','disparo'];
+const PANELS = ['inicio','importar','validacao','fila-zap','fila-insta','redirecionamentos','configuracoes'];
 function switchPanel(name) {
   PANELS.forEach(p => document.getElementById('panel-'+p).classList.toggle('active', p===name));
-  document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', PANELS[i]===name));
-  if (name==='inicio')   renderInicio();
-  if (name==='importar') renderImportarPanel();
-  if (name==='disparo')  renderDisparoPanel();
+  document.querySelectorAll('.nav-item').forEach(el => {
+    const label = el.getAttribute('data-label') || '';
+    const panelMap = {'Início':'inicio','Importar':'importar','Validação':'validacao','Fila WhatsApp':'fila-zap','Fila Instagram':'fila-insta','Redirecionamentos':'redirecionamentos','Configurações':'configuracoes'};
+    el.classList.toggle('active', panelMap[label] === name);
+  });
+  if (name==='inicio')         renderInicio();
+  if (name==='importar')       renderImportarPanel();
+  if (name==='validacao')      renderValidacao();
+  if (name==='fila-zap')       renderFilaZap();
+  if (name==='fila-insta')     renderFilaInsta();
+  if (name==='configuracoes')  renderConfiguracoes();
   updateBadges();
 }
+
 function updateBadges() {
   const data = ensureWeekData();
   const flat = flattenWeekData(data);
   document.getElementById('badge-inicio').textContent = flat.length;
   document.getElementById('badge-importar').textContent = flat.filter(e => e.status === 'Não enviada').length;
+  const val = getValData();
+  document.getElementById('badge-validacao').textContent = val.length;
   const naoEnv = flat.filter(e => (e.status||'Não enviada')==='Não enviada' && e.whatsapp).length;
-  document.getElementById('badge-disparo').textContent = naoEnv;
+  document.getElementById('badge-fila-zap').textContent = naoEnv;
+  const insta = getInstaFila();
+  document.getElementById('badge-fila-insta').textContent = insta.filter(i => i.status === 'pendente').length;
 }
 
 /* ════════════════════════════
@@ -767,75 +1012,194 @@ function ensureWeekData() {
   return d;
 }
 function getHistoryData() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)||'null'); } catch { return null; } }
-function flattenWeekData(data) {
-  if (!data) return [];
-  const r = [];
-  Object.keys(data.days).sort().forEach(date => (data.days[date]||[]).forEach(e => r.push({ date, ...e })));
-  return r;
+function flattenWeekData(d) { return Object.values(d.days||{}).flat(); }
+function getAllNomes(d) { return new Set(flattenWeekData(d).map(e => normalizeStr(e.nome))); }
+function getAllPhones(d) { return new Set(flattenWeekData(d).map(e => normalizePhone(e.whatsapp||'')).filter(Boolean)); }
+function getAllSites(d)  { return new Set(flattenWeekData(d).map(e => extractDomain(e.site||'')).filter(Boolean)); }
+
+/* ════════════════════════════
+   STORAGE — VALIDAÇÃO FILA
+════════════════════════════ */
+function getValData()  { try { return JSON.parse(localStorage.getItem(VAL_KEY)||'[]'); } catch { return []; } }
+function saveValData(d){ localStorage.setItem(VAL_KEY, JSON.stringify(d)); }
+
+/* ════════════════════════════
+   STORAGE — INSTA FILA
+════════════════════════════ */
+function getInstaFila()  { try { return JSON.parse(localStorage.getItem(INSTA_KEY)||'[]'); } catch { return []; } }
+function saveInstaFila(d){ localStorage.setItem(INSTA_KEY, JSON.stringify(d)); }
+
+/* ════════════════════════════
+   STORAGE — CHIPS
+════════════════════════════ */
+function getChips()  { try { return JSON.parse(localStorage.getItem(CHIPS_KEY)||'[]'); } catch { return []; } }
+function saveChips(c){ localStorage.setItem(CHIPS_KEY, JSON.stringify(c)); }
+function getChipById(id) { return getChips().find(c => c.id === id); }
+
+/* ════════════════════════════
+   STORAGE — RAMOS
+════════════════════════════ */
+function getRamos()  { try { return JSON.parse(localStorage.getItem(RAMOS_KEY)||'null') || RAMOS_DEFAULT; } catch { return RAMOS_DEFAULT; } }
+function saveRamos(r){ localStorage.setItem(RAMOS_KEY, JSON.stringify(r)); }
+
+/* ════════════════════════════
+   EXCLUDED DOMAINS
+════════════════════════════ */
+function getExcludedDomains() { try { return JSON.parse(localStorage.getItem(EXCLUDED_KEY)||'[]'); } catch { return []; } }
+function saveExcludedDomains(arr) { localStorage.setItem(EXCLUDED_KEY, JSON.stringify(arr)); }
+function extractDomain(site) {
+  try { return new URL(site.trim()).hostname.replace(/^www\./,'').toLowerCase(); } catch { return null; }
 }
-function getAllNomes(data) {
-  const s = new Set();
-  Object.values(data.days).forEach(arr => (arr||[]).forEach(e => s.add(normalizeStr(e.nome))));
-  return s;
+function isExcludedDomain(site) {
+  const domain = extractDomain(site);
+  if (!domain) return false;
+  return getExcludedDomains().includes(domain);
+}
+
+/* ════════════════════════════
+   SITE BLOCKLIST
+════════════════════════════ */
+const SITE_BLOCKLIST_DOMAINS = [
+  'google.com','google.com.br','instagram.com','facebook.com','fb.com',
+  'twitter.com','x.com','linkedin.com','youtube.com','tiktok.com',
+  'whatsapp.com','wa.me','maps.google.com','goo.gl','bit.ly','linktr.ee',
+  'wix.com','wordpress.com','blogspot.com','hotmart.com','kiwify.com.br',
+  'mercadolivre.com.br','shopify.com','ifood.com.br','booking.com',
+  'olx.com.br','gov.br','sebrae.com.br','yelp.com','tripadvisor.com',
+  'guiamais.com.br','telelistas.net',
+];
+function isSiteBlocklisted(site) {
+  try {
+    const hostname = new URL(site).hostname.replace(/^www\./, '').toLowerCase();
+    return SITE_BLOCKLIST_DOMAINS.some(b => hostname === b || hostname.endsWith('.' + b));
+  } catch { return false; }
+}
+
+/* ════════════════════════════
+   EXTRACT HELPERS
+════════════════════════════ */
+function extractSite(item) { return String(item.website || item.url || item.site || '').trim(); }
+function extractPhone(item) { return String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim(); }
+function extractName(item)  { return capitalizeName(String(item.title || item.name || item.nome || '').trim()); }
+function extractInstagram(item) {
+  const ig = String(item.instagram || item.instagramUrl || item.instagram_url || '').trim();
+  if (ig) return ig;
+  const socials = item.socialMedia || item.profiles || item.social || [];
+  if (Array.isArray(socials)) {
+    const found = socials.find(s => {
+      const url = String(s.url || s.link || s.href || '').toLowerCase();
+      return url.includes('instagram.com');
+    });
+    if (found) return String(found.url || found.link || found.href || '').trim();
+  }
+  return '';
+}
+function extractCategory(item) {
+  return String(item.categoryName || item.category || item.categoria || item.type || '').trim();
+}
+function extractGoogleUrl(item) {
+  return String(item.url || item.googleUrl || item.google_url || item.maps_url || item.link || '').trim();
+}
+function hasValidSiteRaw(item) {
+  const site = String(item.website || item.url || item.site || '').trim();
+  return site.startsWith('http') && site.length > 8;
+}
+function hasValidPhone(item) {
+  return normalizePhone(extractPhone(item)).length >= 10;
+}
+
+/* ════════════════════════════
+   RAMO FILTER
+════════════════════════════ */
+let activeRamoId = null;
+
+function getRamoKeywords() {
+  if (!activeRamoId) return null;
+  const ramo = getRamos().find(r => r.id === activeRamoId);
+  return ramo ? ramo.keywords : null;
+}
+
+function isRamoMatch(item) {
+  const kws = getRamoKeywords();
+  if (!kws) return true; // sem ramo selecionado: passa tudo
+  const cat = normalizeStr(extractCategory(item));
+  return kws.some(kw => cat.includes(normalizeStr(kw)));
+}
+
+function onRamoChange() {
+  activeRamoId = document.getElementById('ramoSelect').value || null;
+  const ramo = activeRamoId ? getRamos().find(r => r.id === activeRamoId) : null;
+  const wrap = document.getElementById('subRamosWrap');
+  const list = document.getElementById('subRamosList');
+  if (ramo) {
+    wrap.style.display = 'block';
+    list.innerHTML = ramo.keywords.map(k =>
+      `<span style="background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);font-family:'DM Mono',monospace;font-size:8px;padding:2px 8px;border-radius:100px">${escHtml(k)}</span>`
+    ).join('');
+  } else {
+    wrap.style.display = 'none';
+    list.innerHTML = '';
+  }
+  importPreview();
+}
+
+function renderRamoSelect() {
+  const sel = document.getElementById('ramoSelect');
+  const ramos = getRamos();
+  sel.innerHTML = '<option value="">Selecionar ramo...</option>' +
+    ramos.map(r => `<option value="${r.id}"${activeRamoId===r.id?' selected':''}>${escHtml(r.nome)}</option>`).join('');
 }
 
 /* ════════════════════════════
    INÍCIO — RENDER
 ════════════════════════════ */
 function renderInicio() {
-  const data     = ensureWeekData();
+  const data = ensureWeekData();
   const weekDays = currentWeekDays();
-  const today    = todayStr();
+  const today = todayStr();
+  if (!weekDays.includes(selectedDay)) selectedDay = today;
 
-  // Day tabs
-  const dayTabsEl = document.getElementById('inicioDayTabs');
-  dayTabsEl.innerHTML = weekDays.map(day => {
-    const count  = (data.days[day]||[]).length;
+  document.getElementById('inicioDayTabs').innerHTML = weekDays.map(day => {
+    const emps = data.days[day] || [];
     const active = day === selectedDay;
-    const isToday = day === today;
     return `<div class="day-tab${active?' active':''}" onclick="setDay('${day}')">
-      ${dayLabel(day)}${isToday?' <span style="color:var(--accent);font-size:8px">●</span>':''}
-      ${count > 0 ? `<span class="day-count">${count}</span>` : ''}
+      ${dayLabel(day)}${day===today?' <span style="color:var(--accent);font-size:8px">●</span>':''}
+      ${emps.length>0?`<span class="day-count">${emps.length}</span>`:''}
     </div>`;
   }).join('');
 
-  // Status tabs
-  const dayEmps = data.days[selectedDay] || [];
-  const statusTabsEl = document.getElementById('inicioStatusTabs');
-  statusTabsEl.innerHTML = STATUS_OPTIONS.map(st => {
-    const count = dayEmps.filter(e => (e.status||'Não enviada') === st).length;
-    if (count === 0 && st !== 'Não enviada') return '';
-    return `<div class="status-tab${selectedStatus===st?' active':''}" onclick="setStatus('${st}')">
-      ${st} <span class="st-count">${count}</span>
-    </div>`;
-  }).join('');
+  const emps = data.days[selectedDay] || [];
+  const statusCounts = {};
+  STATUS_OPTIONS.forEach(s => { statusCounts[s] = emps.filter(e => (e.status||'Não enviada')===s).length; });
+  document.getElementById('inicioStatusTabs').innerHTML = STATUS_OPTIONS.map(s =>
+    `<div class="status-tab${selectedStatus===s?' active':''}" onclick="setStatus('${s}')">
+      ${s} <span class="st-count">${statusCounts[s]}</span>
+    </div>`
+  ).join('');
 
-  // Table
-  const filtered = dayEmps.filter(e => (e.status||'Não enviada') === selectedStatus);
+  const filtered = emps.filter(e => (e.status||'Não enviada') === selectedStatus);
   const tbody = document.getElementById('inicioTbody');
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Nenhuma empresa neste dia</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Nenhuma empresa com status "${selectedStatus}" neste dia</td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(e => {
-      const waLink = buildWaLink(e.whatsapp);
-      const hasWa  = !!e.whatsapp;
-      const hasSite = !!e.site;
+      const googleUrl = e.googleUrl || '';
+      const nomeDisplay = googleUrl
+        ? `<a href="${escHtml(googleUrl)}" target="_blank" title="Ver perfil Google">${escHtml(e.nome)}</a>`
+        : escHtml(e.nome);
       return `<tr>
-        <td class="td-name">${escHtml(e.nome)}</td>
-        <td class="td-link">${e.instagram
-          ? `<a href="${escHtml(e.instagram.startsWith('http') ? e.instagram : 'https://instagram.com/' + e.instagram.replace(/^@/,''))}" target="_blank" style="display:inline-flex;align-items:center;gap:4px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>${escHtml(e.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//,'@').replace(/\/$/,'').split('?')[0])}</a>`
-          : '<span class="td-missing">—</span>'
-        }</td>
-        <td class="td-link">${hasSite ? `<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>` : '<span class="td-missing">—</span>'}</td>
-        <td>${hasWa
-          ? `<div style="display:flex;align-items:center;gap:5px">
-               <a href="${escHtml(waLink)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ok);text-decoration:none">📱 ${escHtml(e.whatsapp)}</a>
-               <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" title="Editar número">✏️</button>
-             </div>`
-          : `<div style="display:flex;align-items:center;gap:5px">
-               <span class="td-missing">—</span>
-               <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'" title="Adicionar número">✏️</button>
-             </div>`
+        <td class="td-name">${nomeDisplay}</td>
+        <td>${e.instagram?`<a href="${escHtml(e.instagram)}" target="_blank" class="q-badge insta" style="text-decoration:none">📸</a>`:'<span class="td-missing">—</span>'}</td>
+        <td class="td-link">${e.site?`<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>`:'<span class="td-missing">—</span>'}</td>
+        <td>${e.whatsapp
+          ?`<div style="display:flex;align-items:center;gap:5px">
+              <a href="${buildWaLink(e.whatsapp)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ok);text-decoration:none">${escHtml(e.whatsapp)}</a>
+              <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px" title="Editar">✏️</button>
+            </div>`
+          :`<div style="display:flex;align-items:center;gap:5px">
+              <span class="td-missing">—</span>
+              <button onclick="editWhatsapp('${e.id}','${selectedDay}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px" title="Adicionar">✏️</button>
+            </div>`
         }</td>
         <td><select class="status-select" onchange="updateStatus('${e.id}','${selectedDay}',this.value)">${STATUS_OPTIONS.map(s=>`<option value="${s}"${(e.status||'Não enviada')===s?' selected':''}>${s}</option>`).join('')}</select></td>
         <td><button class="btn btn-ghost" style="font-size:9px;padding:4px 9px" onclick="showMsg('${e.id}','${selectedDay}')">Msg</button></td>
@@ -844,11 +1208,10 @@ function renderInicio() {
     }).join('');
   }
 
-  // Export day select
   const sel = document.getElementById('exportDaySelect');
   sel.innerHTML = '<option value="">Selecionar dia...</option>' + weekDays.map(d => `<option value="${d}">${dayLabel(d)}</option>`).join('');
-
   renderHistory();
+  renderExcluidos();
 }
 
 function setDay(day)    { selectedDay = day; selectedStatus = 'Não enviada'; renderInicio(); }
@@ -872,50 +1235,39 @@ function copyMsg() {
 function shuffleMsg() {
   if (!msgEmpresaId) return;
   const data = ensureWeekData();
-  const all  = Object.values(data.days).flat();
-  const emp  = all.find(e => e.id === msgEmpresaId);
+  const emp  = Object.values(data.days).flat().find(e => e.id === msgEmpresaId);
   if (!emp) return;
   const { text, idx } = pickOtherTemplate(emp.nome, msgTemplateIdx);
   msgTemplateIdx = idx;
   document.getElementById('msgBody').textContent = text;
 }
-
 function updateStatus(id, day, status) {
   const data = ensureWeekData();
   const emp  = (data.days[day]||[]).find(e => e.id === id);
   if (!emp) return;
   emp.status = status;
   if (status === 'Enviada') emp.enviadoEm = todayStr();
-  saveWeekData(data);
-  updateBadges();
+  saveWeekData(data); updateBadges();
 }
 function editWhatsapp(id, day) {
   const data = ensureWeekData();
   const emp  = (data.days[day]||[]).find(e => e.id === id);
   if (!emp) return;
   const currentNum = emp.whatsapp || '';
-
-  // Encontra a célula do whatsapp pela linha da tabela
   const allRows = document.querySelectorAll('#inicioTbody tr');
   let targetCell = null;
   allRows.forEach(row => {
     const delBtn = row.querySelector('.del-btn');
-    if (delBtn && delBtn.getAttribute('onclick').includes(`'${id}'`)) {
-      targetCell = row.cells[2];
-    }
+    if (delBtn && delBtn.getAttribute('onclick') && delBtn.getAttribute('onclick').includes(`'${id}'`)) targetCell = row.cells[3];
   });
   if (!targetCell) return;
-
-  targetCell.innerHTML = `
-    <div style="display:flex;align-items:center;gap:5px">
-      <input id="waInput_${id}" type="text" value="${escHtml(currentNum)}"
-        placeholder="ex: 11999999999"
-        style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;width:130px;outline:none"
-        onkeydown="if(event.key==='Enter')saveWhatsapp('${id}','${day}');if(event.key==='Escape')renderInicio();"
-      />
-      <button onclick="saveWhatsapp('${id}','${day}')" style="background:var(--accent);border:none;color:#0a0a0d;border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer;font-weight:700">✓</button>
-      <button onclick="renderInicio()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer">✕</button>
-    </div>`;
+  targetCell.innerHTML = `<div style="display:flex;align-items:center;gap:5px">
+    <input id="waInput_${id}" type="text" value="${escHtml(currentNum)}" placeholder="ex: 11999999999"
+      style="background:var(--bg);border:1px solid var(--accent);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;width:130px;outline:none"
+      onkeydown="if(event.key==='Enter')saveWhatsapp('${id}','${day}');if(event.key==='Escape')renderInicio();"/>
+    <button onclick="saveWhatsapp('${id}','${day}')" style="background:var(--accent);border:none;color:#0a0a0d;border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer;font-weight:700">✓</button>
+    <button onclick="renderInicio()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-size:10px;padding:4px 8px;cursor:pointer">✕</button>
+  </div>`;
   document.getElementById(`waInput_${id}`).focus();
 }
 function saveWhatsapp(id, day) {
@@ -926,29 +1278,21 @@ function saveWhatsapp(id, day) {
   const emp  = (data.days[day]||[]).find(e => e.id === id);
   if (!emp) return;
   emp.whatsapp = raw;
-  saveWeekData(data);
-  updateBadges();
-  renderInicio();
+  saveWeekData(data); updateBadges(); renderInicio();
   notify(raw ? '✓ Número atualizado' : '✓ Número removido');
 }
 function deleteEmpresa(id, day) {
   const data = ensureWeekData();
   if (!data.days[day]) return;
   data.days[day] = data.days[day].filter(e => e.id !== id);
-  saveWeekData(data);
-  renderInicio();
-  updateBadges();
+  saveWeekData(data); renderInicio(); updateBadges();
   notify('Empresa removida');
 }
 function clearAll() { document.getElementById('clearModal').classList.add('open'); }
 function confirmClear() {
-  const data = ensureWeekData();
-  data.days = {};
-  saveWeekData(data);
+  const data = ensureWeekData(); data.days = {}; saveWeekData(data);
   document.getElementById('clearModal').classList.remove('open');
-  renderInicio();
-  updateBadges();
-  notify('Semana limpa');
+  renderInicio(); updateBadges(); notify('Semana limpa');
 }
 
 /* ════════════════════════════
@@ -957,132 +1301,66 @@ function confirmClear() {
 function renderHistory() {
   const hist = getHistoryData();
   const section = document.getElementById('historySection');
-  const badge   = document.getElementById('historyBadge');
-  const tbody   = document.getElementById('historyTbody');
   if (!hist) { section.style.display = 'none'; return; }
   const flat = Object.keys(hist.days).sort().flatMap(d => (hist.days[d]||[]).map(e => ({ date: d, ...e })));
   if (!flat.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  badge.textContent = `${flat.length} empresa${flat.length!==1?'s':''}`;
+  document.getElementById('historyBadge').textContent = `${flat.length} empresa${flat.length!==1?'s':''}`;
   document.getElementById('historyToggleBtn').textContent = historyOpen ? 'Ocultar' : 'Mostrar';
   document.getElementById('historyContent').classList.toggle('open', historyOpen);
   if (!historyOpen) return;
-  tbody.innerHTML = flat.map(e => `<tr>
+  document.getElementById('historyTbody').innerHTML = flat.map(e => `<tr>
     <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(e.date)}</td>
     <td class="td-name">${escHtml(e.nome)}</td>
     <td class="td-link">${e.site?`<a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>`:'<span class="td-missing">—</span>'}</td>
-    <td>${e.whatsapp?`<span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ok)">${escHtml(e.whatsapp)}</span>`:'<span class="td-missing">—</span>'}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:9px">${e.whatsapp||'—'}</td>
     <td style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${escHtml(e.status||'Não enviada')}</td>
   </tr>`).join('');
 }
 function toggleHistory() { historyOpen = !historyOpen; renderHistory(); }
 function archiveHistory() {
   if (!confirm('Arquivar semana anterior?')) return;
-  localStorage.removeItem(HISTORY_KEY);
-  renderHistory();
-  notify('Semana arquivada');
+  localStorage.removeItem(HISTORY_KEY); renderHistory(); notify('Semana arquivada');
 }
 
 /* ════════════════════════════
    EXCLUDED DOMAINS
 ════════════════════════════ */
-function getExcludedDomains() { try { return JSON.parse(localStorage.getItem(EXCLUDED_KEY)||'[]'); } catch { return []; } }
-function saveExcludedDomains(arr) { localStorage.setItem(EXCLUDED_KEY, JSON.stringify(arr)); }
-function extractDomain(site) {
-  try { return new URL(site.trim()).hostname.replace(/^www\./,'').toLowerCase(); } catch { return null; }
-}
-function isExcludedDomain(site) {
-  const domain = extractDomain(site);
-  if (!domain) return false;
-  return getExcludedDomains().includes(domain);
-}
-
 function renderExcluidos() {
   const domains = getExcludedDomains();
   const countEl = document.getElementById('excludedCount');
   const listEl  = document.getElementById('excludedList');
   if (!countEl || !listEl) return;
   countEl.textContent = `(${domains.length} domínio${domains.length!==1?'s':''})`;
-  if (!domains.length) {
-    listEl.innerHTML = '<span style="color:var(--muted)">// nenhum domínio excluído ainda</span>';
-    return;
-  }
+  if (!domains.length) { listEl.innerHTML = '<span style="color:var(--muted)">// nenhum domínio excluído ainda</span>'; return; }
   listEl.innerHTML = domains.map(d =>
     `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
       <span>${escHtml(d)}</span>
-      <button onclick="removerExcluido('${escHtml(d)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px;transition:color 0.18s" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+      <button onclick="removerExcluido('${escHtml(d)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px" onmouseover="this.style.color='var(--error)'" onmouseout="this.style.color='var(--muted)'">✕</button>
     </div>`
   ).join('');
 }
 function removerExcluido(domain) {
-  const arr = getExcludedDomains().filter(d => d !== domain);
-  saveExcludedDomains(arr);
-  renderExcluidos();
-  notify(`✓ ${domain} removido da lista`);
+  saveExcludedDomains(getExcludedDomains().filter(d => d !== domain));
+  renderExcluidos(); notify(`✓ ${domain} removido`);
 }
 function limparExcluidos() {
   if (!confirm('Limpar todos os domínios excluídos?')) return;
-  saveExcludedDomains([]);
-  renderExcluidos();
-  notify('Lista de excluídos limpa');
-}
-
-function aplicarValidador() {
-  const raw = document.getElementById('validadorInput').value.trim();
-  if (!raw) { notify('// cole ao menos um site', 'warn'); return; }
-
-  // Extrai domínios dos links colados (os que FICAM)
-  const linhas = raw.split(/[\n,\s]+/).map(l => l.trim()).filter(Boolean);
-  const manter = new Set();
-  linhas.forEach(l => {
-    const domain = extractDomain(l.startsWith('http') ? l : 'https://' + l);
-    if (domain) manter.add(domain);
-  });
-
-  if (!manter.size) { notify('// nenhum link válido encontrado', 'err'); return; }
-
-  const data = ensureWeekData();
-  const dayEmps = data.days[selectedDay] || [];
-  const naoEnviadas = dayEmps.filter(e => (e.status||'Não enviada') === 'Não enviada');
-
-  const excluidos = getExcludedDomains();
-  let removidos = 0;
-
-  naoEnviadas.forEach(emp => {
-    const domain = extractDomain(emp.site || '');
-    if (!domain || !manter.has(domain)) {
-      // Remove da lista do dia
-      data.days[selectedDay] = (data.days[selectedDay]||[]).filter(e => e.id !== emp.id);
-      // Adiciona domínio à lista de excluídos
-      if (domain && !excluidos.includes(domain)) excluidos.push(domain);
-      removidos++;
-    }
-  });
-
-  saveWeekData(data);
-  saveExcludedDomains(excluidos);
-  document.getElementById('validadorInput').value = '';
-  document.getElementById('validadorResumo').innerHTML = '';
-
-  renderInicio();
-  renderExcluidos();
-  updateBadges();
-  notify(`✓ ${manter.size} mantidos · ${removidos} excluídos`);
+  saveExcludedDomains([]); renderExcluidos(); notify('Lista limpa');
 }
 
 /* ════════════════════════════
-   IMPORTAR — FILTRO
-   Critério: tem site E tem telefone/whatsapp
+   IMPORTAR
 ════════════════════════════ */
 function renderImportarPanel() {
+  renderRamoSelect();
   const weekDays = currentWeekDays();
   const today    = todayStr();
   if (!importTargetDay) importTargetDay = today;
   document.getElementById('importDayTabs').innerHTML = weekDays.map(day => {
     const active  = day === importTargetDay;
-    const isToday = day === today;
     return `<div class="day-tab${active?' active':''}" onclick="setImportDay('${day}')">
-      ${dayLabel(day)}${isToday?' <span style="color:var(--accent);font-size:8px">●</span>':''}
+      ${dayLabel(day)}${day===today?' <span style="color:var(--accent);font-size:8px">●</span>':''}
     </div>`;
   }).join('');
   importPreview();
@@ -1096,219 +1374,394 @@ function parseApifyJson(raw) {
   return Array.isArray(arr) ? arr : null;
 }
 
-function hasValidSite(item) {
-  const site = String(item.website || item.url || item.site || '').trim();
-  if (!site.startsWith('http') || site.length <= 8) return false;
-  return !isSiteBlocklisted(site);
-}
-function hasValidPhone(item) {
-  const phone = String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim();
-  return normalizePhone(phone).length >= 10;
-}
-function extractSite(item) { return String(item.website || item.url || item.site || '').trim(); }
-function extractPhone(item) { return String(item.phone || item.whatsapp || item.phoneNumber || item.telefone || '').trim(); }
-function extractName(item)  { return String(item.title || item.name || item.nome || '').trim(); }
-function extractInstagram(item) {
-  const ig = String(item.instagram || item.instagramUrl || item.instagram_url || item.social_instagram || '').trim();
-  if (ig) return ig;
-  // tenta achar em socialMedia[] ou profiles[]
-  const socials = item.socialMedia || item.profiles || item.social || [];
-  if (Array.isArray(socials)) {
-    const found = socials.find(s => {
-      const url = String(s.url || s.link || s.href || '').toLowerCase();
-      const type = String(s.type || s.platform || s.name || '').toLowerCase();
-      return url.includes('instagram.com') || type.includes('instagram');
-    });
-    if (found) return String(found.url || found.link || found.href || '').trim();
-  }
-  return '';
-}
-
-/* ════════════════════════════
-   FILTRO — CATEGORIA CONTABILIDADE
-════════════════════════════ */
-
-// Palavras-chave aceitas no categoryName (contabilidade e afins)
-const CATEGORY_KEYWORDS_ALLOWED = [
-  'contabilidade', 'contabil', 'contador', 'contadores', 'escritorio contabil',
-  'assessoria contabil', 'consultoria contabil', 'auditoria', 'fiscal',
-  'tributario', 'tributaria', 'contabilista', 'contabilistas',
-  'accounting', 'bookkeeping', 'tax'
-];
-
-// Sites genéricos/redes sociais/plataformas que devem ser bloqueados
-const SITE_BLOCKLIST_DOMAINS = [
-  'google.com', 'google.com.br',
-  'instagram.com', 'facebook.com', 'fb.com',
-  'twitter.com', 'x.com',
-  'linkedin.com',
-  'youtube.com',
-  'tiktok.com',
-  'whatsapp.com',
-  'wa.me',
-  'maps.google.com',
-  'goo.gl',
-  'bit.ly', 'linktr.ee', 'linktree.com',
-  'wix.com', 'wordpress.com', 'blogspot.com',
-  'hotmart.com', 'kiwify.com.br', 'eduzz.com',
-  'mercadolivre.com.br', 'mercadopago.com.br',
-  'shopify.com', 'lojaintegrada.com.br',
-  'ifood.com.br', 'rappi.com.br',
-  'booking.com', 'airbnb.com',
-  'olx.com.br', 'enjoei.com.br',
-  'gov.br', 'receita.fazenda.gov.br',
-  'sebrae.com.br',
-  'yelp.com', 'foursquare.com', 'tripadvisor.com',
-  'guiamais.com.br', 'telelistas.net',
-];
-
-function isSiteBlocklisted(site) {
-  try {
-    const hostname = new URL(site).hostname.replace(/^www\./, '').toLowerCase();
-    return SITE_BLOCKLIST_DOMAINS.some(blocked => hostname === blocked || hostname.endsWith('.' + blocked));
-  } catch { return false; }
-}
-
-function extractCategory(item) {
-  return String(
-    item.categoryName || item.category || item.categoria ||
-    item.type || item.tipo || item.segment || item.segmento || ''
-  ).trim();
-}
-
-function isContabilidade(item) {
-  const cat = normalizeStr(extractCategory(item));
-  if (!cat) return false; // sem categoria: não passa
-  return CATEGORY_KEYWORDS_ALLOWED.some(kw => cat.includes(normalizeStr(kw)));
-}
-
-function rejectReason(item) {
-  if (!isContabilidade(item))      return 'categoria';
-  if (!hasValidSiteRaw(item))      return 'sem_site';
-  if (isSiteBlocklisted(extractSite(item))) return 'site_bloqueado';
-  if (!hasValidPhone(item))        return 'sem_telefone';
-  return null;
-}
-
-// Versão sem checagem de blocklist (usada internamente)
-function hasValidSiteRaw(item) {
-  const site = String(item.website || item.url || item.site || '').trim();
-  return site.startsWith('http') && site.length > 8;
-}
-
 function importPreview() {
   const raw     = document.getElementById('importJsonInput').value.trim();
   const listEl  = document.getElementById('importPreviewList');
   const sumEl   = document.getElementById('importSummary');
   const countEl = document.getElementById('previewCount');
-
-  if (!raw) {
-    listEl.innerHTML = '<span style="color:var(--muted)">// aguardando JSON...</span>';
-    sumEl.innerHTML  = '// cole o JSON acima para ver a prévia do filtro';
-    countEl.textContent = '';
-    return;
-  }
+  if (!raw) { listEl.innerHTML='<span style="color:var(--muted)">// aguardando JSON...</span>'; sumEl.innerHTML='// cole o JSON acima para ver a prévia do filtro'; countEl.textContent=''; return; }
   const arr = parseApifyJson(raw);
-  if (!arr) {
-    sumEl.innerHTML = '<span class="err">// JSON inválido — verifique a sintaxe</span>';
-    listEl.innerHTML = '';
-    countEl.textContent = '';
-    return;
-  }
+  if (!arr) { sumEl.innerHTML='<span class="err">// JSON inválido</span>'; listEl.innerHTML=''; countEl.textContent=''; return; }
 
   const total     = arr.length;
-  const semCategoria  = arr.filter(i => !isContabilidade(i));
-  const contabil      = arr.filter(isContabilidade);
-  const semSite       = contabil.filter(i => !hasValidSiteRaw(i));
-  const siteBloq      = contabil.filter(i => hasValidSiteRaw(i) && (isSiteBlocklisted(extractSite(i)) || isExcludedDomain(extractSite(i))));
-  const comSite       = contabil.filter(i => hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && !isExcludedDomain(extractSite(i)));
-  const semTel        = comSite.filter(i => !hasValidPhone(i));
-  const validos       = comSite.filter(hasValidPhone);
+  const fora      = arr.filter(i => !isRamoMatch(i));
+  const doRamo    = arr.filter(isRamoMatch);
+  const semSite   = doRamo.filter(i => !hasValidSiteRaw(i));
+  const siteBloq  = doRamo.filter(i => hasValidSiteRaw(i) && (isSiteBlocklisted(extractSite(i)) || isExcludedDomain(extractSite(i))));
+  const comSite   = doRamo.filter(i => hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && !isExcludedDomain(extractSite(i)));
+  const semTel    = comSite.filter(i => !hasValidPhone(i));
+  const validos   = comSite.filter(hasValidPhone);
 
-  const data      = ensureWeekData();
-  const existNomes = getAllNomes(data);
-  const novos = validos.filter(i => !existNomes.has(normalizeStr(extractName(i))));
+  // deduplication check
+  const data = ensureWeekData();
+  const valFila = getValData();
+  const existPhones = new Set([...getAllPhones(data), ...valFila.map(v => normalizePhone(v.whatsapp||'')).filter(Boolean)]);
+  const existSites  = new Set([...getAllSites(data),  ...valFila.map(v => extractDomain(v.site||'')).filter(Boolean)]);
+  const novos = validos.filter(i => {
+    const ph = normalizePhone(extractPhone(i));
+    const si = extractDomain(extractSite(i));
+    return !existPhones.has(ph) && !existSites.has(si);
+  });
+  const semSiteRamo = doRamo.filter(i => !hasValidSiteRaw(i) || isSiteBlocklisted(extractSite(i)));
 
   sumEl.innerHTML = `
     <span class="acc">${total}</span> total ·
-    <span class="err">${semCategoria.length}</span> fora de contabilidade ·
-    <span class="err">${semSite.length}</span> sem site ·
+    <span class="err">${fora.length}</span> fora do ramo ·
+    <span class="warn">${semSite.length}</span> sem site ·
     <span class="err">${siteBloq.length}</span> site bloqueado ·
     <span class="warn">${semTel.length}</span> sem telefone ·
     <span class="acc">${validos.length}</span> válidos ·
-    <span class="acc">${novos.length}</span> novos
+    <span class="acc">${novos.length}</span> novos ·
+    <span class="insta" style="color:var(--insta)">${semSiteRamo.length}</span> → Instagram
   `;
   countEl.textContent = `· ${validos.length} válidos`;
 
-  if (!validos.length) {
-    listEl.innerHTML = '<span style="color:var(--muted)">// nenhuma empresa de contabilidade válida encontrada</span>';
-    return;
-  }
+  if (!validos.length && !semSiteRamo.length) { listEl.innerHTML='<span style="color:var(--muted)">// nenhuma empresa válida encontrada</span>'; return; }
 
-  listEl.innerHTML = '<div class="ext-list">' + validos.map(item => {
+  listEl.innerHTML = '<div class="ext-list">' + validos.slice(0,50).map(item => {
     const nome  = extractName(item);
     const site  = extractSite(item);
     const phone = extractPhone(item);
     const cat   = extractCategory(item);
-    const isDup = existNomes.has(normalizeStr(nome));
+    const ph = normalizePhone(phone);
+    const si = extractDomain(site);
+    const isDup = existPhones.has(ph) || existSites.has(si);
     return `<div class="empresa-card" style="${isDup?'opacity:0.45':''}">
       <div class="empresa-info">
         <div class="empresa-nome">${escHtml(nome)}</div>
         <div class="empresa-meta">
           <div class="empresa-site"><a href="${escHtml(site)}" target="_blank">${escHtml(site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a></div>
           <div class="empresa-phone">📱 ${escHtml(phone)}</div>
-          ${cat ? `<span class="q-badge ok" style="font-size:7px">${escHtml(cat)}</span>` : ''}
+          ${cat?`<span class="q-badge ok" style="font-size:7px">${escHtml(cat)}</span>`:''}
         </div>
       </div>
-      ${isDup ? '<span class="q-badge warn">duplicada</span>' : '<span class="q-badge ok">✓ válida</span>'}
+      ${isDup?'<span class="q-badge warn">duplicada</span>':'<span class="q-badge ok">✓ válida</span>'}
     </div>`;
   }).join('') + '</div>';
 }
 
 function importarLeads() {
   const raw = document.getElementById('importJsonInput').value.trim();
-  if (!raw) { notify('// cole o JSON primeiro', 'err'); return; }
+  if (!raw) { notify('// cole o JSON primeiro','err'); return; }
   const arr = parseApifyJson(raw);
-  if (!arr || !arr.length) { notify('// JSON inválido ou vazio', 'err'); return; }
-
-  const validos = arr.filter(i => isContabilidade(i) && hasValidSiteRaw(i) && !isSiteBlocklisted(extractSite(i)) && !isExcludedDomain(extractSite(i)) && hasValidPhone(i));
-  if (!validos.length) { notify('// nenhuma empresa de contabilidade com site + telefone', 'warn'); return; }
+  if (!arr || !arr.length) { notify('// JSON inválido ou vazio','err'); return; }
 
   const data = ensureWeekData();
-  if (!data.days[importTargetDay]) data.days[importTargetDay] = [];
-  const existNomes = getAllNomes(data);
+  const valFila = getValData();
+  const existPhones = new Set([...getAllPhones(data), ...valFila.map(v => normalizePhone(v.whatsapp||'')).filter(Boolean)]);
+  const existSites  = new Set([...getAllSites(data),  ...valFila.map(v => extractDomain(v.site||'')).filter(Boolean)]);
 
-  let added = 0, skipped = 0;
-  validos.forEach(item => {
+  let addedComSite = 0, addedSemSite = 0, skipped = 0;
+  const novaValFila = [...valFila];
+
+  arr.filter(isRamoMatch).forEach(item => {
     const nome  = extractName(item);
     const site  = extractSite(item);
     const phone = extractPhone(item);
     if (!nome) { skipped++; return; }
-    if (existNomes.has(normalizeStr(nome))) { skipped++; return; }
-    const instagram = extractInstagram(item);
-    data.days[importTargetDay].push({
-      id: genId(), nome, site, whatsapp: phone, instagram,
-      status: 'Não enviada', criadoEm: importTargetDay,
-    });
-    existNomes.add(normalizeStr(nome));
-    added++;
+
+    const ph = normalizePhone(phone);
+    const si = extractDomain(site);
+    if ((ph && existPhones.has(ph)) || (si && existSites.has(si))) { skipped++; return; }
+
+    const temSite = hasValidSiteRaw(item) && !isSiteBlocklisted(site) && !isExcludedDomain(site);
+    const temTel  = hasValidPhone(item);
+
+    const entry = {
+      id: genId(), nome, site: temSite ? site : '',
+      whatsapp: phone, instagram: extractInstagram(item),
+      googleUrl: extractGoogleUrl(item),
+      categoria: extractCategory(item),
+      temSite, temTel,
+      numStatus: 'pendente', // pendente, valido, invalido
+      importadoEm: todayStr(),
+      diaDestino: importTargetDay,
+    };
+
+    if (ph) existPhones.add(ph);
+    if (si) existSites.add(si);
+
+    if (temSite && temTel) {
+      novaValFila.push({ ...entry, tipo: 'com-site' });
+      addedComSite++;
+    } else if (!temSite) {
+      novaValFila.push({ ...entry, tipo: 'sem-site' });
+      addedSemSite++;
+    } else { skipped++; }
   });
 
-  saveWeekData(data);
+  saveValData(novaValFila);
   updateBadges();
   importPreview();
 
-  let msg = added > 0 ? `✓ ${added} empresa${added>1?'s':''} importada${added>1?'s':''}` : '// nenhuma empresa nova';
-  if (skipped > 0) msg += ` · ${skipped} duplicada${skipped>1?'s':''} ignorada${skipped>1?'s':''}`;
-  notify(msg, added > 0 ? '' : 'warn');
+  let msg = `✓ ${addedComSite} com site · ${addedSemSite} sem site → Validação`;
+  if (skipped) msg += ` · ${skipped} ignoradas`;
+  notify(msg, addedComSite+addedSemSite > 0 ? '' : 'warn');
+  document.getElementById('importJsonInput').value = '';
 }
 
 /* ════════════════════════════
-   DISPARO — RENDER
+   VALIDAÇÃO
 ════════════════════════════ */
-function renderDisparoPanel() {
+function setValTab(tab) {
+  valTab = tab;
+  document.getElementById('valTabComSite').classList.toggle('active', tab==='com-site');
+  document.getElementById('valTabSemSite').classList.toggle('active', tab==='sem-site');
+  document.getElementById('valPanelComSite').classList.toggle('active', tab==='com-site');
+  document.getElementById('valPanelSemSite').classList.toggle('active', tab==='sem-site');
+}
+
+function renderValidacao() {
+  const val = getValData();
+  const comSite = val.filter(v => v.tipo === 'com-site');
+  const semSite = val.filter(v => v.tipo === 'sem-site');
+
+  document.getElementById('valCountComSite').textContent = `(${comSite.length})`;
+  document.getElementById('valCountSemSite').textContent = `(${semSite.length})`;
+
+  // chip tabs para validação
+  const chips = getChips();
+  document.getElementById('valChipTabs').innerHTML = chips.length
+    ? chips.map(c => `<div class="chip-tab${activeChipId===c.id?' active':''}" onclick="setValChip('${c.id}')">${escHtml(c.nome)}</div>`).join('')
+    : '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Nenhum chip configurado</span>';
+
+  if (!activeChipId && chips.length) activeChipId = chips[0].id;
+
+  // com site list
+  const comSiteEl = document.getElementById('valComSiteList');
+  if (!comSite.length) {
+    comSiteEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding:20px;text-align:center">// nenhuma empresa aguardando validação</div>';
+  } else {
+    comSiteEl.innerHTML = '<div class="ext-list">' + comSite.map(v => {
+      const statusColor = v.numStatus==='valido'?'var(--ok)':v.numStatus==='invalido'?'var(--error)':'var(--muted)';
+      const statusLabel = v.numStatus==='valido'?'✓ número válido':v.numStatus==='invalido'?'✗ inválido':'pendente';
+      return `<div class="empresa-card" id="val-card-${v.id}">
+        <div class="empresa-info">
+          <div class="empresa-nome">
+            ${v.googleUrl?`<a href="${escHtml(v.googleUrl)}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${escHtml(v.nome)}</a>`:escHtml(v.nome)}
+          </div>
+          <div class="empresa-meta">
+            ${v.site?`<div class="empresa-site"><a href="${escHtml(v.site)}" target="_blank">${escHtml(v.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a></div>`:''}
+            <div class="empresa-phone">📱
+              <span id="val-phone-${v.id}" style="cursor:pointer" onclick="editValPhone('${v.id}')">${escHtml(v.whatsapp||'—')}</span>
+            </div>
+            <span style="font-family:'DM Mono',monospace;font-size:8px;color:${statusColor}">${statusLabel}</span>
+          </div>
+        </div>
+        <div class="empresa-actions">
+          ${v.numStatus==='valido'
+            ?`<button class="add-btn added" onclick="aprovarParaFila('${v.id}')">→ Fila Zap</button>`
+            :`<button class="add-btn" onclick="validarNumeroUnico('${v.id}')">Validar</button>`
+          }
+          <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  // sem site list
+  const semSiteEl = document.getElementById('valSemSiteList');
+  if (!semSite.length) {
+    semSiteEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding:20px;text-align:center">// nenhuma empresa sem site</div>';
+  } else {
+    semSiteEl.innerHTML = '<div class="ext-list">' + semSite.map(v => {
+      return `<div class="empresa-card" id="val-sem-${v.id}">
+        <div class="empresa-info">
+          <div class="empresa-nome">
+            ${v.googleUrl?`<a href="${escHtml(v.googleUrl)}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${escHtml(v.nome)}</a>`:escHtml(v.nome)}
+          </div>
+          <div class="empresa-meta">
+            <div class="empresa-phone">📱 ${escHtml(v.whatsapp||'—')}</div>
+            ${v.categoria?`<span class="q-badge ok" style="font-size:7px">${escHtml(v.categoria)}</span>`:''}
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+            <input class="insta-link-input" id="insta-link-${v.id}" type="url" placeholder="https://instagram.com/empresa" value="${escHtml(v.instagram||'')}" style="font-size:9px;padding:5px 8px"/>
+            <button class="add-btn" onclick="aprovarParaInsta('${v.id}')">→ Fila Insta</button>
+            <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+}
+
+function setValChip(id) { activeChipId = id; renderValidacao(); }
+
+function editValPhone(id) {
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+  const el = document.getElementById(`val-phone-${id}`);
+  if (!el) return;
+  el.outerHTML = `<input id="val-phone-edit-${id}" type="text" value="${escHtml(v.whatsapp||'')}"
+    style="background:var(--bg);border:1px solid var(--accent);border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;padding:3px 7px;width:120px;outline:none"
+    onkeydown="if(event.key==='Enter')saveValPhone('${id}');if(event.key==='Escape')renderValidacao();" onblur="saveValPhone('${id}')"/>`;
+  document.getElementById(`val-phone-edit-${id}`)?.focus();
+}
+
+function saveValPhone(id) {
+  const input = document.getElementById(`val-phone-edit-${id}`);
+  if (!input) return;
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+  v.whatsapp = input.value.trim();
+  v.numStatus = 'pendente';
+  saveValData(val); renderValidacao(); notify('✓ Número atualizado');
+}
+
+async function validarNumeroUnico(id) {
+  const chip = getChipById(activeChipId);
+  if (!chip) { notify('// selecione um chip primeiro','warn'); return; }
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+  const phone = normalizePhone(v.whatsapp || '');
+  if (!phone || phone.length < 10) { notify('// número inválido','err'); return; }
+  const numero = phone.startsWith('55') ? phone : '55' + phone;
+
+  const card = document.getElementById(`val-card-${id}`);
+  if (card) card.style.opacity = '0.6';
+  try {
+    const res = await fetch(`${chip.url}/chat/whatsappNumbers/${chip.instance}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': chip.key },
+      body: JSON.stringify({ numbers: [numero] })
+    });
+    const data = await res.json();
+    const result = Array.isArray(data) ? data[0] : data;
+    v.numStatus = result?.exists ? 'valido' : 'invalido';
+    saveValData(val); renderValidacao();
+    notify(result?.exists ? `✓ ${v.nome} — número válido` : `✗ ${v.nome} — sem WhatsApp`);
+  } catch(e) {
+    notify('// erro ao validar número','err');
+    if (card) card.style.opacity = '1';
+  }
+}
+
+async function validarTodosNumeros() {
+  const chip = getChipById(activeChipId);
+  if (!chip) { notify('// selecione um chip primeiro','warn'); return; }
+  const val = getValData();
+  const pendentes = val.filter(v => v.tipo==='com-site' && v.numStatus==='pendente');
+  if (!pendentes.length) { notify('// nenhum número pendente','warn'); return; }
+
+  document.getElementById('valSpinner').style.display = 'block';
+  let validados = 0, invalidos = 0;
+
+  for (let i = 0; i < pendentes.length; i += 10) {
+    const lote = pendentes.slice(i, i + 10);
+    const numbers = lote.map(v => {
+      const ph = normalizePhone(v.whatsapp || '');
+      return ph.startsWith('55') ? ph : '55' + ph;
+    }).filter(n => n.length >= 12);
+    if (!numbers.length) continue;
+    try {
+      const res = await fetch(`${chip.url}/chat/whatsappNumbers/${chip.instance}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': chip.key },
+        body: JSON.stringify({ numbers })
+      });
+      const data = await res.json();
+      const results = Array.isArray(data) ? data : [];
+      lote.forEach(v => {
+        const ph = normalizePhone(v.whatsapp || '');
+        const numero = ph.startsWith('55') ? ph : '55' + ph;
+        const found = results.find(r => r.jid && r.jid.includes(numero));
+        v.numStatus = found?.exists ? 'valido' : 'invalido';
+        if (v.numStatus === 'valido') validados++; else invalidos++;
+      });
+    } catch(e) { console.error(e); }
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  const updated = getValData().map(v => {
+    const p = pendentes.find(p => p.id === v.id);
+    return p || v;
+  });
+  saveValData(updated);
+  document.getElementById('valSpinner').style.display = 'none';
+  renderValidacao(); updateBadges();
+  notify(`✓ ${validados} válidos · ${invalidos} sem WhatsApp`);
+}
+
+function removerDaValidacao(id) {
+  saveValData(getValData().filter(v => v.id !== id));
+  renderValidacao(); updateBadges();
+}
+
+function aprovarParaFila(id) {
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v || v.numStatus !== 'valido') { notify('// valide o número primeiro','warn'); return; }
+
+  // Adiciona ao início (empresas da semana)
+  const data = ensureWeekData();
+  const day = v.diaDestino || todayStr();
+  if (!data.days[day]) data.days[day] = [];
+
+  // Verifica limite de 60 por dia
+  const diasSemana = currentWeekDays();
+  let diaDestino = day;
+  let idx = diasSemana.indexOf(day);
+  while ((data.days[diaDestino]||[]).length >= 60) {
+    idx++;
+    if (idx >= diasSemana.length) { notify('// semana cheia, empresa não adicionada','warn'); return; }
+    diaDestino = diasSemana[idx];
+    if (!data.days[diaDestino]) data.days[diaDestino] = [];
+  }
+
+  data.days[diaDestino].push({
+    id: v.id, nome: v.nome, site: v.site, whatsapp: v.whatsapp,
+    instagram: v.instagram, googleUrl: v.googleUrl,
+    status: 'Não enviada', criadoEm: todayStr(),
+  });
+  saveWeekData(data);
+
+  // Remove da fila de validação
+  saveValData(getValData().filter(x => x.id !== id));
+  renderValidacao(); updateBadges();
+  notify(`✓ ${v.nome} → ${dayLabel(diaDestino)}`);
+}
+
+function aprovarParaInsta(id) {
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+
+  // Salva link do insta editado
+  const linkInput = document.getElementById(`insta-link-${id}`);
+  if (linkInput) v.instagram = linkInput.value.trim();
+
+  const instaFila = getInstaFila();
+  instaFila.push({ ...v, status: 'pendente', aprovadoEm: todayStr() });
+  saveInstaFila(instaFila);
+
+  saveValData(getValData().filter(x => x.id !== id));
+  renderValidacao(); updateBadges();
+  notify(`✓ ${v.nome} → Fila Instagram`);
+}
+
+/* ════════════════════════════
+   FILA WHATSAPP — RENDER
+════════════════════════════ */
+function renderFilaZap() {
+  const chips = getChips();
   const weekDays = currentWeekDays();
-  const today    = todayStr();
+  const today = todayStr();
+
+  // chip tabs
+  document.getElementById('filaZapChipTabs').innerHTML = chips.length
+    ? chips.map(c => `<div class="chip-tab${disparoChipId===c.id?' active':''}" onclick="setDisparoChip('${c.id}')">${escHtml(c.nome)}</div>`).join('')
+    : '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Configure chips em Configurações</span>';
+
+  if (!disparoChipId && chips.length) disparoChipId = chips[0].id;
+
+  const chip = getChipById(disparoChipId);
+  document.getElementById('disparoChipInfo').textContent = chip
+    ? `${chip.nome} · ${chip.instance}` : 'Nenhum chip configurado';
+
+  if (!weekDays.includes(disparoDay)) disparoDay = today;
   document.getElementById('disparoDayTabs').innerHTML = weekDays.map(day => {
     const data  = ensureWeekData();
     const count = (data.days[day]||[]).filter(e => e.whatsapp && (e.status||'Não enviada')==='Não enviada').length;
@@ -1319,61 +1772,61 @@ function renderDisparoPanel() {
     </div>`;
   }).join('');
   renderDisparoEmpresas();
+  renderFila();
 }
-function setDisparoDay(day) { disparoDay = day; disparoStatus = 'Não enviada'; renderDisparoPanel(); }
+
+function setDisparoChip(id) {
+  disparoChipId = id;
+  const chip = getChipById(id);
+  document.getElementById('disparoChipInfo').textContent = chip ? `${chip.nome} · ${chip.instance}` : '—';
+  renderFilaZap();
+}
+
+function setDisparoDay(day) { disparoDay = day; disparoStatus = 'Não enviada'; renderFilaZap(); }
 function setDisparoStatus(st) { disparoStatus = st; renderDisparoEmpresas(); }
 
 function renderDisparoEmpresas() {
-  const data   = ensureWeekData();
+  const data = ensureWeekData();
   const todasComWa = (data.days[disparoDay]||[]).filter(e => e.whatsapp);
   const semWa  = (data.days[disparoDay]||[]).filter(e => !e.whatsapp).length;
   const listEl = document.getElementById('disparoEmpresasList');
   const statsEl= document.getElementById('disparoStats');
-
   const naoEnv  = todasComWa.filter(e => (e.status||'Não enviada')==='Não enviada').length;
   const emFila  = todasComWa.filter(e => e.status==='Em fila').length;
   const env     = todasComWa.filter(e => e.status==='Enviada').length;
 
-  // Status tabs
-  const DISPARO_STATUS_TABS = [
-    { key: 'Não enviada', label: 'Não enviada', count: naoEnv },
-    { key: 'Em fila',     label: 'Em fila',     count: emFila },
-    { key: 'Enviada',     label: 'Enviada',      count: env },
-  ];
-  document.getElementById('disparoStatusTabs').innerHTML = DISPARO_STATUS_TABS.map(tab =>
-    `<div class="status-tab${disparoStatus===tab.key?' active':''}" onclick="setDisparoStatus('${tab.key}')">
-      ${tab.label} <span class="st-count">${tab.count}</span>
-    </div>`
-  ).join('');
+  document.getElementById('disparoStatusTabs').innerHTML = [
+    {key:'Não enviada',label:'Não enviada',count:naoEnv},
+    {key:'Em fila',label:'Em fila',count:emFila},
+    {key:'Enviada',label:'Enviada',count:env},
+  ].map(tab => `<div class="status-tab${disparoStatus===tab.key?' active':''}" onclick="setDisparoStatus('${tab.key}')">
+    ${tab.label} <span class="st-count">${tab.count}</span>
+  </div>`).join('');
 
   statsEl.innerHTML = `
     <div class="stat-chip"><div class="stat-chip-val acc">${naoEnv}</div><div class="stat-chip-label">para enviar</div></div>
-    <div class="stat-chip"><div class="stat-chip-val" style="color:var(--warning)">${emFila}</div><div class="stat-chip-label">em fila</div></div>
+    <div class="stat-chip"><div class="stat-chip-val warn">${emFila}</div><div class="stat-chip-label">em fila</div></div>
     <div class="stat-chip"><div class="stat-chip-val">${env}</div><div class="stat-chip-label">enviadas</div></div>
     <div class="stat-chip"><div class="stat-chip-val warn">${semWa}</div><div class="stat-chip-label">sem WhatsApp</div></div>
   `;
 
   const emps = todasComWa.filter(e => (e.status||'Não enviada') === disparoStatus);
-
-  if (!emps.length) {
-    listEl.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px">Nenhuma empresa ${disparoStatus === 'Não enviada' ? 'para enviar' : disparoStatus === 'Em fila' ? 'em fila' : 'enviada'} neste dia</div>`;
-    return;
-  }
+  if (!emps.length) { listEl.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px">Nenhuma empresa neste status</div>`; return; }
 
   listEl.innerHTML = '<div class="ext-list">' + emps.map(e => {
     const naFila  = filaDisparo.some(f => f.id === e.id);
     const enviada = e.status === 'Enviada';
     return `<div class="empresa-card">
       <div class="empresa-info">
-        <div class="empresa-nome">${escHtml(e.nome)}</div>
+        <div class="empresa-nome">${e.googleUrl?`<a href="${escHtml(e.googleUrl)}" target="_blank" style="color:var(--text);text-decoration:none">${escHtml(e.nome)}</a>`:escHtml(e.nome)}</div>
         <div class="empresa-meta">
-          ${e.site ? `<div class="empresa-site"><a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a></div>` : ''}
+          ${e.site?`<div class="empresa-site"><a href="${escHtml(e.site)}" target="_blank">${escHtml(e.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a></div>`:''}
           <div class="empresa-phone">📱 ${escHtml(e.whatsapp)}</div>
         </div>
       </div>
-      ${enviada ? '<span class="q-badge ok">✓ enviada</span>' : ''}
+      ${enviada?'<span class="q-badge ok">✓ enviada</span>':''}
       <div class="empresa-actions">
-        ${!enviada ? `<button class="add-btn${naFila?' added':''}" onclick="toggleFila('${e.id}')">${naFila?'✓ na fila':'+ Fila'}</button>` : ''}
+        ${!enviada?`<button class="add-btn${naFila?' added':''}" onclick="toggleFila('${e.id}')">${naFila?'✓ na fila':'+ Fila'}</button>`:''}
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -1381,32 +1834,27 @@ function renderDisparoEmpresas() {
 
 function toggleFila(empId) {
   const idx = filaDisparo.findIndex(f => f.id === empId);
+  const data = ensureWeekData();
   if (idx >= 0) {
     filaDisparo.splice(idx, 1);
-    // Volta pra Não enviada ao remover da fila
-    const data = ensureWeekData();
     Object.keys(data.days).forEach(day => {
       const emp = (data.days[day]||[]).find(e => e.id === empId);
       if (emp && emp.status === 'Em fila') emp.status = 'Não enviada';
     });
     saveWeekData(data);
   } else {
-    const data = ensureWeekData();
     const all  = Object.values(data.days).flat();
     const emp  = all.find(e => e.id === empId);
     if (!emp || !emp.whatsapp) return;
     const { text, idx: tIdx } = pickTemplate(emp.nome);
     filaDisparo.push({ id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp, mensagem: text, templateIdx: tIdx, status: 'aguardando' });
-    // Marca como Em fila
     Object.keys(data.days).forEach(day => {
       const e = (data.days[day]||[]).find(e => e.id === empId);
       if (e) e.status = 'Em fila';
     });
     saveWeekData(data);
   }
-  renderDisparoEmpresas();
-  renderFila();
-  updateBadges();
+  renderDisparoEmpresas(); renderFila(); updateBadges();
 }
 
 function renderFila() {
@@ -1431,9 +1879,26 @@ function renderFila() {
         <div class="fila-item-status ${item.status}">${labels[item.status]||item.status}</div>
       </div>
       <div class="fila-item-body">
+        <!-- MSG 1: Apresentação -->
         <div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px">① APRESENTAÇÃO</div>
           <div class="fila-msg-area" id="fila-msg-${item.id}">${escHtml(item.mensagem)}</div>
           <button class="fila-msg-shuffle" onclick="shuffleFilaMsg('${item.id}')">↻ sortear</button>
+        </div>
+        <!-- MSG 2: Link site -->
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px">② LINK DO SITE</div>
+          <div class="fila-msg-area">${escHtml(LINK_BICHOP)}</div>
+        </div>
+        <!-- MSG 3: Imagem -->
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px">③ IMAGEM PERSONALIZADA</div>
+          <div class="fila-img-area${item.imagemBase64?' has-img':''}" onclick="document.getElementById('img-input-${item.id}').click()">
+            ${item.imagemBase64?`<img src="${item.imagemBase64}" alt="preview"/>`:''}
+            <span class="fila-img-label">${item.imagemBase64?'':'📎 clique para anexar imagem'}</span>
+            ${item.imagemBase64?`<button class="fila-remove-btn" style="top:4px;right:4px" onclick="event.stopPropagation();removerImagem('${item.id}')">×</button>`:''}
+          </div>
+          <input type="file" accept="image/*" class="fila-img-input" id="img-input-${item.id}" onchange="onImgChange('${item.id}',this)"/>
         </div>
       </div>
     </div>`;
@@ -1459,6 +1924,12 @@ function onImgChange(id, input) {
   };
   reader.readAsDataURL(file);
 }
+function removerImagem(id) {
+  const item = filaDisparo.find(f => f.id === id);
+  if (!item) return;
+  delete item.imagemBase64; delete item.imagemNome;
+  renderFila();
+}
 function removerFila(id) {
   filaDisparo = filaDisparo.filter(f => f.id !== id);
   const data = ensureWeekData();
@@ -1466,23 +1937,41 @@ function removerFila(id) {
     const emp = (data.days[day]||[]).find(e => e.id === id);
     if (emp && emp.status === 'Em fila') emp.status = 'Não enviada';
   });
-  saveWeekData(data);
-  updateBadges();
-  renderDisparoEmpresas();
-  renderFila();
+  saveWeekData(data); updateBadges(); renderDisparoEmpresas(); renderFila();
 }
 function limparFila() {
-  if (disparoEmAndamento) { notify('// disparo em andamento', 'warn'); return; }
+  if (disparoEmAndamento) { notify('// disparo em andamento','warn'); return; }
   if (aguardandoLote) cancelarLotes();
   const data = ensureWeekData();
   Object.keys(data.days).forEach(day => {
     (data.days[day]||[]).forEach(emp => { if (emp.status === 'Em fila') emp.status = 'Não enviada'; });
   });
-  saveWeekData(data);
-  filaDisparo = [];
-  updateBadges();
-  renderDisparoEmpresas();
-  renderFila();
+  saveWeekData(data); filaDisparo = []; updateBadges(); renderDisparoEmpresas(); renderFila();
+}
+
+/* ════════════════════════════
+   HORÁRIO AUTOMÁTICO
+════════════════════════════ */
+let horarioJaDisparado = false;
+let horarioUltimoDisparo = '';
+
+function checkHorarioDisparo(now) {
+  if (disparoEmAndamento || aguardandoLote || !filaDisparo.length) return;
+  const cfg = loadEvoConfig();
+  if (!cfg.horarioInicio) return;
+  const [hh, mm] = cfg.horarioInicio.split(':').map(Number);
+  const nowH = now.getHours(), nowM = now.getMinutes();
+  const key = `${todayStr()}_${cfg.horarioInicio}`;
+  if (nowH === hh && nowM === mm && horarioUltimoDisparo !== key) {
+    horarioUltimoDisparo = key;
+    notify(`⏰ Disparo automático iniciado — ${cfg.horarioInicio}`);
+    iniciarDisparo();
+  }
+  const el = document.getElementById('horarioStatus');
+  if (el) {
+    el.textContent = `próximo: ${cfg.horarioInicio}`;
+    el.className = 'horario-status' + (disparoEmAndamento?' ativo':'');
+  }
 }
 
 /* ════════════════════════════
@@ -1490,22 +1979,32 @@ function limparFila() {
 ════════════════════════════ */
 function loadEvoConfig() { try { return JSON.parse(localStorage.getItem(EVO_KEY)||'{}'); } catch { return {}; } }
 function saveEvoConfig() {
-  const cfg = { url: document.getElementById('evoUrl').value, key: document.getElementById('evoKey').value, instance: document.getElementById('evoInstance').value, delayMin: document.getElementById('delayMin').value, delayMax: document.getElementById('delayMax').value, loteTamanho: document.getElementById('loteTamanho')?.value, loteEsperaMin: document.getElementById('loteEsperaMin')?.value };
+  const cfg = {
+    delayMin: document.getElementById('delayMin')?.value,
+    delayMax: document.getElementById('delayMax')?.value,
+    loteTamanho: document.getElementById('loteTamanho')?.value,
+    loteEsperaMin: document.getElementById('loteEsperaMin')?.value,
+    horarioInicio: document.getElementById('horarioInicio')?.value,
+  };
   localStorage.setItem(EVO_KEY, JSON.stringify(cfg));
 }
-function toggleLoteConfig() { document.getElementById('loteConfigFields').style.display = document.getElementById('loteAtivo').checked ? 'flex' : 'none'; }
+function toggleLoteConfig() {
+  document.getElementById('loteConfigFields').style.display = document.getElementById('loteAtivo').checked ? 'flex' : 'none';
+}
 
 /* ════════════════════════════
    DISPARO — LOTES
 ════════════════════════════ */
-function getLoteConfig() { return { ativo: document.getElementById('loteAtivo')?.checked||false, tamanho: parseInt(document.getElementById('loteTamanho')?.value)||30, esperaMin: parseInt(document.getElementById('loteEsperaMin')?.value)||60 }; }
+function getLoteConfig() {
+  return { ativo: document.getElementById('loteAtivo')?.checked||false, tamanho: parseInt(document.getElementById('loteTamanho')?.value)||15, esperaMin: parseInt(document.getElementById('loteEsperaMin')?.value)||60 };
+}
 
 function cancelarLotes() {
-  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer  = null; }
+  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer = null; }
   if (loteCountdownInt) { clearInterval(loteCountdownInt); loteCountdownInt = null; }
   filaLotes = []; loteAtual = 0; lotesTotal = 0; aguardandoLote = false; loteEsperaFim = null;
   document.getElementById('loteEsperaPanel').style.display = 'none';
-  notify('// fila de lotes cancelada', 'warn');
+  notify('// fila cancelada','warn');
 }
 
 function iniciarCountdownLote(msRestante) {
@@ -1516,7 +2015,7 @@ function iniciarCountdownLote(msRestante) {
   if (loteCountdownInt) clearInterval(loteCountdownInt);
   function tick() {
     const restante = loteEsperaFim - Date.now();
-    if (restante <= 0) { clearInterval(loteCountdownInt); loteCountdownInt = null; countEl.textContent='00:00'; barEl.style.width='100%'; btnProx.disabled=false; btnProx.style.background='var(--accent)'; notify('✓ Lote liberado!'); return; }
+    if (restante <= 0) { clearInterval(loteCountdownInt); loteCountdownInt=null; countEl.textContent='00:00'; barEl.style.width='100%'; btnProx.disabled=false; btnProx.style.background='var(--accent)'; notify('✓ Lote liberado!'); return; }
     const min = Math.floor(restante/60000), seg = Math.floor((restante%60000)/1000);
     countEl.textContent = `${String(min).padStart(2,'0')}:${String(seg).padStart(2,'0')}`;
     barEl.style.width = Math.min(100, ((duracaoMs-restante)/duracaoMs)*100) + '%';
@@ -1530,7 +2029,7 @@ async function confirmarProximoLote() {
   document.getElementById('btnProximoLote').disabled = true;
   document.getElementById('loteEsperaPanel').style.display = 'none';
   if (loteCountdownInt) { clearInterval(loteCountdownInt); loteCountdownInt = null; }
-  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer  = null; }
+  if (loteEsperaTimer)  { clearTimeout(loteEsperaTimer);  loteEsperaTimer = null; }
   await dispararLote();
 }
 
@@ -1538,9 +2037,11 @@ async function dispararLote() {
   loteAtual++;
   const lote     = filaLotes.shift();
   const loteConf = getLoteConfig();
-  const cfg      = loadEvoConfig();
-  const delayMin = parseInt(document.getElementById('delayMin').value)||60;
-  const delayMax = parseInt(document.getElementById('delayMax').value)||120;
+  const chip     = getChipById(disparoChipId);
+  if (!chip) { notify('// configure um chip primeiro','err'); return; }
+  const delayMin = parseInt(document.getElementById('delayMin').value)||15;
+  const delayMax = parseInt(document.getElementById('delayMax').value)||30;
+  const MSG_DELAY = 15000; // 15s entre mensagens da mesma empresa
   const logEl    = document.getElementById('disparoLog');
   logEl.style.display = 'block';
   disparoEmAndamento = true;
@@ -1549,7 +2050,7 @@ async function dispararLote() {
   document.getElementById('disparoBtn').textContent = `Lote ${loteAtual}/${lotesTotal}...`;
 
   function log(msg) { const l = document.createElement('div'); l.style.marginBottom='3px'; l.innerHTML=`<span style="color:var(--muted)">[${timeStr()}]</span> ${msg}`; logEl.appendChild(l); logEl.scrollTop=logEl.scrollHeight; }
-  log(`<span style="color:var(--accent)">━━ LOTE ${loteAtual}/${lotesTotal} · ${lote.length} mensagem${lote.length>1?'s':''} ━━</span>`);
+  log(`<span style="color:var(--accent)">━━ LOTE ${loteAtual}/${lotesTotal} · ${lote.length} empresa${lote.length>1?'s':''} ━━</span>`);
 
   for (let i = 0; i < lote.length; i++) {
     const item = lote[i];
@@ -1558,21 +2059,38 @@ async function dispararLote() {
     log(`Enviando para <span style="color:var(--text)">${escHtml(item.nome)}</span>...`);
     try {
       const waNum  = item.whatsapp.replace(/\D/g,'');
-      const numero = waNum.startsWith('55') ? waNum : '55'+waNum;
-      const payload = { number: numero, options: { delay: 1000 }, textMessage: { text: item.mensagem } };
-      const res = await fetch(`${cfg.url}/message/sendText/${cfg.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':cfg.key}, body: JSON.stringify(payload) });
-      if (res.ok) {
-        item.status='enviado'; atualizarStatusFila(item.id,'enviado');
-        log(`<span style="color:var(--accent)">✓ Enviado para ${escHtml(item.nome)}</span>`);
-        atualizarStatusEmpresa(item.id,'Enviada');
+      const numero = waNum.startsWith('55') ? waNum : '55' + waNum;
+
+      // MSG 1 — Apresentação
+      const payload1 = { number: numero, options: { delay: 1000 }, textMessage: { text: item.mensagem } };
+      const res1 = await fetch(`${chip.url}/message/sendText/${chip.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':chip.key}, body: JSON.stringify(payload1) });
+      if (!res1.ok) throw new Error(`HTTP ${res1.status}`);
+      log(`  ① apresentação enviada`);
+      await new Promise(r => setTimeout(r, MSG_DELAY));
+
+      // MSG 2 — Link
+      const payload2 = { number: numero, options: { delay: 1000 }, textMessage: { text: LINK_BICHOP } };
+      await fetch(`${chip.url}/message/sendText/${chip.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':chip.key}, body: JSON.stringify(payload2) });
+      log(`  ② link enviado`);
+      await new Promise(r => setTimeout(r, MSG_DELAY));
+
+      // MSG 3 — Imagem (se houver)
+      if (item.imagemBase64) {
+        const base64data = item.imagemBase64.split(',')[1];
+        const mimeType = item.imagemBase64.split(';')[0].split(':')[1] || 'image/jpeg';
+        const payload3 = { number: numero, options: { delay: 1000 }, mediaMessage: { mediatype: 'image', media: base64data, mimetype: mimeType, caption: '' } };
+        await fetch(`${chip.url}/message/sendMedia/${chip.instance}`, { method:'POST', headers:{'Content-Type':'application/json','apikey':chip.key}, body: JSON.stringify(payload3) });
+        log(`  ③ imagem enviada`);
       } else {
-        const err = await res.json().catch(()=>({}));
-        item.status='erro'; atualizarStatusFila(item.id,'erro');
-        log(`<span style="color:var(--error)">✗ Erro ${res.status} — ${err.message||err.error||'falha'}</span>`);
+        log(`  ③ <span style="color:var(--warning)">sem imagem anexada</span>`);
       }
+
+      item.status='enviado'; atualizarStatusFila(item.id,'enviado');
+      log(`<span style="color:var(--accent)">✓ ${escHtml(item.nome)}</span>`);
+      atualizarStatusEmpresa(item.id,'Enviada');
     } catch(e) {
       item.status='erro'; atualizarStatusFila(item.id,'erro');
-      log(`<span style="color:var(--error)">✗ Falha de conexão — ${e.message}</span>`);
+      log(`<span style="color:var(--error)">✗ Erro — ${e.message}</span>`);
     }
     if (i < lote.length-1) {
       const delay = (delayMin + Math.random()*(delayMax-delayMin))*1000;
@@ -1585,7 +2103,7 @@ async function dispararLote() {
   log(`<span style="color:var(--accent)">✓ Lote ${loteAtual} concluído! ${env} enviado${env>1?'s':''} · ${erros} erro${erros>1?'s':''}</span>`);
   disparoEmAndamento = false;
   document.getElementById('disparoSpinner').style.display = 'none';
-  renderDisparoPanel(); renderInicio();
+  renderFilaZap(); renderInicio();
 
   if (filaLotes.length > 0) {
     const esperaMs = loteConf.esperaMin*60*1000; loteEsperaFim = Date.now()+esperaMs; aguardandoLote = true;
@@ -1608,8 +2126,8 @@ async function dispararLote() {
 
 async function iniciarDisparo() {
   if (disparoEmAndamento || aguardandoLote) return;
-  const cfg = loadEvoConfig();
-  if (!cfg.url || !cfg.key || !cfg.instance) { notify('// configure a Evolution API primeiro','err'); return; }
+  const chip = getChipById(disparoChipId);
+  if (!chip) { notify('// configure um chip primeiro','err'); return; }
   if (!filaDisparo.length) { notify('// fila vazia','warn'); return; }
   document.getElementById('disparoLog').innerHTML = '';
   const loteConf = getLoteConfig();
@@ -1638,6 +2156,330 @@ function atualizarStatusEmpresa(id, novoStatus) {
     if (idx>=0) { data.days[day][idx].status=novoStatus; data.days[day][idx].enviadoEm=todayStr(); }
   });
   saveWeekData(data); updateBadges();
+}
+
+/* ════════════════════════════
+   FILA INSTAGRAM — RENDER
+════════════════════════════ */
+function renderFilaInsta() {
+  const fila = getInstaFila();
+  const tabs = ['pendente','enviado'];
+  const counts = { pendente: fila.filter(f=>f.status==='pendente').length, enviado: fila.filter(f=>f.status==='enviado').length };
+
+  document.getElementById('instaStatusTabs').innerHTML = tabs.map(t =>
+    `<div class="status-tab${instaStatus===t?' active':''}" onclick="setInstaStatus('${t}')">
+      ${t==='pendente'?'Pendentes':'Enviados'} <span class="st-count">${counts[t]}</span>
+    </div>`
+  ).join('');
+
+  const filtered = fila.filter(f => f.status === instaStatus);
+  const listEl = document.getElementById('instaFilaList');
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="fila-empty">Nenhuma empresa ${instaStatus==='pendente'?'pendente':'enviada'}.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(item => {
+    const apresentacao = getTemplates()[0].replace(/\{EMPRESA\}/g, item.nome);
+    return `<div class="insta-card" id="insta-card-${item.id}">
+      <div class="insta-card-header">
+        <div class="insta-nome">
+          ${item.googleUrl?`<a href="${escHtml(item.googleUrl)}" target="_blank" style="color:var(--text);text-decoration:none">${escHtml(item.nome)}</a>`:escHtml(item.nome)}
+        </div>
+        ${item.instagram?`<a href="${escHtml(item.instagram)}" target="_blank" class="q-badge insta" style="text-decoration:none">📸 ver perfil</a>`:''}
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px">LINK INSTAGRAM</div>
+        <div style="display:flex;gap:6px">
+          <input class="insta-link-input" id="insta-ig-${item.id}" type="url" placeholder="https://instagram.com/empresa" value="${escHtml(item.instagram||'')}"/>
+          <button class="copy-small" onclick="salvarInstaLink('${item.id}')">salvar</button>
+        </div>
+      </div>
+      <div class="insta-msg-blocks">
+        <div class="insta-msg-block">
+          <div class="insta-msg-block-label">① APRESENTAÇÃO</div>
+          <div class="insta-msg-text">${escHtml(apresentacao)}</div>
+          <div style="margin-top:6px;display:flex;gap:5px">
+            <button class="copy-small" onclick="copiarTexto(${JSON.stringify(apresentacao)})">copiar</button>
+          </div>
+        </div>
+        <div class="insta-msg-block">
+          <div class="insta-msg-block-label">② LINK DO SITE</div>
+          <div class="insta-msg-text">${escHtml(LINK_BICHOP)}</div>
+          <div style="margin-top:6px"><button class="copy-small" onclick="copiarTexto('${LINK_BICHOP}')">copiar</button></div>
+        </div>
+        <div class="insta-msg-block">
+          <div class="insta-msg-block-label">③ IMAGEM PERSONALIZADA</div>
+          <div class="fila-img-area${item.imagemBase64?' has-img':''}" onclick="document.getElementById('insta-img-${item.id}').click()" style="min-height:50px">
+            ${item.imagemBase64?`<img src="${item.imagemBase64}" alt="preview"/>`:''}
+            <span class="fila-img-label">${item.imagemBase64?'':'📎 anexar imagem'}</span>
+          </div>
+          <input type="file" accept="image/*" class="fila-img-input" id="insta-img-${item.id}" onchange="onInstaImgChange('${item.id}',this)"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+        ${item.status==='pendente'
+          ?`<button class="btn btn-insta" style="font-size:10px;padding:7px 14px" onclick="marcarInstaEnviado('${item.id}')">✓ Marcar enviado</button>`
+          :`<span class="q-badge ok">✓ enviado</span>`
+        }
+        <button class="btn btn-danger" style="font-size:10px;padding:7px 12px" onclick="removerDaFilaInsta('${item.id}')">Remover</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setInstaStatus(s) { instaStatus = s; renderFilaInsta(); }
+
+function salvarInstaLink(id) {
+  const input = document.getElementById(`insta-ig-${id}`);
+  if (!input) return;
+  const fila = getInstaFila();
+  const item = fila.find(f => f.id === id);
+  if (!item) return;
+  item.instagram = input.value.trim();
+  saveInstaFila(fila); notify('✓ Link salvo');
+}
+
+function onInstaImgChange(id, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const fila = getInstaFila();
+    const item = fila.find(f => f.id === id);
+    if (!item) return;
+    item.imagemBase64 = e.target.result;
+    saveInstaFila(fila); renderFilaInsta();
+  };
+  reader.readAsDataURL(file);
+}
+
+function marcarInstaEnviado(id) {
+  const fila = getInstaFila();
+  const item = fila.find(f => f.id === id);
+  if (!item) return;
+  item.status = 'enviado'; item.enviadoEm = todayStr();
+  saveInstaFila(fila); renderFilaInsta(); updateBadges();
+  notify('✓ Marcado como enviado');
+}
+
+function removerDaFilaInsta(id) {
+  saveInstaFila(getInstaFila().filter(f => f.id !== id));
+  renderFilaInsta(); updateBadges();
+}
+
+function limparFilaInsta() {
+  if (!confirm('Remover todos os enviados?')) return;
+  saveInstaFila(getInstaFila().filter(f => f.status !== 'enviado'));
+  renderFilaInsta(); updateBadges(); notify('✓ Enviados removidos');
+}
+
+function copiarTexto(text) {
+  navigator.clipboard.writeText(text).then(() => notify('✓ Copiado'));
+}
+
+/* ════════════════════════════
+   REDIRECIONAMENTOS
+════════════════════════════ */
+const API_BASE = '';
+
+async function criarRedirecionamento() {
+  const nome   = document.getElementById('rdNomeEmpresa').value.trim();
+  const desk   = document.getElementById('rdDeskUrl').value.trim();
+  const mob    = document.getElementById('rdMobUrl').value.trim();
+  if (!nome || !desk || !mob) { notify('// preencha todos os campos','err'); return; }
+
+  const spinner = document.getElementById('rdSpinner');
+  spinner.style.display = 'block';
+  try {
+    const res = await fetch(`${API_BASE}/api/shorten`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companyName: nome, deskUrl: desk, mobUrl: mob })
+    });
+    const data = await res.json();
+    if (!res.ok) { notify(data.error || '// erro ao criar link','err'); return; }
+    const result = document.getElementById('rdResultado');
+    const link   = document.getElementById('rdLinkGerado');
+    result.style.display = 'block';
+    link.href = data.shortUrl; link.textContent = data.shortUrl;
+    notify('✓ Link criado!');
+  } catch(e) {
+    notify('// erro de conexão','err');
+  } finally {
+    spinner.style.display = 'none';
+  }
+}
+
+function copiarLinkRd() {
+  const link = document.getElementById('rdLinkGerado').textContent;
+  navigator.clipboard.writeText(link).then(() => notify('✓ Link copiado'));
+}
+
+async function atualizarRedirecionamento() {
+  const alias = document.getElementById('rdAliasUpdate').value.trim();
+  const desk  = document.getElementById('rdDeskUrlUpdate').value.trim();
+  const mob   = document.getElementById('rdMobUrlUpdate').value.trim();
+  if (!alias) { notify('// informe o alias','err'); return; }
+  if (!desk && !mob) { notify('// informe ao menos um link','err'); return; }
+  try {
+    const res = await fetch(`${API_BASE}/api/update`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias, deskUrl: desk||undefined, mobUrl: mob||undefined })
+    });
+    const data = await res.json();
+    if (!res.ok) { notify(data.error || '// erro','err'); return; }
+    notify('✓ Link atualizado!');
+  } catch(e) { notify('// erro de conexão','err'); }
+}
+
+/* ════════════════════════════
+   CONFIGURAÇÕES
+════════════════════════════ */
+function renderConfiguracoes() {
+  renderChipsConfig();
+  renderRamosConfig();
+  renderTemplatesConfig();
+}
+
+/* CHIPS */
+function abrirModalNovoChip() {
+  document.getElementById('chipNome').value = '';
+  document.getElementById('chipUrl').value = '';
+  document.getElementById('chipInstance').value = '';
+  document.getElementById('chipKey').value = '';
+  document.getElementById('chipModal').classList.add('open');
+}
+function fecharChipModal() { document.getElementById('chipModal').classList.remove('open'); }
+
+function salvarChip() {
+  const nome     = document.getElementById('chipNome').value.trim();
+  const url      = document.getElementById('chipUrl').value.trim();
+  const instance = document.getElementById('chipInstance').value.trim();
+  const key      = document.getElementById('chipKey').value.trim();
+  if (!nome || !url || !instance || !key) { notify('// preencha todos os campos','err'); return; }
+  const chips = getChips();
+  if (chips.length >= 2) { notify('// máximo de 2 chips','warn'); return; }
+  chips.push({ id: genId(), nome, url, instance, key, status: 'desconectado' });
+  saveChips(chips);
+  fecharChipModal(); renderConfiguracoes(); updateBadges();
+  notify('✓ Chip salvo');
+}
+
+function renderChipsConfig() {
+  const chips = getChips();
+  const grid  = document.getElementById('chipGrid');
+  if (!chips.length) {
+    grid.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">Nenhum chip configurado. Adicione até 2 chips.</div>';
+    return;
+  }
+  grid.innerHTML = chips.map(c => `<div class="chip-card">
+    <div class="chip-card-header">
+      <div class="chip-dot ${c.status==='conectado'?'on':'off'}"></div>
+      <div>
+        <div class="chip-name">${escHtml(c.nome)}</div>
+        <div class="chip-instance">${escHtml(c.instance)}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost" style="font-size:10px;padding:6px 12px" onclick="verQRChip('${c.id}')">📱 QR Code</button>
+      <button class="btn btn-danger chip-del" style="font-size:10px;padding:6px 12px" onclick="deletarChip('${c.id}')">✕ Remover</button>
+    </div>
+  </div>`).join('');
+}
+
+async function verQRChip(id) {
+  qrChipIdAtivo = id;
+  const chip = getChipById(id);
+  if (!chip) return;
+  document.getElementById('qrChipNome').textContent = chip.nome;
+  document.getElementById('qrModal').classList.add('open');
+  await carregarQR(chip);
+}
+
+async function carregarQR(chip) {
+  document.getElementById('qrWrap').innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted)">Gerando QR Code...</div>';
+  try {
+    const res = await fetch(`${chip.url}/instance/connect/${chip.instance}`, { headers: { 'apikey': chip.key } });
+    const data = await res.json();
+    const qr = data.qrcode?.base64 || data.base64 || data.qr || '';
+    if (qr) {
+      document.getElementById('qrWrap').innerHTML = `<img src="${qr.startsWith('data:')?qr:'data:image/png;base64,'+qr}" alt="QR Code"/>`;
+    } else {
+      document.getElementById('qrWrap').innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--ok)">✓ Instância já conectada</div>';
+    }
+  } catch(e) {
+    document.getElementById('qrWrap').innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--error)">✗ Erro ao gerar QR Code</div>';
+  }
+}
+
+async function atualizarQR() {
+  if (!qrChipIdAtivo) return;
+  const chip = getChipById(qrChipIdAtivo);
+  if (chip) await carregarQR(chip);
+}
+
+function deletarChip(id) {
+  if (!confirm('Remover este chip?')) return;
+  saveChips(getChips().filter(c => c.id !== id));
+  if (disparoChipId === id) disparoChipId = null;
+  if (activeChipId === id) activeChipId = null;
+  renderConfiguracoes(); updateBadges(); notify('✓ Chip removido');
+}
+
+/* RAMOS */
+function renderRamosConfig() {
+  const ramos = getRamos();
+  document.getElementById('ramosConfigList').innerHTML = ramos.map(r => `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-weight:700;font-size:13px;flex:1">${escHtml(r.nome)}</span>
+      <button class="del-btn" onclick="deletarRamo('${r.id}')">✕</button>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      ${r.keywords.map(k=>`<span style="background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;border-radius:100px">${escHtml(k)}</span>`).join('')}
+    </div>
+  </div>`).join('');
+}
+
+function adicionarRamo() {
+  const input = document.getElementById('novoRamoInput');
+  const nome = input.value.trim();
+  if (!nome) return;
+  const ramos = getRamos();
+  ramos.push({ id: genId(), nome, keywords: [normalizeStr(nome)] });
+  saveRamos(ramos); renderRamosConfig(); renderRamoSelect();
+  input.value = ''; notify('✓ Ramo adicionado');
+}
+
+function deletarRamo(id) {
+  if (!confirm('Remover ramo?')) return;
+  saveRamos(getRamos().filter(r => r.id !== id));
+  renderRamosConfig(); renderRamoSelect();
+  if (activeRamoId === id) { activeRamoId = null; onRamoChange(); }
+  notify('✓ Ramo removido');
+}
+
+/* TEMPLATES */
+function renderTemplatesConfig() {
+  const tpls = getTemplates();
+  document.getElementById('templatesList').innerHTML = tpls.map((t, i) => `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;position:relative">
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:8px">TEMPLATE ${i+1}</div>
+    <textarea style="min-height:80px;font-size:10px;line-height:1.6" oninput="saveTemplate(${i},this.value)">${escHtml(t)}</textarea>
+    ${tpls.length>1?`<button class="del-btn" style="position:absolute;top:8px;right:8px" onclick="removerTemplate(${i})">✕</button>`:''}
+  </div>`).join('');
+}
+
+function saveTemplate(idx, val) {
+  const tpls = getTemplates(); tpls[idx] = val; saveTemplates(tpls);
+}
+function adicionarTemplate() {
+  const tpls = getTemplates();
+  tpls.push('Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA}...\n\nFaz sentido conversarmos?');
+  saveTemplates(tpls); renderTemplatesConfig(); notify('✓ Template adicionado');
+}
+function removerTemplate(idx) {
+  const tpls = getTemplates(); tpls.splice(idx, 1); saveTemplates(tpls); renderTemplatesConfig();
 }
 
 /* ════════════════════════════
@@ -1670,7 +2512,7 @@ function exportExcelDay() {
   const data=ensureWeekData(); const rows=data.days[day]||[];
   if (!rows.length) { notify('Nenhuma empresa neste dia','err'); return; }
   const wb=XLSX.utils.book_new(); buildSheet(wb, dayLabelShort(day), rows);
-  downloadWb(wb, `prospecção-${day.replace(/\//g,'-')}.xlsx`); notify(`✓ Excel de ${dayLabel(day)} gerado`);
+  downloadWb(wb, `prospecção-${day.replace(/\//g,'-')}.xlsx`); notify(`✓ Excel gerado`);
 }
 function exportExcelHistory() {
   const hist=getHistoryData(); if (!hist) { notify('Nenhum histórico','err'); return; }
@@ -1685,20 +2527,24 @@ function exportExcelHistory() {
 (function() {
   const s = document.getElementById('sidebar');
   if (localStorage.getItem(SIDEBAR_KEY)==='1') s.classList.remove('collapsed');
+
   const cfg = loadEvoConfig();
-  if (cfg.url)      document.getElementById('evoUrl').value      = cfg.url;
-  if (cfg.key)      document.getElementById('evoKey').value      = cfg.key;
-  if (cfg.instance) document.getElementById('evoInstance').value = cfg.instance;
-  if (cfg.delayMin) document.getElementById('delayMin').value    = cfg.delayMin;
-  if (cfg.delayMax) document.getElementById('delayMax').value    = cfg.delayMax;
+  if (cfg.delayMin)      document.getElementById('delayMin').value      = cfg.delayMin;
+  if (cfg.delayMax)      document.getElementById('delayMax').value      = cfg.delayMax;
   if (cfg.loteTamanho)   document.getElementById('loteTamanho').value   = cfg.loteTamanho;
   if (cfg.loteEsperaMin) document.getElementById('loteEsperaMin').value = cfg.loteEsperaMin;
-})();
+  if (cfg.horarioInicio) document.getElementById('horarioInicio').value = cfg.horarioInicio;
 
-ensureWeekData();
-renderInicio();
-renderExcluidos();
-updateBadges();
+  // init chips
+  const chips = getChips();
+  if (chips.length) { disparoChipId = chips[0].id; activeChipId = chips[0].id; }
+
+  renderRamoSelect();
+  ensureWeekData();
+  renderInicio();
+  renderExcluidos();
+  updateBadges();
+})();
 </script>
 </body>
 </html>
