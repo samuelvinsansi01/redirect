@@ -632,6 +632,14 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="page-title">Fila <span>Instagram.</span></div>
     <div class="page-sub">// prospecção manual · copie as mensagens e envie pelo app</div>
   </div>
+
+  <!-- CRONOGRAMA SEMANAL -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Cronograma semanal <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0" id="instaSemanaLabel"></span></div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">Aloque empresas aprovadas por dia da semana. Dom a Sáb.</div>
+    <div id="instaCronograma" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px"></div>
+  </div>
+
   <div class="card">
     <div class="card-title">Empresas aprovadas para Instagram</div>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
@@ -814,8 +822,10 @@ const EXCLUDED_KEY   = 'vs_excluded_domains';
 const CHIPS_KEY      = 'vs_chips_v2';
 const RAMOS_KEY      = 'vs_ramos_v2';
 const TEMPLATES_KEY  = 'vs_templates_v2';
+const TEMPLATES_RAMO_KEY = 'vs_templates_ramo_v1'; // templates por ramo+tipo
 const VAL_KEY        = 'vs_validacao_v2';   // fila de validação
 const INSTA_KEY      = 'vs_insta_fila_v2';  // fila instagram
+const INSTA_SCHED_KEY = 'vs_insta_sched_v1'; // cronograma instagram
 
 const STATUS_OPTIONS = ['Não enviada','Em fila','Enviada','Respondida','Não respondida','Recusada','Fechada'];
 const WEEKDAY_NAMES  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -850,6 +860,98 @@ const TEMPLATES_DEFAULT = [
   `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que ele pode estar passando uma imagem mais genérica do que a empresa merece. Muitos clientes em potencial descartam pelo que veem online antes mesmo de entrar em contato.\n\nDesenvolvo sites personalizados para empresas que querem ser levadas a sério no digital.\n\nFaz sentido conversarmos?`,
 ];
 
+/* ════════════════════════════
+   TEMPLATES POR RAMO E TIPO
+════════════════════════════ */
+const RAMO_TEMPLATES_DEFAULT = {
+  contabilidade: {
+    'com-site': [
+      `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que ele pode estar afastando clientes sem vocês perceberem. Muitos sites de contabilidades não foram pensados para converter e acabam não transmitindo a credibilidade que o escritório realmente tem.\n\nTrabalho desenvolvendo sites personalizados para contabilidades que querem ser vistas de forma profissional e atrair mais clientes no digital.\n\nFaz sentido conversarmos?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nPassei pelo site da {EMPRESA} e sinto que ele não está representando bem o que vocês entregam. O cliente decide pela confiança, e essa confiança começa pelo digital.\n\nTrabalho criando sites personalizados para escritórios contábeis que querem se destacar e converter mais visitantes em clientes.\n\nFaz sentido pra vocês?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e percebi que ele pode estar passando uma imagem mais genérica do que o escritório merece. Clientes em potencial descartam pelo que veem online antes mesmo de entrar em contato.\n\nDesenvolvo sites personalizados para contabilidades que querem ser levadas a sério no digital.\n\nFaz sentido conversarmos?`,
+      `Olá! Me chamo Samuel.\n\nDei uma olhada no site da {EMPRESA} e acredito que existe espaço para ele gerar mais resultados. Um site bem construído é o principal vendedor silencioso de um escritório contábil.\n\nTrabalho com desenvolvimento de sites para contabilidades que querem crescer no digital de forma profissional.\n\nPodemos conversar?`,
+      `Oi! Sou o Samuel.\n\nVi o site da {EMPRESA} e fiquei pensando: será que ele está transmitindo a confiança que os clientes precisam sentir antes de fechar com um escritório contábil?\n\nCrio sites que comunicam expertise e geram credibilidade desde o primeiro acesso.\n\nFaz sentido uma conversa rápida?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nAnalysei o site da {EMPRESA} e notei que alguns elementos importantes para conversão podem estar em falta. Sites de contabilidade precisam transmitir segurança, organização e expertise logo de cara.\n\nEspecializo-me em sites para escritórios contábeis que querem impressionar e converter mais.\n\nFaz sentido conversarmos?`,
+      `Olá! Sou o Samuel.\n\nPassei pelo site da {EMPRESA} e vejo uma oportunidade de torná-lo muito mais eficiente para atrair novos clientes. Muitos escritórios contábeis perdem leads simplesmente por não terem uma presença digital à altura.\n\nTrabalho com sites personalizados para contabilidades. Posso te mostrar alguns exemplos?\n\nFaz sentido?`,
+      `Oi, me chamo Samuel!\n\nVi o site da {EMPRESA} e acredito que ele pode estar te custando clientes sem que vocês percebam. No mercado contábil, a primeira impressão online é decisiva.\n\nDesenvolvo sites que posicionam escritórios como referência em suas regiões.\n\nPodemos conversar rápido sobre isso?`,
+      `Olá! Sou o Samuel.\n\nAnalisei o site da {EMPRESA} e vi que há potencial para melhorar bastante a forma como vocês se apresentam online. Um bom site de contabilidade precisa passar credibilidade, clareza e profissionalismo.\n\nTrabalho exatamente com isso — sites para escritórios que querem crescer.\n\nFaz sentido uma conversa?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nSoube da {EMPRESA} e fui conferir o site. Acredito que existe uma oportunidade real de tornar a presença digital de vocês muito mais forte e capaz de atrair mais clientes.\n\nTrabalho com sites personalizados para contabilidades. O resultado que entrego é um site que trabalha por vocês 24h.\n\nFaz sentido conversarmos?`,
+    ],
+    'sem-site': [
+      `Olá, me chamo Samuel. Tudo bem?\n\nEncontrei a {EMPRESA} mas percebi que vocês ainda não têm um site. No mercado contábil, isso pode estar fazendo clientes em potencial descartarem vocês antes mesmo de entrar em contato.\n\nTrabalho criando sites profissionais para escritórios contábeis. Posso mostrar como isso mudaria a percepção de novos clientes sobre vocês.\n\nFaz sentido conversar?`,
+      `Olá! Me chamo Samuel.\n\nVi a {EMPRESA} e não encontrei um site de vocês. Muitos clientes pesquisam online antes de contratar um escritório contábil — sem site, vocês podem estar perdendo essas oportunidades.\n\nDesenvolvo sites para contabilidades que querem crescer digitalmente. O investimento se paga com o primeiro cliente novo.\n\nFaz sentido conversarmos?`,
+      `Oi, sou o Samuel!\n\nEncontrei a {EMPRESA} e percebi que vocês ainda não têm presença digital própria. Num mercado onde a confiança é tudo, um site bem feito faz toda a diferença na hora do cliente escolher.\n\nCrio sites personalizados para escritórios contábeis. Posso te mostrar alguns exemplos rápidos?\n\nFaz sentido?`,
+    ],
+  },
+  marcenaria: {
+    'com-site': [
+      `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que ele pode estar deixando clientes na dúvida em vez de convencê-los a entrar em contato. Para móveis planejados, o site precisa vender visualmente antes de qualquer conversa.\n\nTrabalho desenvolvendo sites para marcenarias e móveis planejados que querem mostrar seu trabalho com mais impacto.\n\nFaz sentido conversarmos?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nPassei pelo site da {EMPRESA} e percebi que o site pode não estar fazendo jus à qualidade do trabalho de vocês. No ramo de móveis planejados, a apresentação visual é tudo.\n\nCrio sites que mostram projetos de forma impressionante e convertem visitantes em orçamentos.\n\nFaz sentido pra vocês?`,
+      `Olá! Sou o Samuel.\n\nVi o site da {EMPRESA} e acho que ele pode estar perdendo clientes por não mostrar seu portfólio da melhor forma possível. Clientes de móveis planejados decidem pela beleza e confiança que veem online.\n\nDesenvolvo sites que destacam projetos e geram mais orçamentos para marcenarias.\n\nFaz sentido conversarmos?`,
+      `Oi! Me chamo Samuel.\n\nDei uma olhada no site da {EMPRESA} e acredito que ele pode ser muito mais poderoso para atrair clientes. Sites de marcenaria precisam fazer o cliente visualizar o sonho antes mesmo de pedir um orçamento.\n\nEspecializo-me em sites para móveis planejados e marcenarias que querem crescer.\n\nPodemos conversar?`,
+      `Olá, sou o Samuel!\n\nAnalisei o site da {EMPRESA} e vejo oportunidade de destacar melhor os projetos e a qualidade do trabalho de vocês. No mercado de móveis planejados, o site é a vitrine mais importante.\n\nTrabalho com sites que mostram portfólios de forma que geram desejo e mais pedidos de orçamento.\n\nFaz sentido uma conversa rápida?`,
+      `Olá! Me chamo Samuel.\n\nVi o site da {EMPRESA} e acredito que ele pode estar passando uma impressão mais simples do que o trabalho de vocês merece. Cada projeto entregue por vocês merece ser mostrado de forma impactante.\n\nDesenvolvo sites para marcenarias que transformam portfólio em clientes.\n\nFaz sentido conversarmos?`,
+      `Oi, sou o Samuel!\n\nPassei pelo site da {EMPRESA} e acredito que existe muito espaço para melhorar como vocês se apresentam online. O cliente de móveis planejados pesquisa muito antes de decidir — o site precisa ser perfeito.\n\nCrio sites para marcenarias e móveis planejados que geram mais orçamentos e fechamentos.\n\nFaz sentido?`,
+      `Olá! Sou o Samuel.\n\nAnalisei o site da {EMPRESA} e percebi que ele pode estar deixando clientes irem para a concorrência por não transmitir confiança suficiente. Sites de marcenaria precisam mostrar qualidade antes de qualquer conversa.\n\nTrabalho com sites que posicionam marcenarias como referência em suas regiões.\n\nFaz sentido conversarmos?`,
+      `Olá, me chamo Samuel. Tudo bem?\n\nVi o site da {EMPRESA} e acredito que vocês merecem uma vitrine digital muito melhor. No ramo de móveis planejados, o site é muitas vezes o primeiro contato que o cliente tem com o trabalho de vocês.\n\nDesenvolvo sites que mostram projetos com a qualidade que eles merecem.\n\nFaz sentido conversar?`,
+      `Olá! Me chamo Samuel.\n\nPassei pelo site da {EMPRESA} e sinto que o potencial de vocês não está sendo totalmente comunicado online. Clientes de móveis planejados decidem com os olhos — o site precisa impressionar.\n\nCrio sites personalizados para marcenarias que querem crescer e se destacar.\n\nFaz sentido conversarmos?`,
+    ],
+    'sem-site': [
+      `Olá, me chamo Samuel. Tudo bem?\n\nEncontrei a {EMPRESA} mas percebi que vocês ainda não têm um site. No ramo de móveis planejados, clientes pesquisam muito antes de decidir — sem um site com portfólio, vocês ficam de fora dessa pesquisa.\n\nTrabalho criando sites para marcenarias que querem mostrar seus projetos e atrair mais clientes.\n\nFaz sentido conversarmos?`,
+      `Olá! Sou o Samuel.\n\nVi a {EMPRESA} e não encontrei um site de vocês. Para quem trabalha com móveis planejados, um site com portfólio é a diferença entre ser escolhido ou ser ignorado pelo cliente que pesquisa online.\n\nDesenvolvo sites para marcenarias. O site vira um vendedor 24h por dia.\n\nFaz sentido uma conversa?`,
+      `Oi, me chamo Samuel!\n\nEncontrei a {EMPRESA} e percebi que vocês ainda não têm uma presença digital própria. No mercado de móveis planejados, quem não aparece online perde para quem aparece.\n\nCrio sites para marcenarias que querem crescer digitalmente. Posso te mostrar exemplos?\n\nFaz sentido?`,
+    ],
+  },
+};
+
+function getRamoTemplatesDefault(ramoId, tipo) {
+  if (RAMO_TEMPLATES_DEFAULT[ramoId] && RAMO_TEMPLATES_DEFAULT[ramoId][tipo]) {
+    return RAMO_TEMPLATES_DEFAULT[ramoId][tipo];
+  }
+  return tipo === 'com-site' ? TEMPLATES_DEFAULT : TEMPLATES_DEFAULT.slice(0, 3);
+}
+
+function getRamoTemplates() {
+  try { return JSON.parse(localStorage.getItem(TEMPLATES_RAMO_KEY)||'null') || {}; } catch { return {}; }
+}
+function saveRamoTemplates(obj) { localStorage.setItem(TEMPLATES_RAMO_KEY, JSON.stringify(obj)); }
+
+function getTemplatesForRamoTipo(ramoId, tipo) {
+  const all = getRamoTemplates();
+  const key = `${ramoId}__${tipo}`;
+  if (all[key] && all[key].length > 0) return all[key];
+  return getRamoTemplatesDefault(ramoId, tipo);
+}
+
+function saveRamoTemplate(ramoId, tipo, idx, val) {
+  const all = getRamoTemplates();
+  const key = `${ramoId}__${tipo}`;
+  if (!all[key]) all[key] = [...getRamoTemplatesDefault(ramoId, tipo)];
+  all[key][idx] = val;
+  saveRamoTemplates(all);
+}
+
+function adicionarRamoTemplate(ramoId, tipo) {
+  const all = getRamoTemplates();
+  const key = `${ramoId}__${tipo}`;
+  if (!all[key]) all[key] = [...getRamoTemplatesDefault(ramoId, tipo)];
+  const maxTpl = tipo === 'sem-site' ? 3 : 10;
+  if (all[key].length >= maxTpl) { notify(`// máximo de ${maxTpl} templates para ${tipo}`,'warn'); return; }
+  all[key].push(`Olá, me chamo Samuel. Tudo bem?\n\nVi ${tipo==='com-site'?'o site d':''}a {EMPRESA}...\n\nFaz sentido conversarmos?`);
+  saveRamoTemplates(all);
+  renderTemplatesConfig();
+}
+
+function removerRamoTemplate(ramoId, tipo, idx) {
+  const all = getRamoTemplates();
+  const key = `${ramoId}__${tipo}`;
+  if (!all[key]) all[key] = [...getRamoTemplatesDefault(ramoId, tipo)];
+  if (all[key].length <= 1) { notify('// precisa ter ao menos 1 template','warn'); return; }
+  all[key].splice(idx, 1);
+  saveRamoTemplates(all);
+  renderTemplatesConfig();
+}
+
 const LINK_BICHOP = 'https://samuelvinsansi.com.br';
 
 /* ════════════════════════════
@@ -875,6 +977,8 @@ let horarioCheckInt  = null;
 let qrChipIdAtivo    = null;
 let qrPollInt        = null;
 let disparoChipId    = null;
+let tplRamoId        = null;
+let tplTipo          = 'com-site';
 
 /* ════════════════════════════
    DATE HELPERS
@@ -1028,6 +1132,12 @@ function saveValData(d){ localStorage.setItem(VAL_KEY, JSON.stringify(d)); }
 ════════════════════════════ */
 function getInstaFila()  { try { return JSON.parse(localStorage.getItem(INSTA_KEY)||'[]'); } catch { return []; } }
 function saveInstaFila(d){ localStorage.setItem(INSTA_KEY, JSON.stringify(d)); }
+
+/* ════════════════════════════
+   STORAGE — INSTA CRONOGRAMA
+════════════════════════════ */
+function getInstaSched()  { try { return JSON.parse(localStorage.getItem(INSTA_SCHED_KEY)||'{}'); } catch { return {}; } }
+function saveInstaSched(d){ localStorage.setItem(INSTA_SCHED_KEY, JSON.stringify(d)); }
 
 /* ════════════════════════════
    STORAGE — CHIPS
@@ -1527,14 +1637,20 @@ function renderValidacao() {
 
   if (!activeChipId && chips.length) activeChipId = chips[0].id;
 
-  // com site list
+  // com site list — inválidos/sem zap no topo, válidos abaixo
   const comSiteEl = document.getElementById('valComSiteList');
   if (!comSite.length) {
     comSiteEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding:20px;text-align:center">// nenhuma empresa aguardando validação</div>';
   } else {
-    comSiteEl.innerHTML = '<div class="ext-list">' + comSite.map(v => {
+    // Separar: sem zap (pendente + inválido) em cima, válidos em baixo
+    const semZap   = comSite.filter(v => v.numStatus !== 'valido');
+    const comZap   = comSite.filter(v => v.numStatus === 'valido');
+
+    const renderCard = (v) => {
       const statusColor = v.numStatus==='valido'?'var(--ok)':v.numStatus==='invalido'?'var(--error)':'var(--muted)';
-      const statusLabel = v.numStatus==='valido'?'✓ número válido':v.numStatus==='invalido'?'✗ inválido':'pendente';
+      const statusLabel = v.numStatus==='valido'?'✓ número válido':v.numStatus==='invalido'?'✗ sem WhatsApp':'pendente';
+      const chipId = v.chipValidacaoId || activeChipId;
+      const chipNome = getChipById(chipId) ? getChipById(chipId).nome : '';
       return `<div class="empresa-card" id="val-card-${v.id}">
         <div class="empresa-info">
           <div class="empresa-nome">
@@ -1546,17 +1662,37 @@ function renderValidacao() {
               <span id="val-phone-${v.id}" style="cursor:pointer" onclick="editValPhone('${v.id}')">${escHtml(v.whatsapp||'—')}</span>
             </div>
             <span style="font-family:'DM Mono',monospace;font-size:8px;color:${statusColor}">${statusLabel}</span>
+            ${chipNome?`<span class="q-badge ok" style="font-size:7px">📱 ${escHtml(chipNome)}</span>`:''}
           </div>
         </div>
         <div class="empresa-actions">
           ${v.numStatus==='valido'
-            ?`<button class="add-btn added" onclick="aprovarParaFila('${v.id}')">→ Fila Zap</button>`
+            ?`<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+                <button class="add-btn added" onclick="aprovarParaFila('${v.id}')">→ Fila Zap</button>
+                <button class="add-btn" style="color:var(--insta);border-color:rgba(225,48,108,0.4)" onclick="aprovarParaInstaComSite('${v.id}')">→ Fila Insta</button>
+              </div>`
             :`<button class="add-btn" onclick="validarNumeroUnico('${v.id}')">Validar</button>`
           }
           <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
         </div>
       </div>`;
-    }).join('') + '</div>';
+    };
+
+    let html = '';
+    if (semZap.length) {
+      html += `<div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;padding:8px 4px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">
+        ⬆ Sem WhatsApp validado <span style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--error);padding:1px 6px;border-radius:100px;margin-left:4px">${semZap.length}</span>
+        <span style="color:var(--muted);font-size:7px;margin-left:6px">— analise para Instagram</span>
+      </div>`;
+      html += semZap.map(renderCard).join('');
+    }
+    if (comZap.length) {
+      html += `<div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;padding:${semZap.length?'14px':'8px'} 4px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">
+        ⬇ Com WhatsApp válido <span style="background:rgba(78,203,113,0.1);border:1px solid rgba(78,203,113,0.3);color:var(--ok);padding:1px 6px;border-radius:100px;margin-left:4px">${comZap.length}</span>
+      </div>`;
+      html += comZap.map(renderCard).join('');
+    }
+    comSiteEl.innerHTML = '<div class="ext-list">' + html + '</div>';
   }
 
   // sem site list
@@ -1574,10 +1710,15 @@ function renderValidacao() {
             <div class="empresa-phone">📱 ${escHtml(v.whatsapp||'—')}</div>
             ${v.categoria?`<span class="q-badge ok" style="font-size:7px">${escHtml(v.categoria)}</span>`:''}
           </div>
-          <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
-            <input class="insta-link-input" id="insta-link-${v.id}" type="url" placeholder="https://instagram.com/empresa" value="${escHtml(v.instagram||'')}" style="font-size:9px;padding:5px 8px"/>
-            <button class="add-btn" onclick="aprovarParaInsta('${v.id}')">→ Fila Insta</button>
-            <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
+          <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <input class="insta-link-input" id="insta-link-${v.id}" type="url" placeholder="https://instagram.com/empresa" value="${escHtml(v.instagram||'')}" style="font-size:9px;padding:5px 8px;flex:1;min-width:160px"/>
+            <div style="display:flex;gap:4px;flex-shrink:0">
+              ${v.whatsapp && normalizePhone(v.whatsapp).length >= 10
+                ? `<button class="add-btn added" style="background:var(--accent);color:#0a0a0d;border-color:var(--accent)" onclick="aprovarSemSiteParaZap('${v.id}')">→ Fila Zap</button>`
+                : ''}
+              <button class="add-btn" onclick="aprovarParaInsta('${v.id}')">→ Fila Insta</button>
+              <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -1683,6 +1824,38 @@ async function validarTodosNumeros() {
   document.getElementById('valSpinner').style.display = 'none';
   renderValidacao(); updateBadges();
   notify(`✓ ${validados} válidos · ${invalidos} sem WhatsApp`);
+}
+
+function aprovarSemSiteParaZap(id) {
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+  const phone = normalizePhone(v.whatsapp || '');
+  if (!phone || phone.length < 10) { notify('// número inválido para WhatsApp','err'); return; }
+
+  const data = ensureWeekData();
+  const day = v.diaDestino || todayStr();
+  if (!data.days[day]) data.days[day] = [];
+
+  const diasSemana = currentWeekDays();
+  let diaDestino = day;
+  let idx = diasSemana.indexOf(day);
+  while ((data.days[diaDestino]||[]).length >= 60) {
+    idx++;
+    if (idx >= diasSemana.length) { notify('// semana cheia','warn'); return; }
+    diaDestino = diasSemana[idx];
+    if (!data.days[diaDestino]) data.days[diaDestino] = [];
+  }
+
+  data.days[diaDestino].push({
+    id: v.id, nome: v.nome, site: '', whatsapp: v.whatsapp,
+    instagram: v.instagram, googleUrl: v.googleUrl,
+    status: 'Não enviada', criadoEm: todayStr(), semSite: true,
+  });
+  saveWeekData(data);
+  saveValData(getValData().filter(x => x.id !== id));
+  renderValidacao(); updateBadges();
+  notify(`✓ ${v.nome} → Fila WhatsApp (${dayLabel(diaDestino)})`);
 }
 
 function removerDaValidacao(id) {
@@ -1869,13 +2042,15 @@ function renderFila() {
 
   itensEl.innerHTML = filaDisparo.map((item, i) => {
     const waNum = item.whatsapp.replace(/\D/g,'');
+    const chip = getChipById(disparoChipId);
+    const chipBadge = chip ? `<span class="q-badge ok" style="font-size:7px;margin-left:4px">📱 ${escHtml(chip.nome)}</span>` : '';
     const labels = { aguardando:'aguardando', enviando:'enviando...', enviado:'✓ enviado', erro:'✗ erro' };
     return `<div class="fila-item ${item.status}" id="fila-item-${item.id}">
       <button class="fila-remove-btn" onclick="removerFila('${item.id}')">×</button>
       <div class="fila-item-header">
         <div class="fila-item-num">${i+1}</div>
         <div class="fila-item-nome">${escHtml(item.nome)}</div>
-        <div class="fila-item-wa">+${waNum}</div>
+        <div class="fila-item-wa">+${waNum}${chipBadge}</div>
         <div class="fila-item-status ${item.status}">${labels[item.status]||item.status}</div>
       </div>
       <div class="fila-item-body">
@@ -2462,12 +2637,56 @@ function deletarRamo(id) {
 
 /* TEMPLATES */
 function renderTemplatesConfig() {
-  const tpls = getTemplates();
-  document.getElementById('templatesList').innerHTML = tpls.map((t, i) => `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;position:relative">
+  const ramos = getRamos();
+  const el = document.getElementById('templatesList');
+
+  // Seletor de ramo e tipo
+  const ramoSel = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <select id="tplRamoSel" onchange="onTplRamoChange()" style="flex:1;min-width:140px;font-size:11px;padding:8px 12px">
+      <option value="">— Templates gerais (fallback) —</option>
+      ${ramos.map(r => `<option value="${r.id}"${tplRamoId===r.id?' selected':''}>${escHtml(r.nome)}</option>`).join('')}
+    </select>
+    <div style="display:flex;gap:4px">
+      <button onclick="setTplTipo('com-site')" style="padding:7px 13px;border-radius:7px;border:1px solid ${tplTipo==='com-site'?'var(--accent)':'var(--border2)'};background:${tplTipo==='com-site'?'var(--accent-dim)':'transparent'};color:${tplTipo==='com-site'?'var(--accent)':'var(--muted)'};font-family:'DM Mono',monospace;font-size:9px;cursor:pointer">Com site</button>
+      <button onclick="setTplTipo('sem-site')" style="padding:7px 13px;border-radius:7px;border:1px solid ${tplTipo==='sem-site'?'var(--accent)':'var(--border2)'};background:${tplTipo==='sem-site'?'var(--accent-dim)':'transparent'};color:${tplTipo==='sem-site'?'var(--accent)':'var(--muted)'};font-family:'DM Mono',monospace;font-size:9px;cursor:pointer">Sem site</button>
+    </div>
+  </div>`;
+
+  let tpls, isRamo;
+  if (tplRamoId) {
+    tpls = getTemplatesForRamoTipo(tplRamoId, tplTipo);
+    isRamo = true;
+  } else {
+    tpls = getTemplates();
+    isRamo = false;
+  }
+
+  const maxTpl = (tplRamoId && tplTipo==='sem-site') ? 3 : 10;
+  const limitLabel = tplRamoId
+    ? `<span style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)">${tpls.length}/${maxTpl} templates</span>`
+    : '';
+
+  const tplsHtml = tpls.map((t, i) => `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;position:relative">
     <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:8px">TEMPLATE ${i+1}</div>
-    <textarea style="min-height:80px;font-size:10px;line-height:1.6" oninput="saveTemplate(${i},this.value)">${escHtml(t)}</textarea>
-    ${tpls.length>1?`<button class="del-btn" style="position:absolute;top:8px;right:8px" onclick="removerTemplate(${i})">✕</button>`:''}
+    <textarea style="min-height:80px;font-size:10px;line-height:1.6" oninput="${isRamo?`saveRamoTemplate('${tplRamoId}','${tplTipo}',${i},this.value)`:`saveTemplate(${i},this.value)`}">${escHtml(t)}</textarea>
+    ${tpls.length>1?`<button class="del-btn" style="position:absolute;top:8px;right:8px" onclick="${isRamo?`removerRamoTemplate('${tplRamoId}','${tplTipo}',${i})`:`removerTemplate(${i})`}">✕</button>`:''}
   </div>`).join('');
+
+  const addBtn = `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+    ${limitLabel}
+    <button class="btn btn-ghost" onclick="${isRamo?`adicionarRamoTemplate('${tplRamoId}','${tplTipo}')`:`adicionarTemplate()`}" ${tpls.length>=maxTpl?'disabled':''}>+ Novo template</button>
+  </div>`;
+
+  el.innerHTML = ramoSel + tplsHtml + addBtn;
+}
+
+function onTplRamoChange() {
+  tplRamoId = document.getElementById('tplRamoSel').value || null;
+  renderTemplatesConfig();
+}
+function setTplTipo(tipo) {
+  tplTipo = tipo;
+  renderTemplatesConfig();
 }
 
 function saveTemplate(idx, val) {
