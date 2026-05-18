@@ -288,18 +288,14 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 .val-num-status.invalid{color:var(--error);border-color:rgba(255,92,92,0.3);}
 
 /* ══ INSTAGRAM FILA ══ */
-.insta-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:8px;}
-.insta-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.insta-nome{font-weight:700;font-size:13px;flex:1;}
-.insta-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.insta-link-input{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;flex:1;min-width:180px;outline:none;transition:border-color 0.2s;}
-.insta-link-input:focus{border-color:var(--insta);}
-.insta-msg-blocks{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
-.insta-msg-block{background:var(--surface2);border-radius:8px;padding:10px 12px;}
-.insta-msg-block-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;}
-.insta-msg-text{font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);line-height:1.7;white-space:pre-wrap;}
-.copy-small{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-family:'DM Mono',monospace;font-size:8px;padding:3px 8px;cursor:pointer;transition:all 0.18s;}
-.copy-small:hover{border-color:var(--accent);color:var(--accent);}
+.insta-card{display:none;} /* Removido */
+
+/* ══ ACCORDION FILA ══ */
+.fila-item-header{cursor:pointer;user-select:none;}
+.fila-item-header:hover{background:rgba(255,255,255,0.02);}
+
+/* val grid responsive */
+@media(max-width:1000px){#valPanelComSite > div{grid-template-columns:1fr;}}
 
 /* ══ REDIRECIONAMENTOS ══ */
 .redirect-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -355,11 +351,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
       <span class="nav-label">Fila WhatsApp</span>
       <span class="nav-badge" id="badge-fila-zap">0</span>
     </div>
-    <div class="nav-item" onclick="switchPanel('fila-insta')" data-label="Fila Instagram">
-      <div class="nav-icon">📸</div>
-      <span class="nav-label">Fila Instagram</span>
-      <span class="nav-badge" id="badge-fila-insta">0</span>
-    </div>
+
     <div class="nav-section-label">Ferramentas</div>
     <div class="nav-item" onclick="switchPanel('redirecionamentos')" data-label="Redirecionamentos">
       <div class="nav-icon">🔗</div>
@@ -510,33 +502,41 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
   <div class="val-tabs">
     <div class="val-tab active" onclick="setValTab('com-site')" id="valTabComSite">Com site <span id="valCountComSite" style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)"></span></div>
-    <div class="val-tab" onclick="setValTab('sem-site')" id="valTabSemSite">Sem site <span id="valCountSemSite" style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)"></span></div>
   </div>
 
   <!-- COM SITE -->
   <div class="val-sub-panel active" id="valPanelComSite">
-    <div class="card">
-      <div class="card-title">Empresas com site — validar número WhatsApp</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Chip para validação:</div>
-        <div id="valChipTabs" class="chip-tabs"></div>
-        <button class="btn btn-primary" style="font-size:10px;padding:7px 14px" onclick="validarTodosNumeros()">
-          <div class="spinner" id="valSpinner" style="border-top-color:#0a0a0d"></div>
-          Validar todos os números
-        </button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+      <div class="card">
+        <div class="card-title">Empresas com site — validar número WhatsApp</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">Chip para validação:</div>
+          <div id="valChipTabs" class="chip-tabs"></div>
+          <button class="btn btn-primary" style="font-size:10px;padding:7px 14px" onclick="validarTodosNumeros()">
+            <div class="spinner" id="valSpinner" style="border-top-color:#0a0a0d"></div>
+            Validar todos os números
+          </button>
+        </div>
+        <div id="valComSiteList" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// nenhuma empresa aguardando validação</div>
       </div>
-      <div id="valComSiteList" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// nenhuma empresa aguardando validação</div>
+      <!-- CARD VALIDADOR DE LINKS -->
+      <div class="card" id="cardValidadorLinks">
+        <div class="card-title">Validador de links — selecionar sites</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:14px">Cole os links que achar bons. Após confirmar, os sites não selecionados serão excluídos da lista.</div>
+        <div style="margin-bottom:10px">
+          <label>Colar links (um por linha)</label>
+          <textarea id="validadorLinksInput" placeholder="https://empresa1.com.br&#10;https://empresa2.com.br&#10;..." style="min-height:120px;font-size:10px" oninput="previewValidadorLinks()"></textarea>
+        </div>
+        <div id="validadorLinksPreview" style="margin-bottom:12px"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" style="flex:1" onclick="confirmarValidadorLinks()">✓ Manter apenas estes</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('validadorLinksInput').value='';previewValidadorLinks()">Limpar</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- SEM SITE -->
-  <div class="val-sub-panel" id="valPanelSemSite">
-    <div class="card">
-      <div class="card-title">Empresas sem site — fila Instagram</div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:14px">Adicione o link do Instagram e aprove manualmente para entrar na fila.</div>
-      <div id="valSemSiteList" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">// nenhuma empresa sem site</div>
-    </div>
-  </div>
+
 </div>
 
 <!-- ── FILA WHATSAPP ── -->
@@ -559,40 +559,14 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     </div>
     <div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Configuração de disparo</div>
-        <div style="margin-bottom:14px">
-          <label>Chip selecionado</label>
+        <div class="card-title">Disparar</div>
+        <div style="margin-bottom:10px">
+          <label>Chip ativo</label>
           <div id="disparoChipInfo" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2)">Nenhum chip configurado</div>
         </div>
-        <div style="margin-bottom:12px">
-          <label>Horário de início automático</label>
-          <div class="horario-row">
-            <input type="time" id="horarioInicio" value="12:00" style="width:auto" oninput="saveEvoConfig()"/>
-            <div class="horario-status" id="horarioStatus">aguardando</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-          <div>
-            <label>Delay entre mensagens <span class="tag">SEG</span></label>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input type="number" id="delayMin" value="15" min="5" style="width:70px" oninput="saveEvoConfig()"/>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">a</span>
-              <input type="number" id="delayMax" value="30" min="5" style="width:70px" oninput="saveEvoConfig()"/>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">seg</span>
-            </div>
-          </div>
-          <div>
-            <label>Lotes <span class="tag">ANTI-BAN</span></label>
-            <div style="display:flex;align-items:center;gap:8px">
-              <input type="checkbox" id="loteAtivo" style="width:auto;padding:0;accent-color:var(--accent)" onchange="toggleLoteConfig()"/>
-              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">Ativar</span>
-              <div id="loteConfigFields" style="display:none;gap:6px;align-items:center">
-                <input type="number" id="loteTamanho" value="15" min="1" max="60" style="width:55px" oninput="saveEvoConfig()"/>
-                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">por lote ·</span>
-                <input type="number" id="loteEsperaMin" value="60" min="1" style="width:50px" oninput="saveEvoConfig()"/>
-                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">min</span>
-              </div>
-            </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);padding:7px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);flex:1">
+            Horário: <span id="horarioStatusInline" style="color:var(--accent)">--:--</span>
           </div>
         </div>
         <div style="display:flex;gap:8px">
@@ -626,31 +600,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
   </div>
 </div>
 
-<!-- ── FILA INSTAGRAM ── -->
-<div class="panel" id="panel-fila-insta">
-  <div class="page-header">
-    <div class="page-title">Fila <span>Instagram.</span></div>
-    <div class="page-sub">// prospecção manual · copie as mensagens e envie pelo app</div>
-  </div>
 
-  <!-- CRONOGRAMA SEMANAL -->
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-title">Cronograma semanal <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0" id="instaSemanaLabel"></span></div>
-    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px">Aloque empresas aprovadas por dia da semana. Dom a Sáb.</div>
-    <div id="instaCronograma" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Empresas aprovadas para Instagram</div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-      <div class="status-tabs" id="instaStatusTabs" style="margin-bottom:0"></div>
-      <button class="btn btn-danger" style="font-size:10px;padding:7px 12px;margin-left:auto" onclick="limparFilaInsta()">Limpar enviadas</button>
-    </div>
-    <div id="instaFilaList">
-      <div class="fila-empty">Nenhuma empresa na fila do Instagram.</div>
-    </div>
-  </div>
-</div>
 
 <!-- ── REDIRECIONAMENTOS ── -->
 <div class="panel" id="panel-redirecionamentos">
@@ -731,6 +681,42 @@ tr:hover td{background:rgba(255,255,255,0.015);}
     <div class="card-title">Chips WhatsApp</div>
     <div id="chipGrid" class="chip-grid"></div>
     <button class="btn btn-ghost" onclick="abrirModalNovoChip()">+ Adicionar chip</button>
+  </div>
+
+  <!-- CONFIGURAÇÃO DE DISPARO -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Configuração de disparo</div>
+    <div style="margin-bottom:12px">
+      <label>Horário de início automático</label>
+      <div class="horario-row">
+        <input type="time" id="horarioInicio" value="12:00" style="width:auto" oninput="saveEvoConfig()"/>
+        <div class="horario-status" id="horarioStatus">aguardando</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <div>
+        <label>Delay entre mensagens <span class="tag">SEG</span></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="delayMin" value="15" min="5" style="width:70px" oninput="saveEvoConfig()"/>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">a</span>
+          <input type="number" id="delayMax" value="30" min="5" style="width:70px" oninput="saveEvoConfig()"/>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">seg</span>
+        </div>
+      </div>
+      <div>
+        <label>Lotes <span class="tag">ANTI-BAN</span></label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="loteAtivo" style="width:auto;padding:0;accent-color:var(--accent)" onchange="toggleLoteConfig()"/>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">Ativar</span>
+          <div id="loteConfigFields" style="display:none;gap:6px;align-items:center">
+            <input type="number" id="loteTamanho" value="15" min="1" max="60" style="width:55px" oninput="saveEvoConfig()"/>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">por lote ·</span>
+            <input type="number" id="loteEsperaMin" value="60" min="1" style="width:50px" oninput="saveEvoConfig()"/>
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">min</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- RAMOS -->
@@ -965,7 +951,7 @@ let disparoStatus    = 'Não enviada';
 let msgEmpresaId     = null;
 let msgTemplateIdx   = -1;
 let historyOpen      = false;
-let filaDisparo      = [];
+let filaDisparo      = {}; // { chipId: [...items] }
 let disparoEmAndamento = false;
 let aguardandoLote   = false;
 let filaLotes = [], loteAtual = 0, lotesTotal = 0;
@@ -1072,19 +1058,18 @@ function toggleSidebar() {
   s.classList.toggle('collapsed', open);
   localStorage.setItem(SIDEBAR_KEY, open ? '0' : '1');
 }
-const PANELS = ['inicio','importar','validacao','fila-zap','fila-insta','redirecionamentos','configuracoes'];
+const PANELS = ['inicio','importar','validacao','fila-zap','redirecionamentos','configuracoes'];
 function switchPanel(name) {
   PANELS.forEach(p => document.getElementById('panel-'+p).classList.toggle('active', p===name));
   document.querySelectorAll('.nav-item').forEach(el => {
     const label = el.getAttribute('data-label') || '';
-    const panelMap = {'Início':'inicio','Importar':'importar','Validação':'validacao','Fila WhatsApp':'fila-zap','Fila Instagram':'fila-insta','Redirecionamentos':'redirecionamentos','Configurações':'configuracoes'};
+    const panelMap = {'Início':'inicio','Importar':'importar','Validação':'validacao','Fila WhatsApp':'fila-zap','Redirecionamentos':'redirecionamentos','Configurações':'configuracoes'};
     el.classList.toggle('active', panelMap[label] === name);
   });
   if (name==='inicio')         renderInicio();
   if (name==='importar')       renderImportarPanel();
   if (name==='validacao')      renderValidacao();
   if (name==='fila-zap')       renderFilaZap();
-  if (name==='fila-insta')     renderFilaInsta();
   if (name==='configuracoes')  renderConfiguracoes();
   updateBadges();
 }
@@ -1098,8 +1083,6 @@ function updateBadges() {
   document.getElementById('badge-validacao').textContent = val.length;
   const naoEnv = flat.filter(e => (e.status||'Não enviada')==='Não enviada' && e.whatsapp).length;
   document.getElementById('badge-fila-zap').textContent = naoEnv;
-  const insta = getInstaFila();
-  document.getElementById('badge-fila-insta').textContent = insta.filter(i => i.status === 'pendente').length;
 }
 
 /* ════════════════════════════
@@ -1594,9 +1577,6 @@ function importarLeads() {
     if (temSite && temTel) {
       novaValFila.push({ ...entry, tipo: 'com-site' });
       addedComSite++;
-    } else if (!temSite) {
-      novaValFila.push({ ...entry, tipo: 'sem-site' });
-      addedSemSite++;
     } else { skipped++; }
   });
 
@@ -1604,9 +1584,9 @@ function importarLeads() {
   updateBadges();
   importPreview();
 
-  let msg = `✓ ${addedComSite} com site · ${addedSemSite} sem site → Validação`;
+  let msg = `✓ ${addedComSite} com site → Validação`;
   if (skipped) msg += ` · ${skipped} ignoradas`;
-  notify(msg, addedComSite+addedSemSite > 0 ? '' : 'warn');
+  notify(msg, addedComSite > 0 ? '' : 'warn');
   document.getElementById('importJsonInput').value = '';
 }
 
@@ -1616,33 +1596,28 @@ function importarLeads() {
 function setValTab(tab) {
   valTab = tab;
   document.getElementById('valTabComSite').classList.toggle('active', tab==='com-site');
-  document.getElementById('valTabSemSite').classList.toggle('active', tab==='sem-site');
-  document.getElementById('valPanelComSite').classList.toggle('active', tab==='com-site');
-  document.getElementById('valPanelSemSite').classList.toggle('active', tab==='sem-site');
 }
 
 function renderValidacao() {
   const val = getValData();
   const comSite = val.filter(v => v.tipo === 'com-site');
-  const semSite = val.filter(v => v.tipo === 'sem-site');
 
   document.getElementById('valCountComSite').textContent = `(${comSite.length})`;
-  document.getElementById('valCountSemSite').textContent = `(${semSite.length})`;
 
-  // chip tabs para validação
+  // chip tabs para validação — prioridade chip 2 (final 8457)
   const chips = getChips();
+  const chipPriority = chips.find(c => c.nome && c.nome.includes('8457')) || chips.find(c => c.nome && c.nome.toLowerCase().includes('ativação')) || chips[1] || chips[0];
+  if (!activeChipId && chips.length) activeChipId = chipPriority ? chipPriority.id : chips[0].id;
+
   document.getElementById('valChipTabs').innerHTML = chips.length
     ? chips.map(c => `<div class="chip-tab${activeChipId===c.id?' active':''}" onclick="setValChip('${c.id}')">${escHtml(c.nome)}</div>`).join('')
     : '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Nenhum chip configurado</span>';
-
-  if (!activeChipId && chips.length) activeChipId = chips[0].id;
 
   // com site list — inválidos/sem zap no topo, válidos abaixo
   const comSiteEl = document.getElementById('valComSiteList');
   if (!comSite.length) {
     comSiteEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding:20px;text-align:center">// nenhuma empresa aguardando validação</div>';
   } else {
-    // Separar: sem zap (pendente + inválido) em cima, válidos em baixo
     const semZap   = comSite.filter(v => v.numStatus !== 'valido');
     const comZap   = comSite.filter(v => v.numStatus === 'valido');
 
@@ -1664,13 +1639,15 @@ function renderValidacao() {
             <span style="font-family:'DM Mono',monospace;font-size:8px;color:${statusColor}">${statusLabel}</span>
             ${chipNome?`<span class="q-badge ok" style="font-size:7px">📱 ${escHtml(chipNome)}</span>`:''}
           </div>
+          <div class="empresa-meta" style="margin-top:4px">
+            <span style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted)">dia destino:</span>
+            <span style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text2)">${v.diaDestino ? dayLabel(v.diaDestino) : '—'}</span>
+            <button onclick="passarProximoDia('${v.id}')" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:5px;font-family:'DM Mono',monospace;font-size:8px;padding:2px 7px;cursor:pointer;transition:all 0.18s" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">→ próx. dia</button>
+          </div>
         </div>
         <div class="empresa-actions">
           ${v.numStatus==='valido'
-            ?`<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-                <button class="add-btn added" onclick="aprovarParaFila('${v.id}')">→ Fila Zap</button>
-                <button class="add-btn" style="color:var(--insta);border-color:rgba(225,48,108,0.4)" onclick="aprovarParaInstaComSite('${v.id}')">→ Fila Insta</button>
-              </div>`
+            ?`<button class="add-btn added" onclick="aprovarParaFila('${v.id}')">→ Fila Zap</button>`
             :`<button class="add-btn" onclick="validarNumeroUnico('${v.id}')">Validar</button>`
           }
           <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
@@ -1682,7 +1659,6 @@ function renderValidacao() {
     if (semZap.length) {
       html += `<div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;padding:8px 4px 6px;border-bottom:1px solid var(--border);margin-bottom:6px">
         ⬆ Sem WhatsApp validado <span style="background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);color:var(--error);padding:1px 6px;border-radius:100px;margin-left:4px">${semZap.length}</span>
-        <span style="color:var(--muted);font-size:7px;margin-left:6px">— analise para Instagram</span>
       </div>`;
       html += semZap.map(renderCard).join('');
     }
@@ -1694,36 +1670,7 @@ function renderValidacao() {
     }
     comSiteEl.innerHTML = '<div class="ext-list">' + html + '</div>';
   }
-
-  // sem site list
-  const semSiteEl = document.getElementById('valSemSiteList');
-  if (!semSite.length) {
-    semSiteEl.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding:20px;text-align:center">// nenhuma empresa sem site</div>';
-  } else {
-    semSiteEl.innerHTML = '<div class="ext-list">' + semSite.map(v => {
-      return `<div class="empresa-card" id="val-sem-${v.id}">
-        <div class="empresa-info">
-          <div class="empresa-nome">
-            ${v.googleUrl?`<a href="${escHtml(v.googleUrl)}" target="_blank" style="color:var(--text);text-decoration:none" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${escHtml(v.nome)}</a>`:escHtml(v.nome)}
-          </div>
-          <div class="empresa-meta">
-            <div class="empresa-phone">📱 ${escHtml(v.whatsapp||'—')}</div>
-            ${v.categoria?`<span class="q-badge ok" style="font-size:7px">${escHtml(v.categoria)}</span>`:''}
-          </div>
-          <div style="margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-            <input class="insta-link-input" id="insta-link-${v.id}" type="url" placeholder="https://instagram.com/empresa" value="${escHtml(v.instagram||'')}" style="font-size:9px;padding:5px 8px;flex:1;min-width:160px"/>
-            <div style="display:flex;gap:4px;flex-shrink:0">
-              ${v.whatsapp && normalizePhone(v.whatsapp).length >= 10
-                ? `<button class="add-btn added" style="background:var(--accent);color:#0a0a0d;border-color:var(--accent)" onclick="aprovarSemSiteParaZap('${v.id}')">→ Fila Zap</button>`
-                : ''}
-              <button class="add-btn" onclick="aprovarParaInsta('${v.id}')">→ Fila Insta</button>
-              <button class="del-btn" onclick="removerDaValidacao('${v.id}')">✕</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }).join('') + '</div>';
-  }
+  renderValidadorLinks();
 }
 
 function setValChip(id) { activeChipId = id; renderValidacao(); }
@@ -1863,6 +1810,61 @@ function removerDaValidacao(id) {
   renderValidacao(); updateBadges();
 }
 
+/* Passa lead para o dia seguinte (antes de entrar na fila) */
+function passarProximoDia(id) {
+  const val = getValData();
+  const v = val.find(x => x.id === id);
+  if (!v) return;
+  const proxDia = nextWeekday(v.diaDestino || todayStr());
+  v.diaDestino = proxDia;
+  saveValData(val);
+  renderValidacao();
+  notify(`→ ${v.nome} movido para ${dayLabel(proxDia)}`);
+}
+
+/* ════════════════════════════
+   VALIDADOR DE LINKS
+════════════════════════════ */
+function previewValidadorLinks() {
+  const raw = document.getElementById('validadorLinksInput')?.value || '';
+  const links = raw.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+  const el = document.getElementById('validadorLinksPreview');
+  if (!el) return;
+  if (!links.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px">${links.length} link${links.length!==1?'s':''} colado${links.length!==1?'s':''}:</div>` +
+    links.map(l => `<div style="background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;margin-bottom:4px;font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(l)}</div>`).join('');
+}
+
+function renderValidadorLinks() {
+  previewValidadorLinks();
+}
+
+function confirmarValidadorLinks() {
+  const raw = document.getElementById('validadorLinksInput')?.value || '';
+  const links = raw.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+  if (!links.length) { notify('// nenhum link colado','warn'); return; }
+
+  // Normaliza para comparar domínios
+  const normLink = (url) => {
+    try { return new URL(url).hostname.replace(/^www\./,'').toLowerCase(); } catch { return url.toLowerCase().trim(); }
+  };
+  const linkDomains = new Set(links.map(normLink));
+
+  const val = getValData();
+  const antes = val.filter(v => v.tipo === 'com-site').length;
+  // Mantém apenas empresas cujo site está na lista colada
+  const novaVal = val.filter(v => {
+    if (v.tipo !== 'com-site') return true; // preserva outros tipos
+    const empDomain = normLink(v.site || '');
+    return linkDomains.has(empDomain);
+  });
+  const removidos = antes - novaVal.filter(v => v.tipo === 'com-site').length;
+  saveValData(novaVal);
+  document.getElementById('validadorLinksInput').value = '';
+  renderValidacao(); updateBadges();
+  notify(`✓ ${links.length} mantidos · ${removidos} removidos`);
+}
+
 function aprovarParaFila(id) {
   const val = getValData();
   const v = val.find(x => x.id === id);
@@ -1928,7 +1930,11 @@ function renderFilaZap() {
     ? chips.map(c => `<div class="chip-tab${disparoChipId===c.id?' active':''}" onclick="setDisparoChip('${c.id}')">${escHtml(c.nome)}</div>`).join('')
     : '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">Configure chips em Configurações</span>';
 
-  if (!disparoChipId && chips.length) disparoChipId = chips[0].id;
+  if (!disparoChipId && chips.length) {
+    // Prioridade: chip com 8457 (Ativação) ou chip 2
+    const chipPriority = chips.find(c => c.nome && c.nome.includes('8457')) || chips.find(c => c.nome && c.nome.toLowerCase().includes('ativação')) || chips[1] || chips[0];
+    disparoChipId = chipPriority.id;
+  }
 
   const chip = getChipById(disparoChipId);
   document.getElementById('disparoChipInfo').textContent = chip
@@ -1986,8 +1992,9 @@ function renderDisparoEmpresas() {
   const emps = todasComWa.filter(e => (e.status||'Não enviada') === disparoStatus);
   if (!emps.length) { listEl.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:20px">Nenhuma empresa neste status</div>`; return; }
 
+  const filaAtual = getFilaChip(disparoChipId);
   listEl.innerHTML = '<div class="ext-list">' + emps.map(e => {
-    const naFila  = filaDisparo.some(f => f.id === e.id);
+    const naFila  = filaAtual.some(f => f.id === e.id);
     const enviada = e.status === 'Enviada';
     return `<div class="empresa-card">
       <div class="empresa-info">
@@ -2005,11 +2012,19 @@ function renderDisparoEmpresas() {
   }).join('') + '</div>';
 }
 
+function getFilaChip(chipId) {
+  if (!filaDisparo[chipId]) filaDisparo[chipId] = [];
+  return filaDisparo[chipId];
+}
+
 function toggleFila(empId) {
-  const idx = filaDisparo.findIndex(f => f.id === empId);
+  const chipId = disparoChipId;
+  if (!chipId) { notify('// selecione um chip primeiro','warn'); return; }
+  const fila = getFilaChip(chipId);
+  const idx = fila.findIndex(f => f.id === empId);
   const data = ensureWeekData();
   if (idx >= 0) {
-    filaDisparo.splice(idx, 1);
+    fila.splice(idx, 1);
     Object.keys(data.days).forEach(day => {
       const emp = (data.days[day]||[]).find(e => e.id === empId);
       if (emp && emp.status === 'Em fila') emp.status = 'Não enviada';
@@ -2020,7 +2035,7 @@ function toggleFila(empId) {
     const emp  = all.find(e => e.id === empId);
     if (!emp || !emp.whatsapp) return;
     const { text, idx: tIdx } = pickTemplate(emp.nome);
-    filaDisparo.push({ id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp, mensagem: text, templateIdx: tIdx, status: 'aguardando' });
+    fila.push({ id: emp.id, nome: emp.nome, whatsapp: emp.whatsapp, mensagem: text, templateIdx: tIdx, status: 'aguardando', aberto: false });
     Object.keys(data.days).forEach(day => {
       const e = (data.days[day]||[]).find(e => e.id === empId);
       if (e) e.status = 'Em fila';
@@ -2034,30 +2049,33 @@ function renderFila() {
   const countEl = document.getElementById('filaCount');
   const vaziEl  = document.getElementById('filaVazia');
   const itensEl = document.getElementById('filaItens');
-  countEl.textContent = `(${filaDisparo.length} empresa${filaDisparo.length!==1?'s':''})`;
-  const vazia = filaDisparo.length === 0;
+  const filaAtual = getFilaChip(disparoChipId);
+  countEl.textContent = `(${filaAtual.length} empresa${filaAtual.length!==1?'s':''})`;
+  const vazia = filaAtual.length === 0;
   vaziEl.style.display  = vazia ? 'block' : 'none';
   itensEl.style.display = vazia ? 'none'  : 'flex';
   if (vazia) { itensEl.innerHTML = ''; return; }
 
-  itensEl.innerHTML = filaDisparo.map((item, i) => {
+  itensEl.innerHTML = filaAtual.map((item, i) => {
     const waNum = item.whatsapp.replace(/\D/g,'');
     const chip = getChipById(disparoChipId);
     const chipBadge = chip ? `<span class="q-badge ok" style="font-size:7px;margin-left:4px">📱 ${escHtml(chip.nome)}</span>` : '';
     const labels = { aguardando:'aguardando', enviando:'enviando...', enviado:'✓ enviado', erro:'✗ erro' };
+    const aberto = item.aberto || false;
     return `<div class="fila-item ${item.status}" id="fila-item-${item.id}">
-      <button class="fila-remove-btn" onclick="removerFila('${item.id}')">×</button>
-      <div class="fila-item-header">
+      <div class="fila-item-header" onclick="toggleFilaItem('${item.id}')" style="cursor:pointer;user-select:none">
         <div class="fila-item-num">${i+1}</div>
         <div class="fila-item-nome">${escHtml(item.nome)}</div>
         <div class="fila-item-wa">+${waNum}${chipBadge}</div>
         <div class="fila-item-status ${item.status}">${labels[item.status]||item.status}</div>
+        <div style="color:var(--muted);font-size:12px;margin-left:4px;transition:transform 0.2s;transform:rotate(${aberto?'90':'0'}deg)">▶</div>
+        <button class="fila-remove-btn" style="position:static;top:auto;right:auto;width:22px;height:22px" onclick="event.stopPropagation();removerFila('${item.id}')">×</button>
       </div>
-      <div class="fila-item-body">
+      <div class="fila-item-body" style="display:${aberto?'flex':'none'}">
         <!-- MSG 1: Apresentação -->
         <div>
           <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px">① APRESENTAÇÃO</div>
-          <div class="fila-msg-area" id="fila-msg-${item.id}">${escHtml(item.mensagem)}</div>
+          <textarea class="fila-msg-area" id="fila-msg-${item.id}" style="background:var(--surface2);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text2);line-height:1.7;min-height:80px;border:1px solid var(--border2);resize:vertical;width:100%;outline:none" oninput="atualizarMsgFila('${item.id}',this.value)">${escHtml(item.mensagem)}</textarea>
           <button class="fila-msg-shuffle" onclick="shuffleFilaMsg('${item.id}')">↻ sortear</button>
         </div>
         <!-- MSG 2: Link site -->
@@ -2080,19 +2098,35 @@ function renderFila() {
   }).join('');
 }
 
+function toggleFilaItem(id) {
+  const fila = getFilaChip(disparoChipId);
+  const item = fila.find(f => f.id === id);
+  if (!item) return;
+  item.aberto = !item.aberto;
+  renderFila();
+}
+
+function atualizarMsgFila(id, val) {
+  const fila = getFilaChip(disparoChipId);
+  const item = fila.find(f => f.id === id);
+  if (item) item.mensagem = val;
+}
+
 function shuffleFilaMsg(id) {
-  const item = filaDisparo.find(f => f.id === id);
+  const fila = getFilaChip(disparoChipId);
+  const item = fila.find(f => f.id === id);
   if (!item) return;
   const { text, idx } = pickOtherTemplate(item.nome, item.templateIdx);
   item.mensagem = text; item.templateIdx = idx;
   const el = document.getElementById(`fila-msg-${id}`);
-  if (el) el.textContent = item.mensagem;
+  if (el) el.value = item.mensagem;
 }
 function onImgChange(id, input) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const item = filaDisparo.find(f => f.id === id);
+    const fila = getFilaChip(disparoChipId);
+    const item = fila.find(f => f.id === id);
     if (!item) return;
     item.imagemBase64 = e.target.result; item.imagemNome = file.name;
     renderFila();
@@ -2100,13 +2134,15 @@ function onImgChange(id, input) {
   reader.readAsDataURL(file);
 }
 function removerImagem(id) {
-  const item = filaDisparo.find(f => f.id === id);
+  const fila = getFilaChip(disparoChipId);
+  const item = fila.find(f => f.id === id);
   if (!item) return;
   delete item.imagemBase64; delete item.imagemNome;
   renderFila();
 }
 function removerFila(id) {
-  filaDisparo = filaDisparo.filter(f => f.id !== id);
+  if (!filaDisparo[disparoChipId]) return;
+  filaDisparo[disparoChipId] = filaDisparo[disparoChipId].filter(f => f.id !== id);
   const data = ensureWeekData();
   Object.keys(data.days).forEach(day => {
     const emp = (data.days[day]||[]).find(e => e.id === id);
@@ -2117,11 +2153,16 @@ function removerFila(id) {
 function limparFila() {
   if (disparoEmAndamento) { notify('// disparo em andamento','warn'); return; }
   if (aguardandoLote) cancelarLotes();
-  const data = ensureWeekData();
-  Object.keys(data.days).forEach(day => {
-    (data.days[day]||[]).forEach(emp => { if (emp.status === 'Em fila') emp.status = 'Não enviada'; });
-  });
-  saveWeekData(data); filaDisparo = []; updateBadges(); renderDisparoEmpresas(); renderFila();
+  const chipId = disparoChipId;
+  if (chipId && filaDisparo[chipId]) {
+    const data = ensureWeekData();
+    Object.keys(data.days).forEach(day => {
+      (data.days[day]||[]).forEach(emp => { if (emp.status === 'Em fila') emp.status = 'Não enviada'; });
+    });
+    saveWeekData(data);
+    filaDisparo[chipId] = [];
+  }
+  updateBadges(); renderDisparoEmpresas(); renderFila();
 }
 
 /* ════════════════════════════
@@ -2131,7 +2172,8 @@ let horarioJaDisparado = false;
 let horarioUltimoDisparo = '';
 
 function checkHorarioDisparo(now) {
-  if (disparoEmAndamento || aguardandoLote || !filaDisparo.length) return;
+  const filaAtual = disparoChipId ? getFilaChip(disparoChipId) : [];
+  if (disparoEmAndamento || aguardandoLote || !filaAtual.length) return;
   const cfg = loadEvoConfig();
   if (!cfg.horarioInicio) return;
   const [hh, mm] = cfg.horarioInicio.split(':').map(Number);
@@ -2147,6 +2189,8 @@ function checkHorarioDisparo(now) {
     el.textContent = `próximo: ${cfg.horarioInicio}`;
     el.className = 'horario-status' + (disparoEmAndamento?' ativo':'');
   }
+  const el2 = document.getElementById('horarioStatusInline');
+  if (el2) el2.textContent = cfg.horarioInicio || '--:--';
 }
 
 /* ════════════════════════════
@@ -2292,8 +2336,9 @@ async function dispararLote() {
     iniciarCountdownLote(esperaMs);
   } else {
     aguardandoLote=false; document.getElementById('btnDisparar').disabled=false; document.getElementById('disparoBtn').textContent='🟢 Disparar fila';
-    const totalEnv = filaDisparo.filter(f=>f.status==='enviado').length;
-    const totalErr = filaDisparo.filter(f=>f.status==='erro').length;
+    const filaAtual = getFilaChip(disparoChipId);
+    const totalEnv = filaAtual.filter(f=>f.status==='enviado').length;
+    const totalErr = filaAtual.filter(f=>f.status==='erro').length;
     log(`<span style="color:var(--accent)">━━ CONCLUÍDO · ${totalEnv} enviados · ${totalErr} erros ━━</span>`);
     notify(`✓ ${lotesTotal} lote${lotesTotal>1?'s':''} concluído${lotesTotal>1?'s':''} · ${totalEnv} enviados`);
   }
@@ -2303,16 +2348,17 @@ async function iniciarDisparo() {
   if (disparoEmAndamento || aguardandoLote) return;
   const chip = getChipById(disparoChipId);
   if (!chip) { notify('// configure um chip primeiro','err'); return; }
-  if (!filaDisparo.length) { notify('// fila vazia','warn'); return; }
+  const filaAtual = getFilaChip(disparoChipId);
+  if (!filaAtual.length) { notify('// fila vazia','warn'); return; }
   document.getElementById('disparoLog').innerHTML = '';
   const loteConf = getLoteConfig();
-  if (loteConf.ativo && filaDisparo.length > loteConf.tamanho) {
+  if (loteConf.ativo && filaAtual.length > loteConf.tamanho) {
     filaLotes=[]; loteAtual=0;
-    for (let i=0; i<filaDisparo.length; i+=loteConf.tamanho) filaLotes.push(filaDisparo.slice(i,i+loteConf.tamanho));
+    for (let i=0; i<filaAtual.length; i+=loteConf.tamanho) filaLotes.push(filaAtual.slice(i,i+loteConf.tamanho));
     lotesTotal=filaLotes.length;
     await dispararLote();
   } else {
-    filaLotes=[]; loteAtual=1; lotesTotal=1; filaLotes.push([...filaDisparo]);
+    filaLotes=[]; loteAtual=1; lotesTotal=1; filaLotes.push([...filaAtual]);
     await dispararLote();
   }
 }
@@ -2706,38 +2752,45 @@ function removerTemplate(idx) {
 ════════════════════════════ */
 function buildSheet(wb, sheetName, rows) {
   const headers = ['Empresa','Site','WhatsApp','Status','Criado em','Enviado em'];
-  const ws = {}; let row = 0;
-  headers.forEach((h,ci) => ws[XLSX.utils.encode_cell({r:row,c:ci})]={v:h,t:'s'}); row++;
-  rows.forEach(e => {
-    const cells = [{ v:e.nome,t:'s' }, { v:e.site||'',t:'s' }, { v:e.whatsapp||'',t:'s' }, { v:e.status||'Não enviada',t:'s' }, { v:e.criadoEm||'',t:'s' }, { v:e.enviadoEm||'',t:'s' }];
-    cells.forEach((c,ci) => ws[XLSX.utils.encode_cell({r:row,c:ci})]=c); row++;
-  });
-  ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:row-1,c:5}});
+  const aoa = [headers, ...rows.map(e => [e.nome||'', e.site||'', e.whatsapp||'', e.status||'Não enviada', e.criadoEm||'', e.enviadoEm||''])];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols'] = [{wch:30},{wch:36},{wch:22},{wch:16},{wch:12},{wch:12}];
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0,31));
 }
 function downloadWb(wb, filename) {
-  try { const out=XLSX.write(wb,{bookType:'xlsx',type:'array'}); const blob=new Blob([out],{type:'application/octet-stream'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),1000); } catch { notify('// erro ao gerar Excel','err'); }
+  try {
+    XLSX.writeFile(wb, filename);
+  } catch(e) {
+    try {
+      const out = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch(e2) { notify('// erro ao gerar Excel: ' + e2.message, 'err'); }
+  }
 }
 function exportExcel() {
-  const data=ensureWeekData(); const weekDays=currentWeekDays();
-  if (!weekDays.some(d=>(data.days[d]||[]).length>0)) { notify('Nenhuma empresa para exportar','err'); return; }
-  const wb=XLSX.utils.book_new();
+  const data = ensureWeekData(); const weekDays = currentWeekDays();
+  if (!weekDays.some(d => (data.days[d]||[]).length > 0)) { notify('Nenhuma empresa para exportar','err'); return; }
+  const wb = XLSX.utils.book_new();
   weekDays.forEach(day => { if ((data.days[day]||[]).length) buildSheet(wb, dayLabelShort(day), data.days[day]); });
-  downloadWb(wb, `prospecção-semana.xlsx`); notify('✓ Excel gerado');
+  downloadWb(wb, `prospeccao-semana.xlsx`); notify('✓ Excel gerado');
 }
 function exportExcelDay() {
-  const day=document.getElementById('exportDaySelect').value; if (!day) { notify('Selecione um dia','warn'); return; }
-  const data=ensureWeekData(); const rows=data.days[day]||[];
+  const day = document.getElementById('exportDaySelect').value; if (!day) { notify('Selecione um dia','warn'); return; }
+  const data = ensureWeekData(); const rows = data.days[day]||[];
   if (!rows.length) { notify('Nenhuma empresa neste dia','err'); return; }
-  const wb=XLSX.utils.book_new(); buildSheet(wb, dayLabelShort(day), rows);
-  downloadWb(wb, `prospecção-${day.replace(/\//g,'-')}.xlsx`); notify(`✓ Excel gerado`);
+  const wb = XLSX.utils.book_new(); buildSheet(wb, dayLabelShort(day), rows);
+  downloadWb(wb, `prospeccao-${day.replace(/\//g,'-')}.xlsx`); notify(`✓ Excel gerado`);
 }
 function exportExcelHistory() {
-  const hist=getHistoryData(); if (!hist) { notify('Nenhum histórico','err'); return; }
-  const wb=XLSX.utils.book_new();
+  const hist = getHistoryData(); if (!hist) { notify('Nenhum histórico','err'); return; }
+  const wb = XLSX.utils.book_new();
   Object.keys(hist.days).sort().forEach(day => { if ((hist.days[day]||[]).length) buildSheet(wb, dayLabelShort(day), hist.days[day]); });
-  downloadWb(wb, `prospecção-anterior.xlsx`); notify('✓ Excel histórico gerado');
+  downloadWb(wb, `prospeccao-anterior.xlsx`); notify('✓ Excel histórico gerado');
 }
 
 /* ════════════════════════════
@@ -2754,9 +2807,13 @@ function exportExcelHistory() {
   if (cfg.loteEsperaMin) document.getElementById('loteEsperaMin').value = cfg.loteEsperaMin;
   if (cfg.horarioInicio) document.getElementById('horarioInicio').value = cfg.horarioInicio;
 
-  // init chips
+  // init chips — prioridade chip 2 com final 8457
   const chips = getChips();
-  if (chips.length) { disparoChipId = chips[0].id; activeChipId = chips[0].id; }
+  if (chips.length) {
+    const chipPriority = chips.find(c => c.nome && c.nome.includes('8457')) || chips.find(c => c.nome && c.nome.toLowerCase().includes('ativação')) || chips[1] || chips[0];
+    disparoChipId = chipPriority.id;
+    activeChipId = chipPriority.id;
+  }
 
   renderRamoSelect();
   ensureWeekData();
